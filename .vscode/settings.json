@@ -1,0 +1,9 @@
+{
+    "terminal.integrated.env.linux": {
+        "PATH": "/home/harry/.platformio/penv/bin:/home/harry/bin:/home/harry/gocode/bin:/usr/local/go/bin:/home/harry/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/home/harry/esp/xtensa-esp32-elf/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/home/harry/esp/xtensa-esp32-elf/bin"
+    },
+    "files.associations": {
+        "cstdlib": "cpp",
+        "cstdio": "cpp"
+    }
+}
