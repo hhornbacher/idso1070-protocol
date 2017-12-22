@@ -95,16 +95,18 @@ void Protocol::process()
     sendCommand(&cmd);
     receivePackets(&ramChannelSelectionResponse, 1);
     printf("Got packet1:\n");
+    printf("Type: %d\n", ramChannelSelectionResponse.header.replyType);
     printf("Header:\n");
-    hexdump(ramChannelSelectionResponse.header.bytes, 7);
+    hexdump((uint8_t *)&ramChannelSelectionResponse.header, 7);
     printf("Payload:\n");
     hexdump(ramChannelSelectionResponse.payload, IDSO10790A_PACKET_SIZE - 7);
 
     sendCommand(&cmd);
     receivePackets(&ramChannelSelectionResponse, 1);
     printf("Got packet2:\n");
+    printf("Type: %d\n", ramChannelSelectionResponse.header.replyType);
     printf("Header:\n");
-    hexdump(ramChannelSelectionResponse.header.bytes, 7);
+    hexdump((uint8_t *)&ramChannelSelectionResponse.header, 7);
     printf("Payload:\n");
     hexdump(ramChannelSelectionResponse.payload, IDSO10790A_PACKET_SIZE - 7);
 
@@ -114,8 +116,9 @@ void Protocol::process()
     sendCommand(&cmd03);
     receivePackets(&cmd03Response, 1);
     printf("Got packet3:\n");
+    printf("Type: %d\n", cmd03Response.header.replyType);
     printf("Header:\n");
-    hexdump(cmd03Response.header.bytes, 7);
+    hexdump((uint8_t *)&cmd03Response.header, 7);
     printf("Payload:\n");
     hexdump(cmd03Response.payload, IDSO10790A_PACKET_SIZE - 7);
 
@@ -125,8 +128,9 @@ void Protocol::process()
     sendCommand(&cmd04);
     receivePackets(&cmd04Response, 1);
     printf("Got packet4:\n");
+    printf("Type: %d\n", cmd04Response.header.replyType);
     printf("Header:\n");
-    hexdump(cmd04Response.header.bytes, 7);
+    hexdump((uint8_t *)&cmd04Response.header, 7);
     printf("Payload:\n");
     hexdump(cmd04Response.payload, IDSO10790A_PACKET_SIZE - 7);
 
@@ -136,12 +140,14 @@ void Protocol::process()
     sendCommand(&cmd05);
     receivePackets(cmd05Response, 2);
     printf("Got packet5:\n");
+    printf("Type: %d\n", cmd05Response[0].header.replyType);
     printf("Header:\n");
-    hexdump(cmd05Response[0].header.bytes, 7);
+    hexdump((uint8_t *)&cmd05Response[0].header, 7);
     printf("Payload:\n");
     hexdump(cmd05Response[0].payload, IDSO10790A_PACKET_SIZE - 7);
+    printf("Type: %d\n", cmd05Response[1].header.replyType);
     printf("Header:\n");
-    hexdump(cmd05Response[1].header.bytes, 7);
+    hexdump((uint8_t *)&cmd05Response[1].header, 7);
     printf("Payload:\n");
     hexdump(cmd05Response[1].payload, IDSO10790A_PACKET_SIZE - 7);
 

@@ -39,7 +39,9 @@ struct __attribute__((packed)) Packet
 {
   struct __attribute__((packed)) Header
   {
-    uint8_t bytes[7];
+    uint8_t bytes1[4];
+    uint8_t replyType;
+    uint8_t bytes2[2];
   } header;
   uint8_t payload[IDSO10790A_PACKET_SIZE - 7];
 };
