@@ -4,6 +4,8 @@
     },
     "files.associations": {
         "cstdlib": "cpp",
-        "cstdio": "cpp"
+        "cstdio": "cpp",
+        "deque": "cpp",
+        "queue": "cpp"
     }
 }

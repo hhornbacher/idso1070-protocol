@@ -6,7 +6,7 @@ set (CMAKE_CXX_STANDARD 11)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
-#find_package(PTHREAD REQUIRED)
+find_package(PTHREAD REQUIRED)
 
 add_subdirectory(src)
 

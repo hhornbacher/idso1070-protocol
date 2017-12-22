@@ -3,19 +3,6 @@
 #define BUF 1024
 #define HEXDUMP_COLS 8
 
-uint8_t packet03[] = {0xee, 0xaa, 0x00, 0x00};
-uint8_t packet04[] = {0xee, 0xaa, 0x01, 0x00};
-uint8_t packet05[] = {0xee, 0xaa, 0x04, 0x00};
-uint8_t packet06[] = {0xee, 0xaa, 0x05, 0x00};
-uint8_t packet07[] = {0xee, 0xaa, 0x06, 0x00};
-uint8_t packet08[] = {0xee, 0xaa, 0x07, 0x00};
-uint8_t packet09[] = {0xee, 0xaa, 0x08, 0x00};
-uint8_t packet10[] = {0xee, 0xaa, 0x09, 0x00};
-uint8_t packet11[] = {0xee, 0xaa, 0x0a, 0x00};
-uint8_t packet12[] = {0xee, 0xaa, 0x0b, 0x00};
-uint8_t packet13[] = {0xee, 0xaa, 0x0c, 0x00};
-uint8_t packet14[] = {0xee, 0xaa, 0x0f, 0x00};
-
 void hexdump(uint8_t *data, size_t length)
 {
     int rowCount = (length / HEXDUMP_COLS) + (length % HEXDUMP_COLS != 0 ? 1 : 0);
@@ -32,7 +19,17 @@ void hexdump(uint8_t *data, size_t length)
     }
 }
 
-Command::Command(Commands cmd)
+void printPacket(Packet *packet)
+{
+    printf("Got packet:\n");
+    // printf("Type: %d\n", packet->header.replyType);
+    printf("Header:\n");
+    hexdump((uint8_t *)&packet->header, 7);
+    printf("Payload:\n");
+    hexdump(packet->payload, IDSO10790A_PACKET_SIZE - 7);
+}
+
+Command::Command(CommandCode cmd)
 {
     payload[0] = 0x55;
     payload[1] = (uint8_t)cmd;
@@ -56,188 +53,111 @@ Protocol::Protocol(char *host, int port) : connection(host, port)
 
 Protocol::~Protocol()
 {
+    receiving = false;
+    transmitting = false;
+    pthread_join(receiveThread, NULL);
+    pthread_join(transmitThread, NULL);
 }
 
 void Protocol::start()
 {
     connection.start();
+    printf("Creating threads...\n");
+    pthread_create(&receiveThread, NULL, receive, this);
+    pthread_create(&transmitThread, NULL, transmit, this);
 }
 
 void Protocol::stop()
 {
     connection.stop();
+    receiving = false;
+    transmitting = false;
+    pthread_join(receiveThread, NULL);
+    pthread_join(transmitThread, NULL);
+}
+
+void *Protocol::receive(void *arg)
+{
+    Protocol *self = (Protocol *)arg;
+    printf("Receive thread running!\n");
+    while (self->receiving)
+    {
+        self->connection.receive();
+        if (self->connection.getPacketBufferLength() == IDSO10790A_PACKET_SIZE)
+        {
+            Packet *packet = new Packet();
+            memcpy(packet, self->connection.getPacketBuffer(), IDSO10790A_PACKET_SIZE);
+            self->packetQueue.push_back(packet);
+            self->connection.clearPacketBuffer();
+        }
+    }
+    printf("Receive thread stopped!\n");
+
+    pthread_exit(0);
+}
+
+void *Protocol::transmit(void *arg)
+{
+    Protocol *self = (Protocol *)arg;
+    printf("Transmit thread running!\n");
+    while (self->transmitting)
+    {
+        if (self->commandQueue.size() > 0)
+        {
+            printf("commandQueue size: %ld\n", self->commandQueue.size());
+            Command *cmd = self->commandQueue.front();
+            self->connection.transmit(cmd->getPayload(), 4);
+            self->commandQueue.pop_front();
+            delete cmd;
+        }
+    }
+    printf("Transmit thread stopped!\n");
+
+    pthread_exit(0);
+}
+
+void Protocol::sendCommands(CommandQueue cmd)
+{
+    for (CommandQueue::iterator i = cmd.begin(); i != cmd.end(); i++)
+    {
+        commandQueue.push_back(*i);
+    }
 }
 
 void Protocol::sendCommand(Command *cmd)
 {
-    connection.transmit(cmd->getPayload(), 4);
+    commandQueue.push_back(cmd);
 }
 
-void Protocol::receivePackets(Packet *packets, size_t count)
+void Protocol::waitForPackets(size_t count)
 {
-    for (int i = 0; i < count; i++)
+    while (count != packetQueue.size())
     {
-        connection.clearPacketBuffer();
-        while (connection.getPacketBufferLength() != IDSO10790A_PACKET_SIZE)
-        {
-            connection.receive();
-        }
-        memcpy(&packets[i], connection.getPacketBuffer(), IDSO10790A_PACKET_SIZE);
     }
-    printf("Received %d packets\n\n", count);
 }
 
 void Protocol::process()
 {
-    Command cmd(RAM_CHANNEL_SELECTION);
-    Packet ramChannelSelectionResponse;
+    Packet *packet;
+    CommandQueue commands;
 
-    sendCommand(&cmd);
-    receivePackets(&ramChannelSelectionResponse, 1);
-    printf("Got packet1:\n");
-    printf("Type: %d\n", ramChannelSelectionResponse.header.replyType);
-    printf("Header:\n");
-    hexdump((uint8_t *)&ramChannelSelectionResponse.header, 7);
-    printf("Payload:\n");
-    hexdump(ramChannelSelectionResponse.payload, IDSO10790A_PACKET_SIZE - 7);
+    sendCommand(new Command(RAM_CHANNEL_SELECTION));
+    waitForPackets(1);
+    packet = packetQueue.front();
+    printPacket(packet);
+    packetQueue.pop_front();
+    delete packet;
 
-    sendCommand(&cmd);
-    receivePackets(&ramChannelSelectionResponse, 1);
-    printf("Got packet2:\n");
-    printf("Type: %d\n", ramChannelSelectionResponse.header.replyType);
-    printf("Header:\n");
-    hexdump((uint8_t *)&ramChannelSelectionResponse.header, 7);
-    printf("Payload:\n");
-    hexdump(ramChannelSelectionResponse.payload, IDSO10790A_PACKET_SIZE - 7);
+    sendCommand(new Command(RAM_CHANNEL_SELECTION));
+    waitForPackets(1);
+    packet = packetQueue.front();
+    printPacket(packet);
+    packetQueue.pop_front();
+    delete packet;
 
-    Command cmd03(packet03);
-    Packet cmd03Response;
-
-    sendCommand(&cmd03);
-    receivePackets(&cmd03Response, 1);
-    printf("Got packet3:\n");
-    printf("Type: %d\n", cmd03Response.header.replyType);
-    printf("Header:\n");
-    hexdump((uint8_t *)&cmd03Response.header, 7);
-    printf("Payload:\n");
-    hexdump(cmd03Response.payload, IDSO10790A_PACKET_SIZE - 7);
-
-    Command cmd04(packet04);
-    Packet cmd04Response;
-
-    sendCommand(&cmd04);
-    receivePackets(&cmd04Response, 1);
-    printf("Got packet4:\n");
-    printf("Type: %d\n", cmd04Response.header.replyType);
-    printf("Header:\n");
-    hexdump((uint8_t *)&cmd04Response.header, 7);
-    printf("Payload:\n");
-    hexdump(cmd04Response.payload, IDSO10790A_PACKET_SIZE - 7);
-
-    Command cmd05(packet05);
-    Packet cmd05Response[2];
-
-    sendCommand(&cmd05);
-    receivePackets(cmd05Response, 2);
-    printf("Got packet5:\n");
-    printf("Type: %d\n", cmd05Response[0].header.replyType);
-    printf("Header:\n");
-    hexdump((uint8_t *)&cmd05Response[0].header, 7);
-    printf("Payload:\n");
-    hexdump(cmd05Response[0].payload, IDSO10790A_PACKET_SIZE - 7);
-    printf("Type: %d\n", cmd05Response[1].header.replyType);
-    printf("Header:\n");
-    hexdump((uint8_t *)&cmd05Response[1].header, 7);
-    printf("Payload:\n");
-    hexdump(cmd05Response[1].payload, IDSO10790A_PACKET_SIZE - 7);
-
-    // printf("Got packet5:\n");
-    // hexdump(packetBuffer, 509 * 2);
-    // request(packet06);
-    // printf("Got packet6:\n");
-    // hexdump(packetBuffer, 509);
-    // request(packet07);
-    // printf("Got packet7:\n");
-    // hexdump(packetBuffer, 509);
-    // request(packet08);
-    // printf("Got packet8:\n");
-    // hexdump(packetBuffer, 509);
-    // request(packet09);
-    // printf("Got packet9:\n");
-    // hexdump(packetBuffer, 509);
-    // request(packet10);
-    // printf("Got packet10:\n");
-    // hexdump(packetBuffer, 509);
-    // request(packet11);
-    // printf("Got packet:\n");
-    // hexdump(packetBuffer, 509);
-    // request(packet12);
-    // printf("Got packet:\n");
-    // hexdump(packetBuffer, 509);
-    // request(packet13);
-    // printf("Got packet:\n");
-    // hexdump(packetBuffer, 509);
-    // request(packet14);
-    // printf("Got packet:\n");
-    // hexdump(packetBuffer, 509);
+    sendCommands(cmdGen.readEEROM());
+    sleep(10);
+    printf("%ld packets received!\n", packetQueue.size());
 
     exit(0);
-    // char *buffer[BUF];
-    // int size;
-    // switch (state)
-    // {
-    // case STATE1:
-    //     break;
-    // case STATE2:
-    //     if (packetBufferOffset == 0)
-    //     {
-    //         printf("Got packet:\n");
-    //         hexdump(packetBuffer, 21);
-    //         memcpy(buffer, packet02, 4);
-    //         send(socketHandle, buffer, 4, 0);
-    //         size = recv(socketHandle, buffer, BUF - 1, 0);
-    //         memccpy(packetBuffer, buffer, size, PACKETBUFFER_LENGTH);
-    //         packetBufferOffset = size;
-    //     }
-    //     else
-    //     {
-    //         size = recv(socketHandle, buffer, BUF - 1, 0);
-    //         memccpy(&packetBuffer[packetBufferOffset], buffer, size, PACKETBUFFER_LENGTH - packetBufferOffset);
-    //         packetBufferOffset += size;
-    //     }
-    //     if (packetBufferOffset == 509)
-    //     {
-    //         state = STATE3;
-    //         packetBufferOffset = 0;
-    //     }
-    //     break;
-    // case STATE3:
-    //     if (packetBufferOffset == 0)
-    //     {
-    //         printf("Got packet:\n");
-    //         hexdump(packetBuffer, 21);
-    //         memcpy(buffer, packet03, 4);
-    //         send(socketHandle, buffer, 4, 0);
-    //         size = recv(socketHandle, buffer, BUF - 1, 0);
-    //         memccpy(packetBuffer, buffer, size, PACKETBUFFER_LENGTH);
-    //         packetBufferOffset = size;
-    //     }
-    //     else
-    //     {
-    //         size = recv(socketHandle, buffer, BUF - 1, 0);
-    //         memccpy(&packetBuffer[packetBufferOffset], buffer, size, PACKETBUFFER_LENGTH - packetBufferOffset);
-    //         packetBufferOffset += size;
-    //     }
-    //     if (packetBufferOffset == 509)
-    //     {
-    //         state = STATE4;
-    //         packetBufferOffset = 0;
-    //     }
-    //     break;
-    // case STATE4:
-    //     printf("Got packet:\n");
-    //     hexdump(packetBuffer, 21);
-    //     exit(0);
-    //     break;
-    // }
 }

@@ -27,6 +27,11 @@ void Connector::start()
                 sizeof(serverAddress)) == 0)
         printf("Verbindung mit dem Server (%s) hergestellt\n",
                inet_ntoa(serverAddress.sin_addr));
+
+    if (fcntl(socketHandle, F_SETFL, fcntl(socketHandle, F_GETFL) | O_NONBLOCK) < 0)
+    {
+        printf("Error: Cannot set socket to non-blocking mode!\nExiting...\n\n");
+    }
 }
 
 void Connector::stop()
@@ -43,7 +48,15 @@ void Connector::transmit(uint8_t *data, size_t length)
 size_t Connector::receive()
 {
     if (packetBufferLength < PACKETBUFFER_LENGTH)
-        packetBufferLength += recv(socketHandle, &packetBuffer[packetBufferLength], PACKETBUFFER_LENGTH - packetBufferLength, 0);
+    {
+        int result = recv(socketHandle, &packetBuffer[packetBufferLength], PACKETBUFFER_LENGTH - packetBufferLength, 0);
+        if (result > 0)
+            packetBufferLength += result;
+        else if (result == EWOULDBLOCK)
+        {
+            printf("Noting received...\n");
+        }
+    }
     return packetBufferLength;
 }
 

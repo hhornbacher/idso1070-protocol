@@ -26,6 +26,9 @@ char peer0_14[] = {/* Packet 48 */
                    0xee, 0xaa, 0x0c, 0x00};
 char peer0_15[] = {/* Packet 53 */
                    0xee, 0xaa, 0x0f, 0x00};
+
+// Current working position
+
 char peer0_16[] = {/* Packet 57 */
                    0x55, 0x17, 0x00, 0x00};
 char peer0_17[] = {/* Packet 61 */
