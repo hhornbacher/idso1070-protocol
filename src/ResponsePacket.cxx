@@ -15,6 +15,16 @@ uint8_t *ResponsePacket::getPayload()
 }
 size_t ResponsePacket::getPayloadLength()
 {
-    uint8_t *ptrOffset = (uint8_t *)memchr(rawPacket.payload, 0x5a, IDSO10790A_PACKET_SIZE);
-    return (size_t)(rawPacket.payload - ptrOffset);
+    size_t pos = IDSO10790A_PACKET_PAYLOAD_SIZE - 2;
+    uint8_t filter = 0;
+    if(rawPacket.payload[ IDSO10790A_PACKET_PAYLOAD_SIZE - 2]==0x5a)
+    {    
+        filter=0x5a;
+    }
+    while (rawPacket.payload[pos] == filter)
+    {
+        pos--;
+    }
+
+    return pos + 1;
 }
