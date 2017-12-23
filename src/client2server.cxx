@@ -30,7 +30,6 @@ char peer0_14[] = {/* Packet 48 */
 char peer0_15[] = {/* Packet 53 */
                    0xee, 0xaa, 0x0f, 0x00};
 
-// Current working position
 // 0x17 Unknown CommandCode
 char peer0_16[] = {/* Packet 57 */
                    0x55, 0x17, 0x00, 0x00};
@@ -57,10 +56,15 @@ char peer0_25[] = {/* Packet 89 */
 char peer0_26[] = {/* Packet 92 */
                    0xaa, 0x02, 0x00, 0x00};
 
+// Probably getDate --> response = (hex) 32 30 31 36 30 36 30 38 | (ascii) 20160608
 char peer0_27[] = {/* Packet 94 */
                    0x57, 0x04, 0x00, 0x00};
+
+// Current working position
+// maybe keep alive..?
 char peer0_28[] = {/* Packet 96 */
                    0x57, 0x03, 0x00, 0x00};
+
 char peer0_29[] = {/* Packet 98 */
                    0x55, 0x11, 0x00, 0x00};
 char peer0_30[] = {/* Packet 100 */
