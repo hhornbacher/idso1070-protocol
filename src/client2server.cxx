@@ -1,7 +1,10 @@
+// RAM Channel Selection
 char peer0_2[] = {/* Packet 4 */
                   0x55, 0x15, 0x00, 0x00};
 char peer0_3[] = {/* Packet 7 */
                   0x55, 0x15, 0x00, 0x00};
+
+// getReadEEROMCommands
 char peer0_4[] = {/* Packet 9 */
                   0xee, 0xaa, 0x00, 0x00};
 char peer0_5[] = {/* Packet 12 */
@@ -28,7 +31,7 @@ char peer0_15[] = {/* Packet 53 */
                    0xee, 0xaa, 0x0f, 0x00};
 
 // Current working position
-
+// 0x17 Unknown CommandCode
 char peer0_16[] = {/* Packet 57 */
                    0x55, 0x17, 0x00, 0x00};
 char peer0_17[] = {/* Packet 61 */
@@ -49,8 +52,11 @@ char peer0_24[] = {/* Packet 86 */
                    0x55, 0x17, 0x00, 0x00};
 char peer0_25[] = {/* Packet 89 */
                    0x55, 0x17, 0x00, 0x00};
+
+// getReadFpgaVersionCommand
 char peer0_26[] = {/* Packet 92 */
                    0xaa, 0x02, 0x00, 0x00};
+
 char peer0_27[] = {/* Packet 94 */
                    0x57, 0x04, 0x00, 0x00};
 char peer0_28[] = {/* Packet 96 */
