@@ -9,29 +9,31 @@ void hexdump(uint8_t *data, size_t length)
     for (int row = 0; row < rowCount; row++)
     {
         int colCount = row == (length / HEXDUMP_COLS) ? length % HEXDUMP_COLS : HEXDUMP_COLS;
-        printf("0x%08x: ", row * HEXDUMP_COLS);
+        printf("\e[1m0x%08x:\e[21m \e[38;5;142m", row * HEXDUMP_COLS);
         for (int col = 0; col < colCount; col++)
         {
             unsigned int x = (unsigned int)data[(row * HEXDUMP_COLS) + col] & 0xff;
             printf("%02x ", x);
         }
-        printf("\n");
+        printf("\e[0m\n");
     }
 }
 
 void printPacket(ResponsePacket *packet)
 {
-    printf("Got packet:\n");
+    printf("\e[38;5;75mGot packet:\n");
     printf("Header:\n");
     hexdump(packet->getHeader(), 7);
     printf("Payload:\n");
     hexdump(packet->getPayload(), packet->getPayloadLength());
+    printf("\e[0m");
 }
 
 void printCommand(Command *cmd)
 {
-    printf("Sent command:\n");
+    printf("\e[38;5;22mSent command:\n");
     hexdump(cmd->getPayload(), 4);
+    printf("\e[0m");
 }
 
 Command::Command(CommandCode cmd)
@@ -84,7 +86,6 @@ void Protocol::stop()
 void *Protocol::receive(void *arg)
 {
     Protocol *self = (Protocol *)arg;
-    printf("Receive thread running!\n");
     while (self->receiving)
     {
         self->connection.receive();
@@ -93,10 +94,9 @@ void *Protocol::receive(void *arg)
             ResponsePacket *packet = new ResponsePacket(self->connection.getPacketBuffer());
             self->packetQueue.push_back(packet);
             self->connection.clearPacketBuffer();
-            printf("packetQueue size: %ld\n", self->packetQueue.size());
+            printf("\e[38;5;73mpacketQueue size: %ld\e[0m\n", self->packetQueue.size());
         }
     }
-    printf("Receive thread stopped!\n");
 
     pthread_exit(0);
 }
@@ -104,20 +104,19 @@ void *Protocol::receive(void *arg)
 void *Protocol::transmit(void *arg)
 {
     Protocol *self = (Protocol *)arg;
-    printf("Transmit thread running!\n");
     while (self->transmitting)
     {
         if (self->commandQueue.size() > 0)
         {
-            printf("commandQueue size: %ld\n", self->commandQueue.size());
+            printf("\e[38;5;22mcommandQueue size: %ld\e[0m\n", self->commandQueue.size());
             Command *cmd = self->commandQueue.front();
             self->connection.transmit(cmd->getPayload(), 4);
             printCommand(cmd);
             self->commandQueue.pop_front();
             delete cmd;
         }
+        sleep(1);
     }
-    printf("Transmit thread stopped!\n");
 
     pthread_exit(0);
 }
@@ -163,7 +162,6 @@ void Protocol::process()
 
     sendCommands(cmdGen.readEEROM());
     sleep(6);
-    printf("%ld packets received!\n", packetQueue.size());
     for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
     {
         printPacket(*i);
@@ -202,7 +200,6 @@ void Protocol::process()
 
     sendCommands(cmdGen.getTimebase());
     sleep(6);
-    printf("%ld packets received!\n", packetQueue.size());
     for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
     {
         printPacket(*i);
