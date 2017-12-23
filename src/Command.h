@@ -7,40 +7,40 @@
 
 enum CommandCode
 {
-    FORCE_TRIGGER = 1,
-    TRIGGER_MODE = 2,
-    SET_RELAY = 3,
-    CHANNEL_SELECTION = 4,
-    TRIGGER_SOURCE = 5,
-    CHANNEL_VOLTS_DIV_125 = 6,
-    PRE_TRIGGER_LENGTH = 7,
-    POST_TRIGGER_LENGTH = 8,
-    RAM_START_POSITION = 9,
-    RESERVED_DATA_OUTPUT = 10,
-    CH1_PWM = 11,
-    CH2_PWM = 12,
-    TRIGGER_PWM = 13,
-    LOGIC_ANALYZER_1 = 14,
-    LOGIC_ANALYZER_2 = 15,
-    LOGIC_ANALYZER_3 = 16,
-    SAMPLE_RATE = 17,
-    FREQ_DIV_LOW = 18,
-    FREQ_DIV_HIGH = 19,
-    SERIAL_BAUD_RATE = 20,
-    RAM_CHANNEL_SELECTION = 21,
-    READ_RAM_COUNT = 22
+  FORCE_TRIGGER = 0x01,
+  TRIGGER_MODE = 0x02,
+  SET_RELAY = 0x03,
+  CHANNEL_SELECTION = 0x04,
+  TRIGGER_SOURCE = 0x05,
+  CHANNEL_VOLTS_DIV_125 = 0x06,
+  PRE_TRIGGER_LENGTH = 0x07,
+  POST_TRIGGER_LENGTH = 0x08,
+  RAM_START_POSITION = 0x09,
+  RESERVED_DATA_OUTPUT = 0x0a,
+  CH1_PWM = 0x0b,
+  CH2_PWM = 0x0c,
+  TRIGGER_PWM = 0x0d,
+  LOGIC_ANALYZER_1 = 0x0e,
+  LOGIC_ANALYZER_2 = 0x0f,
+  LOGIC_ANALYZER_3 = 0x10,
+  SAMPLE_RATE = 0x11,
+  FREQ_DIV_LOW = 0x12,
+  FREQ_DIV_HIGH = 0x13,
+  SERIAL_BAUD_RATE = 0x14,
+  RAM_CHANNEL_SELECTION = 0x15,
+  READ_RAM_COUNT = 0x16
 };
 
 class Command
 {
-  private:
-    uint8_t payload[4];
+private:
+  uint8_t payload[4];
 
-  public:
-    Command(CommandCode cmd);
-    Command(uint8_t *cmd);
+public:
+  Command(CommandCode cmd);
+  Command(uint8_t *cmd);
 
-    uint8_t *getPayload();
+  uint8_t *getPayload();
 };
 
 typedef std::deque<Command *> CommandQueue;
