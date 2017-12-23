@@ -79,39 +79,57 @@ char peer0_32[] = {/* Packet 104 */
 char peer0_33[] = {/* Packet 106 */
                    0x55, 0x05, 0x91, 0x00};
 
+// TRIGGER_PWM
 char peer0_34[] = {/* Packet 108 */
                    0x55, 0x0d, 0xb5, 0x0a};
+// PRE_TRIGGER_LENGTH
 char peer0_35[] = {/* Packet 110 */
                    0x55, 0x07, 0xed, 0x03};
-
+// POST_TRIGGER_LENGTH
 char peer0_36[] = {/* Packet 112 */
                    0x55, 0x08, 0xe8, 0x03};
+
+// READ_RAM_COUNT
 char peer0_37[] = {/* Packet 114 */
                    0x55, 0x16, 0xd0, 0x77};
+// LOGIC_ANALYZER_1
 char peer0_38[] = {/* Packet 116 */
                    0x55, 0x0e, 0x92, 0x24};
+// LOGIC_ANALYZER_2
 char peer0_39[] = {/* Packet 118 */
                    0x55, 0x0f, 0x49, 0x92};
+// LOGIC_ANALYZER_3
 char peer0_40[] = {/* Packet 122 */
                    0x55, 0x10, 0x24, 0x49};
+// RAM_CHANNEL_SELECTION
 char peer0_41[] = {/* Packet 124 */
                    0x55, 0x15, 0x00, 0x00};
+// SET_RELAY
 char peer0_42[] = {/* Packet 126 */
                    0x55, 0x03, 0x80, 0x00};
+// SET_RELAY
 char peer0_43[] = {/* Packet 128 */
                    0x55, 0x03, 0x02, 0x00};
+// CHANNEL_VOLTS_DIV_125
 char peer0_44[] = {/* Packet 130 */
                    0x55, 0x06, 0x00, 0x00};
+// CH1_PWM
 char peer0_45[] = {/* Packet 132 */
                    0x55, 0x0b, 0x3e, 0x08};
+
+// SET_RELAY
 char peer0_46[] = {/* Packet 134 */
                    0x55, 0x03, 0xef, 0x00};
+// CHANNEL_VOLTS_DIV_125
 char peer0_47[] = {/* Packet 136 */
                    0x55, 0x06, 0x00, 0x00};
+// SET_RELAY
 char peer0_48[] = {/* Packet 138 */
                    0x55, 0x03, 0x40, 0x00};
+// SET_RELAY
 char peer0_49[] = {/* Packet 140 */
                    0x55, 0x03, 0x04, 0x00};
+// CHANNEL_VOLTS_DIV_125
 char peer0_50[] = {/* Packet 142 */
                    0x55, 0x06, 0x00, 0x00};
 
