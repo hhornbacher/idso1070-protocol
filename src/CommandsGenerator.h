@@ -5,10 +5,11 @@
 
 class CommandsGenerator
 {
-  private:
-  public:
-    Command *readEEROMPage(uint8_t address);
-    CommandQueue readEEROM();
+private:
+public:
+  Command *readEEROMPage(uint8_t address);
+  Command *readFPGAVersion();
+  CommandQueue readEEROM();
 };
 
 #endif // _COMMANDS_GENERATOR_H_

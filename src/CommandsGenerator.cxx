@@ -19,3 +19,9 @@ CommandQueue CommandsGenerator::readEEROM()
     cmds.push_back(readEEROMPage(0x0c));
     return cmds;
 }
+
+Command *CommandsGenerator::readFPGAVersion()
+{
+    uint8_t cmdBuffer[4] = {0xaa, 0x02, 0x00, 0x00};
+    return new Command(cmdBuffer);
+}

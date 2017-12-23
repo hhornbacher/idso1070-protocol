@@ -1,7 +1,7 @@
 #include "Protocol.h"
 
 #define BUF 1024
-#define HEXDUMP_COLS 8
+#define HEXDUMP_COLS 16
 
 void hexdump(uint8_t *data, size_t length)
 {
@@ -19,14 +19,14 @@ void hexdump(uint8_t *data, size_t length)
     }
 }
 
-void printPacket(Packet *packet)
+void printPacket(ResponsePacket *packet)
 {
     printf("Got packet:\n");
     // printf("Type: %d\n", packet->header.replyType);
     printf("Header:\n");
-    hexdump((uint8_t *)&packet->header, 7);
+    hexdump(packet->getHeader(), 7);
     printf("Payload:\n");
-    hexdump(packet->payload, IDSO10790A_PACKET_SIZE - 7);
+    hexdump(packet->getPayload(), packet->getPayloadLength());
 }
 
 Command::Command(CommandCode cmd)
@@ -85,10 +85,10 @@ void *Protocol::receive(void *arg)
         self->connection.receive();
         if (self->connection.getPacketBufferLength() == IDSO10790A_PACKET_SIZE)
         {
-            Packet *packet = new Packet();
-            memcpy(packet, self->connection.getPacketBuffer(), IDSO10790A_PACKET_SIZE);
+            ResponsePacket *packet = new ResponsePacket(self->connection.getPacketBuffer());
             self->packetQueue.push_back(packet);
             self->connection.clearPacketBuffer();
+            printf("packetQueue size: %ld\n", self->packetQueue.size());
         }
     }
     printf("Receive thread stopped!\n");
@@ -138,7 +138,7 @@ void Protocol::waitForPackets(size_t count)
 
 void Protocol::process()
 {
-    Packet *packet;
+    ResponsePacket *packet;
     CommandQueue commands;
 
     sendCommand(new Command(RAM_CHANNEL_SELECTION));
@@ -156,8 +156,20 @@ void Protocol::process()
     delete packet;
 
     sendCommands(cmdGen.readEEROM());
-    sleep(10);
+    sleep(6);
     printf("%ld packets received!\n", packetQueue.size());
+    for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
+    {
+        delete *i;
+    }
+    packetQueue.clear();
+
+    sendCommand(cmdGen.readFPGAVersion());
+    waitForPackets(1);
+    packet = packetQueue.front();
+    printPacket(packet);
+    packetQueue.pop_front();
+    delete packet;
 
     exit(0);
 }
