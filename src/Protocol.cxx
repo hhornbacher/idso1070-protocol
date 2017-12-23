@@ -22,11 +22,16 @@ void hexdump(uint8_t *data, size_t length)
 void printPacket(ResponsePacket *packet)
 {
     printf("Got packet:\n");
-    // printf("Type: %d\n", packet->header.replyType);
     printf("Header:\n");
     hexdump(packet->getHeader(), 7);
     printf("Payload:\n");
     hexdump(packet->getPayload(), packet->getPayloadLength());
+}
+
+void printCommand(Command *cmd)
+{
+    printf("Sent command:\n");
+    hexdump(cmd->getPayload(), 4);
 }
 
 Command::Command(CommandCode cmd)
@@ -107,6 +112,7 @@ void *Protocol::transmit(void *arg)
             printf("commandQueue size: %ld\n", self->commandQueue.size());
             Command *cmd = self->commandQueue.front();
             self->connection.transmit(cmd->getPayload(), 4);
+            printCommand(cmd);
             self->commandQueue.pop_front();
             delete cmd;
         }
@@ -160,6 +166,7 @@ void Protocol::process()
     printf("%ld packets received!\n", packetQueue.size());
     for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
     {
+        printPacket(*i);
         delete *i;
     }
     packetQueue.clear();
@@ -170,6 +177,49 @@ void Protocol::process()
     printPacket(packet);
     packetQueue.pop_front();
     delete packet;
+
+    uint8_t cmd01[4] = {0x57, 0x04, 0x00, 0x00};
+    sendCommand(new Command(cmd01));
+    waitForPackets(1);
+    packet = packetQueue.front();
+    printPacket(packet);
+    packetQueue.pop_front();
+    delete packet;
+
+    sendCommand(new Command(SAMPLE_RATE));
+    waitForPackets(1);
+    packet = packetQueue.front();
+    printPacket(packet);
+    packetQueue.pop_front();
+    delete packet;
+
+    sendCommand(new Command(FREQ_DIV_HIGH));
+    waitForPackets(1);
+    packet = packetQueue.front();
+    printPacket(packet);
+    packetQueue.pop_front();
+    delete packet;
+
+    sendCommands(cmdGen.getTimebase());
+    sleep(6);
+    printf("%ld packets received!\n", packetQueue.size());
+    for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
+    {
+        printPacket(*i);
+        delete *i;
+    }
+    packetQueue.clear();
+
+    while (transmitting)
+    {
+        sendCommand(cmdGen.keepAlive());
+        waitForPackets(1);
+        packet = packetQueue.front();
+        printPacket(packet);
+        packetQueue.pop_front();
+        delete packet;
+        sleep(5);
+    }
 
     exit(0);
 }
