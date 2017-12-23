@@ -65,20 +65,25 @@ char peer0_27[] = {/* Packet 94 */
 char peer0_28[] = {/* Packet 96 */
                    0x57, 0x03, 0x00, 0x00};
 
+// getTimebaseCommands
 char peer0_29[] = {/* Packet 98 */
                    0x55, 0x11, 0x00, 0x00};
 char peer0_30[] = {/* Packet 100 */
                    0x55, 0x12, 0x04, 0x00};
 char peer0_31[] = {/* Packet 102 */
                    0x55, 0x13, 0x00, 0x00};
+
+// getTriggerSourceCommands
 char peer0_32[] = {/* Packet 104 */
                    0x55, 0x04, 0x02, 0x00};
 char peer0_33[] = {/* Packet 106 */
                    0x55, 0x05, 0x91, 0x00};
+
 char peer0_34[] = {/* Packet 108 */
                    0x55, 0x0d, 0xb5, 0x0a};
 char peer0_35[] = {/* Packet 110 */
                    0x55, 0x07, 0xed, 0x03};
+
 char peer0_36[] = {/* Packet 112 */
                    0x55, 0x08, 0xe8, 0x03};
 char peer0_37[] = {/* Packet 114 */
@@ -109,16 +114,27 @@ char peer0_49[] = {/* Packet 140 */
                    0x55, 0x03, 0x04, 0x00};
 char peer0_50[] = {/* Packet 142 */
                    0x55, 0x06, 0x00, 0x00};
+
+// CH2_PWM
 char peer0_51[] = {/* Packet 144 */
                    0x55, 0x0c, 0x7d, 0x05};
+
+// SET_RELAY
 char peer0_52[] = {/* Packet 147 */
                    0x55, 0x03, 0xfe, 0x00};
+
+// CHANNEL_VOLTS_DIV_125
 char peer0_53[] = {/* Packet 149 */
                    0x55, 0x06, 0x00, 0x00};
+
+// TRIGGER_MODE
 char peer0_54[] = {/* Packet 151 */
                    0x55, 0x02, 0x02, 0x00};
+
 char peer0_55[] = {/* Packet 153 */
                    0xaa, 0x04, 0x00, 0x00};
+
+// LOGIC_ANALYZER_2
 char peer0_56[] = {/* Packet 899 */
                    0x55, 0x15, 0x00, 0x00};
 char peer0_57[] = {/* Packet 903 */
