@@ -11,8 +11,10 @@ public:
   Command *readFPGAVersion();
   Command *keepAlive();
   Command *getSampleRate();
-  Command *getfreqDivLowBytes();
-  Command *getfreqDivHighBytes();
+  Command *getFreqDivLowBytes();
+  Command *getFreqDivHighBytes();
+  Command *channelSelection();
+  Command *triggerSource();
   CommandQueue readEEROM();
   CommandQueue getTimebase();
 };
