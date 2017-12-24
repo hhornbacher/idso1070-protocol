@@ -7,25 +7,39 @@
 
 #include <deque>
 
-#define IDSO10790A_PACKET_SIZE 509
-#define IDSO10790A_PACKET_HEADER_SIZE 7
-#define IDSO10790A_PACKET_PAYLOAD_SIZE 502
+#include "hexdump.h"
+
+#define IDSO1070A_PACKET_SIZE 509
+#define IDSO1070A_PACKET_HEADER_SIZE 7
+#define IDSO1070A_PACKET_PAYLOAD_SIZE 502
+
+enum PacketType
+{
+  TYPE_AA = 0xaa,
+  TYPE_EE = 0xee,
+  TYPE_FPGA = 0x55
+};
 
 class ResponsePacket
 {
-  private:
-    struct __attribute__((packed)) Packet
-    {
-        uint8_t header[IDSO10790A_PACKET_HEADER_SIZE];
-        uint8_t payload[IDSO10790A_PACKET_PAYLOAD_SIZE];
-    } rawPacket;
+private:
+  struct __attribute__((packed)) Packet
+  {
+    uint8_t header[IDSO1070A_PACKET_HEADER_SIZE];
+    uint8_t payload[IDSO1070A_PACKET_PAYLOAD_SIZE];
+  } rawPacket;
 
-  public:
-    ResponsePacket(uint8_t *data);
+public:
+  ResponsePacket(uint8_t *data);
 
-    uint8_t *getHeader();
-    uint8_t *getPayload();
-    size_t getPayloadLength();
+  uint8_t *getHeader();
+  uint8_t *getPayload();
+  uint8_t getCommandID();
+  PacketType getType();
+  size_t getPayloadLength();
+
+  void print();
+  static char *typeToString(PacketType type);
 };
 
 typedef std::deque<ResponsePacket *> PacketQueue;
