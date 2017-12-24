@@ -39,7 +39,7 @@ public:
   size_t getPayloadLength();
 
   void print();
-  static char *typeToString(PacketType type);
+  static const char *typeToString(PacketType type);
 };
 
 typedef std::deque<ResponsePacket *> PacketQueue;

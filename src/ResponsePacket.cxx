@@ -48,7 +48,7 @@ void ResponsePacket::print()
     printf("\e[0m");
 }
 
-char *ResponsePacket::typeToString(PacketType type)
+const char *ResponsePacket::typeToString(PacketType type)
 {
     switch (type)
     {
