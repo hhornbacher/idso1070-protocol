@@ -42,6 +42,24 @@ private:
   pthread_t transmitThread;
   bool transmitting = true;
 
+  struct IDSO1070A
+  {
+    bool channel1;
+    bool channel2;
+
+    void print()
+    {
+      printf(
+          "[IDSO1070A]\n"
+          "channel1 = %d\n"
+          "channel2 = %d\n"
+          "\n\n",
+          channel1, channel2);
+    }
+  } device = {
+      .channel1 = false,
+      .channel2 = false};
+
   void sendCommands(CommandQueue cmd);
   void sendCommand(Command *cmd);
   void waitForPackets(size_t count);
