@@ -7,6 +7,7 @@
 
 #include <pthread.h>
 
+#include "hexdump.h"
 #include "Connector.h"
 #include "ResponsePacket.h"
 #include "Command.h"
@@ -44,6 +45,30 @@ private:
   void sendCommands(CommandQueue cmd);
   void sendCommand(Command *cmd);
   void waitForPackets(size_t count);
+
+  void parsePacket(ResponsePacket *packet);
+  void parseAAResponse(ResponsePacket *packet);
+  void parseEEResponse(ResponsePacket *packet);
+  void parseFPGAResponse(ResponsePacket *packet);
+  void parseSampleData(ResponsePacket *packet);
+  void parseEEROMPage00(ResponsePacket *packet);
+  void parseEEROMPage04(ResponsePacket *packet);
+  void parseEEROMPage07(ResponsePacket *packet);
+  void parseEEROMPage08(ResponsePacket *packet);
+  void parseEEROMPage09(ResponsePacket *packet);
+  void parseEEROMPage0a(ResponsePacket *packet);
+  void parseEEROMPage0b(ResponsePacket *packet);
+  void parseEEROMPage0c(ResponsePacket *packet);
+  void parseStartCapture(ResponsePacket *packet);
+  void parseRelay(ResponsePacket *packet);
+  void parseTriggerSourceAndSlope(ResponsePacket *packet);
+  void parseVoltsDiv125(ResponsePacket *packet);
+  void parseCh1ZeroLevel(ResponsePacket *packet);
+  void parseCh2ZeroLevel(ResponsePacket *packet);
+  void parseTriggerLevel(ResponsePacket *packet);
+  void parseFreqDivLowBytes(ResponsePacket *packet);
+  void parseFreqDivHighBytes(ResponsePacket *packet);
+  void parseRamChannelSelection(ResponsePacket *packet);
 
 public:
   Protocol(char *host, int port);
