@@ -60,6 +60,34 @@ private:
       .channel1 = false,
       .channel2 = false};
 
+  struct EEROMData
+  {
+    uint8_t diffFixData[2][256];
+    uint8_t caliLevel[200];
+    uint8_t fpgaAlert[40];
+    uint8_t productName[20];
+    uint8_t userName[12];
+
+    void print()
+    {
+      printf(
+          "[EEROMData]\n"
+          "diffFixData[0]:\n");
+      hexdump(diffFixData[0], 256);
+      printf("diffFixData[1]:\n");
+      hexdump(diffFixData[1], 256);
+      printf("caliLevel:\n");
+      hexdump(caliLevel, 200);
+      printf("fpgaAlert:\n");
+      hexdump(fpgaAlert, 40);
+      printf(
+          "productName = %s\n"
+          "userName = %s\n"
+          "\n\n",
+          productName, userName);
+    }
+  } eeromData;
+
   void sendCommands(CommandQueue cmd);
   void sendCommand(Command *cmd);
   void waitForPackets(size_t count);
@@ -71,6 +99,7 @@ private:
   void parseSampleData(ResponsePacket *packet);
   void parseEEROMPage00(ResponsePacket *packet);
   void parseEEROMPage04(ResponsePacket *packet);
+  void parseEEROMPage05(ResponsePacket *packet);
   void parseEEROMPage07(ResponsePacket *packet);
   void parseEEROMPage08(ResponsePacket *packet);
   void parseEEROMPage09(ResponsePacket *packet);
