@@ -9,18 +9,19 @@ Command *CommandsGenerator::readEEROMPage(uint8_t address)
 CommandQueue CommandsGenerator::readEEROM()
 {
     CommandQueue cmds;
+    cmds.push_back(readFPGAVersion());
     cmds.push_back(readEEROMPage(0x00));
-    cmds.push_back(readEEROMPage(0x01));
+    // cmds.push_back(readEEROMPage(0x01));
     cmds.push_back(readEEROMPage(0x04));
     cmds.push_back(readEEROMPage(0x05));
-    cmds.push_back(readEEROMPage(0x06));
+    // cmds.push_back(readEEROMPage(0x06));
     cmds.push_back(readEEROMPage(0x07));
     cmds.push_back(readEEROMPage(0x08));
     cmds.push_back(readEEROMPage(0x09));
     cmds.push_back(readEEROMPage(0x0a));
     cmds.push_back(readEEROMPage(0x0b));
     cmds.push_back(readEEROMPage(0x0c));
-    cmds.push_back(readEEROMPage(0x0f));
+    // cmds.push_back(readEEROMPage(0x0f));
     return cmds;
 }
 
