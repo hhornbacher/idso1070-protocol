@@ -3,7 +3,7 @@
 Command *CommandsGenerator::readEEROMPage(uint8_t address)
 {
     uint8_t cmdBuffer[4] = {0xee, 0xaa, address, 0x00};
-    return new Command(cmdBuffer);
+    return new Command(cmdBuffer, 2);
 }
 
 CommandQueue CommandsGenerator::readEEROM()

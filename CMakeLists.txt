@@ -33,8 +33,6 @@ set (CMAKE_CXX_STANDARD 11)
 # add local cmake dir to module path
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
-find_package(PTHREAD REQUIRED)
-
 add_subdirectory(lib)
 add_subdirectory(src)
 add_subdirectory(tests)

@@ -52,10 +52,12 @@ size_t Connector::receive()
         int result = recv(socketHandle, &packetBuffer[packetBufferLength], PACKETBUFFER_LENGTH - packetBufferLength, 0);
         if (result > 0)
             packetBufferLength += result;
-        else if (result == EWOULDBLOCK)
-        {
-            printf("Noting received...\n");
-        }
+        // else if (result == EWOULDBLOCK)
+        // {
+        //     printf("Noting received...\n");
+        // }
+        // else
+        //     printf("result=%s\n", strerror(result));
     }
     return packetBufferLength;
 }

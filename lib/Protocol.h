@@ -6,8 +6,6 @@
 #include <cstring>
 #include <unistd.h>
 
-#include <pthread.h>
-
 #include "hexdump.h"
 #include "Connector.h"
 #include "ResponsePacket.h"
@@ -35,13 +33,24 @@ private:
 
   CommandsGenerator cmdGen;
 
+  size_t expectedResponseCount = 0;
   PacketQueue packetQueue;
-  pthread_t receiveThread;
   bool receiving = true;
 
   CommandQueue commandQueue;
-  pthread_t transmitThread;
   bool transmitting = true;
+
+  enum States
+  {
+    STATE_IDLE,
+    STATE_RAM_CHANNEL_SELECTION,
+    STATE_READ_EEROM,
+    STATE_SAMPLE_RATE,
+    STATE_FREQ_DIV_HIGH,
+    STATE_FREQ_DIV_LOW,
+    STATE_GET_TIMEBASE,
+    STATE_DONE
+  } state = STATE_IDLE;
 
   struct IDSO1070A
   {
@@ -96,7 +105,6 @@ private:
 
   void sendCommands(CommandQueue cmd);
   void sendCommand(Command *cmd);
-  void waitForPackets(size_t count);
 
   void parsePacket(ResponsePacket *packet);
   void parseAAResponse(ResponsePacket *packet);
@@ -104,16 +112,12 @@ private:
   void parseFPGAResponse(ResponsePacket *packet);
   void parseStateResponse(ResponsePacket *packet);
   void parseSampleData(ResponsePacket *packet);
-  void parseStartCapture(ResponsePacket *packet);
-  void parseRelay(ResponsePacket *packet);
-  void parseTriggerSourceAndSlope(ResponsePacket *packet);
-  void parseVoltsDiv125(ResponsePacket *packet);
-  void parseCh1ZeroLevel(ResponsePacket *packet);
-  void parseCh2ZeroLevel(ResponsePacket *packet);
-  void parseTriggerLevel(ResponsePacket *packet);
   void parseFreqDivLowBytes(ResponsePacket *packet);
   void parseFreqDivHighBytes(ResponsePacket *packet);
   void parseRamChannelSelection(ResponsePacket *packet);
+
+  ResponsePacket *getCurrentPacket();
+  void removeCurrentPacket();
 
 public:
   Protocol(char *host, int port);
@@ -123,8 +127,8 @@ public:
   void stop();
   void process();
 
-  static void *receive(void *arg);
-  static void *transmit(void *arg);
+  void receive();
+  void transmit();
 };
 
 #endif // _PROTOCOL_H_

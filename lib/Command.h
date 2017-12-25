@@ -36,12 +36,15 @@ class Command
 {
 private:
   uint8_t payload[4];
+  uint8_t responseCount = 1;
 
 public:
   Command(CommandCode cmd);
   Command(uint8_t *cmd);
+  Command(uint8_t *cmd, uint8_t responseCount);
 
   uint8_t *getPayload();
+  uint8_t getResponseCount();
 };
 
 typedef std::deque<Command *> CommandQueue;
