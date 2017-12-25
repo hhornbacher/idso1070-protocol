@@ -17,7 +17,8 @@ enum PacketType
 {
   TYPE_AA = 0xaa,
   TYPE_EE = 0xee,
-  TYPE_FPGA = 0x55
+  TYPE_FPGA = 0x55,
+  TYPE_STATE = 0x57
 };
 
 class ResponsePacket
