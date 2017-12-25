@@ -9,7 +9,7 @@ private:
 public:
   Command *readEEROMPage(uint8_t address);
   Command *readFPGAVersion();
-  Command *keepAlive();
+  Command *getBatteryLevel();
   Command *getSampleRate();
   Command *getFreqDivLowBytes();
   Command *getFreqDivHighBytes();

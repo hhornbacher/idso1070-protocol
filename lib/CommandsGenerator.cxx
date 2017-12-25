@@ -30,7 +30,7 @@ Command *CommandsGenerator::readFPGAVersion()
     return new Command(cmdBuffer);
 }
 
-Command *CommandsGenerator::keepAlive()
+Command *CommandsGenerator::getBatteryLevel()
 {
     uint8_t cmdBuffer[4] = {0x57, 0x03, 0x00, 0x00};
     return new Command(cmdBuffer);
