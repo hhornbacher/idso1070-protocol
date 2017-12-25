@@ -151,7 +151,7 @@ void *Protocol::transmit(void *arg)
             self->commandQueue.pop_front();
             delete cmd;
         }
-        sleep(2);
+        sleep(1);
     }
 
     pthread_exit(0);
@@ -191,6 +191,9 @@ void Protocol::parsePacket(ResponsePacket *packet)
     case TYPE_FPGA:
         parseFPGAResponse(packet);
         return;
+    case TYPE_STATE:
+        parseStateResponse(packet);
+        return;
     default:
         printf("Unknown response type: 0x%02x\n", (uint8_t)packet->getType());
         return;
@@ -217,32 +220,39 @@ void Protocol::parseEEResponse(ResponsePacket *packet)
     {
         switch (packet->getHeader()[5])
         {
-        case 0:
-            parseEEROMPage00(packet);
+        case 0x00:
+            eeromData.print();
+            memcpy(eeromData.caliLevel, packet->getPayload(), 200);
+            eeromData.print();
             return;
-        case 4:
-            parseEEROMPage04(packet);
+        case 0x04:
+            eeromData.print();
+            memcpy(eeromData.fpgaAlert, packet->getPayload(), 40);
+            eeromData.print();
             return;
-        case 5:
-            parseEEROMPage05(packet);
+        case 0x05:
+            eeromData.print();
+            memcpy(eeromData.userName, packet->getPayload(), 12);
+            memcpy(eeromData.productName, &packet->getPayload()[12], 20);
+            eeromData.print();
             return;
-        case 7:
-            parseEEROMPage07(packet);
+        case 0x07:
+            memcpy(&eeromData.diffFixData[0][0], packet->getPayload(), 100);
             return;
-        case 8:
-            parseEEROMPage08(packet);
+        case 0x08:
+            memcpy(&eeromData.diffFixData[0][100], packet->getPayload(), 100);
             return;
-        case 9:
-            parseEEROMPage09(packet);
+        case 0x09:
+            memcpy(&eeromData.diffFixData[0][200], packet->getPayload(), 56);
             return;
-        case 10:
-            parseEEROMPage0a(packet);
+        case 0x0a:
+            memcpy(&eeromData.diffFixData[1][0], packet->getPayload(), 100);
             return;
-        case 11:
-            parseEEROMPage0b(packet);
+        case 0x0b:
+            memcpy(&eeromData.diffFixData[1][100], packet->getPayload(), 100);
             return;
-        case 12:
-            parseEEROMPage0c(packet);
+        case 0x0c:
+            memcpy(&eeromData.diffFixData[1][200], packet->getPayload(), 56);
             // readEEROMHasDone();
             return;
         default:
@@ -293,70 +303,22 @@ void Protocol::parseFPGAResponse(ResponsePacket *packet)
     }
 }
 
+void Protocol::parseStateResponse(ResponsePacket *packet)
+{
+    switch (packet->getHeader()[4])
+    {
+    case 0x03:
+        device.batteryLevel = packet->getPayload()[0];
+        break;
+    default:
+        printf("Unknown state response type: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
+        return;
+    }
+}
+
 void Protocol::parseSampleData(ResponsePacket *packet)
 {
     printf("parseSampleData\n");
-}
-
-void Protocol::parseEEROMPage00(ResponsePacket *packet)
-{
-    printf("parseEEROMPage00\n");
-    eeromData.print();
-    memcpy(eeromData.caliLevel, packet->getPayload(), 200);
-    eeromData.print();
-}
-
-void Protocol::parseEEROMPage04(ResponsePacket *packet)
-{
-    printf("parseEEROMPage04\n");
-    eeromData.print();
-    memcpy(eeromData.fpgaAlert, packet->getPayload(), 40);
-    eeromData.print();
-}
-
-void Protocol::parseEEROMPage05(ResponsePacket *packet)
-{
-    printf("parseEEROMPage05\n");
-    eeromData.print();
-    memcpy(eeromData.userName, packet->getPayload(), 12);
-    memcpy(eeromData.productName, &packet->getPayload()[12], 20);
-    eeromData.print();
-}
-
-void Protocol::parseEEROMPage07(ResponsePacket *packet)
-{
-    printf("parseEEROMPage07\n");
-    memcpy(&eeromData.diffFixData[0][0], packet->getPayload(), 100);
-}
-
-void Protocol::parseEEROMPage08(ResponsePacket *packet)
-{
-    printf("parseEEROMPage08\n");
-    memcpy(&eeromData.diffFixData[0][100], packet->getPayload(), 100);
-}
-
-void Protocol::parseEEROMPage09(ResponsePacket *packet)
-{
-    printf("parseEEROMPage09\n");
-    memcpy(&eeromData.diffFixData[0][200], packet->getPayload(), 56);
-}
-
-void Protocol::parseEEROMPage0a(ResponsePacket *packet)
-{
-    printf("parseEEROMPage0a\n");
-    memcpy(&eeromData.diffFixData[1][0], packet->getPayload(), 100);
-}
-
-void Protocol::parseEEROMPage0b(ResponsePacket *packet)
-{
-    printf("parseEEROMPage0b\n");
-    memcpy(&eeromData.diffFixData[1][100], packet->getPayload(), 100);
-}
-
-void Protocol::parseEEROMPage0c(ResponsePacket *packet)
-{
-    printf("parseEEROMPage0c\n");
-    memcpy(&eeromData.diffFixData[1][200], packet->getPayload(), 56);
 }
 
 void Protocol::parseStartCapture(ResponsePacket *packet)
@@ -397,17 +359,44 @@ void Protocol::parseTriggerLevel(ResponsePacket *packet)
 void Protocol::parseFreqDivLowBytes(ResponsePacket *packet)
 {
     printf("parseFreqDivLowBytes\n");
+
+    int i = ((packet->getHeader()[6] & 255) << 8) + (packet->getHeader()[5] & 255);
+    if (device.receiveFreqDivStatus == 0)
+    {
+        device.receiveFreqDivStatus = 1;
+        device.freqDiv = i;
+        // resetRecvFreqStatusAfterDelay();
+    }
+    else if (device.receiveFreqDivStatus != 1 && device.receiveFreqDivStatus == 2)
+    {
+        device.receiveFreqDivStatus = 0;
+        device.freqDiv = i + device.freqDiv;
+        // syncTimeBaseFromFreqDiv(device.freqDiv);
+    }
 }
 
 void Protocol::parseFreqDivHighBytes(ResponsePacket *packet)
 {
     printf("parseFreqDivHighBytes\n");
+
+    int i = ((packet->getHeader()[6] & 0xff) << 8) + (packet->getHeader()[5] & 0xff);
+
+    if (device.receiveFreqDivStatus == 0)
+    {
+        device.receiveFreqDivStatus = 2;
+        device.freqDiv = i << 16;
+        // resetRecvFreqStatusAfterDelay();
+    }
+    else if (device.receiveFreqDivStatus == 1)
+    {
+        device.receiveFreqDivStatus = 0;
+        device.freqDiv = (i << 16) + device.freqDiv;
+        // syncTimeBaseFromFreqDiv(device.freqDiv);
+    }
 }
 
 void Protocol::parseRamChannelSelection(ResponsePacket *packet)
 {
-    printf("parseRamChannelSelection\n");
-    device.print();
     switch (packet->getHeader()[5])
     {
     case 0x00:
@@ -427,7 +416,6 @@ void Protocol::parseRamChannelSelection(ResponsePacket *packet)
         device.channel2 = true;
         break;
     }
-    device.print();
 }
 
 void Protocol::process()
@@ -435,70 +423,71 @@ void Protocol::process()
     ResponsePacket *packet;
     CommandQueue commands;
 
-    sendCommand(new Command(RAM_CHANNEL_SELECTION));
-    waitForPackets(1);
-    packet = packetQueue.front();
-    parsePacket(packet);
-    packetQueue.pop_front();
-    delete packet;
+    // sendCommand(new Command(RAM_CHANNEL_SELECTION));
+    // waitForPackets(1);
+    // packet = packetQueue.front();
+    // parsePacket(packet);
+    // packetQueue.pop_front();
+    // delete packet;
 
-    sendCommand(new Command(RAM_CHANNEL_SELECTION));
-    waitForPackets(1);
-    packet = packetQueue.front();
-    parsePacket(packet);
-    packetQueue.pop_front();
-    delete packet;
+    // sendCommand(new Command(RAM_CHANNEL_SELECTION));
+    // waitForPackets(1);
+    // packet = packetQueue.front();
+    // parsePacket(packet);
+    // packetQueue.pop_front();
+    // delete packet;
 
-    sendCommands(cmdGen.readEEROM());
-    sleep(5);
-    for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
-    {
-        parsePacket((*i));
-        delete (*i);
-    }
-    packetQueue.clear();
+    // sendCommands(cmdGen.readEEROM());
+    // waitForPackets(12);
+    // for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
+    // {
+    //     parsePacket((*i));
+    //     delete (*i);
+    // }
+    // packetQueue.clear();
 
-    sendCommand(cmdGen.readFPGAVersion());
-    waitForPackets(1);
-    packet = packetQueue.front();
-    parsePacket(packet);
-    packetQueue.pop_front();
-    delete packet;
+    // sendCommand(cmdGen.readFPGAVersion());
+    // waitForPackets(1);
+    // packet = packetQueue.front();
+    // parsePacket(packet);
+    // packetQueue.pop_front();
+    // delete packet;
 
-    uint8_t cmd01[4] = {0x57, 0x04, 0x00, 0x00};
-    sendCommand(new Command(cmd01));
-    waitForPackets(1);
-    packet = packetQueue.front();
-    parsePacket(packet);
-    packetQueue.pop_front();
-    delete packet;
+    // uint8_t cmd01[4] = {0x57, 0x04, 0x00, 0x00};
+    // sendCommand(new Command(cmd01));
+    // waitForPackets(1);
+    // packet = packetQueue.front();
+    // parsePacket(packet);
+    // packetQueue.pop_front();
+    // delete packet;
 
-    sendCommand(new Command(SAMPLE_RATE));
-    waitForPackets(1);
-    packet = packetQueue.front();
-    parsePacket(packet);
-    packetQueue.pop_front();
-    delete packet;
+    // sendCommand(new Command(SAMPLE_RATE));
+    // waitForPackets(1);
+    // packet = packetQueue.front();
+    // parsePacket(packet);
+    // packetQueue.pop_front();
+    // delete packet;
 
-    sendCommand(new Command(FREQ_DIV_HIGH));
-    waitForPackets(1);
-    packet = packetQueue.front();
-    parsePacket(packet);
-    packetQueue.pop_front();
-    delete packet;
+    // sendCommand(new Command(FREQ_DIV_HIGH));
+    // waitForPackets(1);
+    // packet = packetQueue.front();
+    // parsePacket(packet);
+    // packetQueue.pop_front();
+    // delete packet;
 
-    sendCommands(cmdGen.getTimebase());
-    sleep(6);
-    for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
-    {
-        parsePacket((*i));
-        delete (*i);
-    }
-    packetQueue.clear();
+    // sendCommands(cmdGen.getTimebase());
+    // waitForPackets(3);
+    // for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
+    // {
+    //     parsePacket((*i));
+    //     delete (*i);
+    // }
+    // packetQueue.clear();
 
     while (transmitting)
     {
-        sendCommand(cmdGen.keepAlive());
+        // This is probably read battery level
+        sendCommand(cmdGen.getBatteryLevel());
         waitForPackets(1);
         packet = packetQueue.front();
         parsePacket(packet);

@@ -44,21 +44,24 @@ private:
 
   struct IDSO1070A
   {
+    uint8_t batteryLevel;
     bool channel1;
     bool channel2;
+    uint8_t receiveFreqDivStatus;
+    uint32_t freqDiv;
 
     void print()
     {
       printf(
           "[IDSO1070A]\n"
+          "freqDiv = %ld\n"
+          "batteryLevel = %d\n"
           "channel1 = %d\n"
           "channel2 = %d\n"
           "\n\n",
-          channel1, channel2);
+          freqDiv, batteryLevel, channel1, channel2);
     }
-  } device = {
-      .channel1 = false,
-      .channel2 = false};
+  } device;
 
   struct EEROMData
   {
@@ -96,16 +99,8 @@ private:
   void parseAAResponse(ResponsePacket *packet);
   void parseEEResponse(ResponsePacket *packet);
   void parseFPGAResponse(ResponsePacket *packet);
+  void parseStateResponse(ResponsePacket *packet);
   void parseSampleData(ResponsePacket *packet);
-  void parseEEROMPage00(ResponsePacket *packet);
-  void parseEEROMPage04(ResponsePacket *packet);
-  void parseEEROMPage05(ResponsePacket *packet);
-  void parseEEROMPage07(ResponsePacket *packet);
-  void parseEEROMPage08(ResponsePacket *packet);
-  void parseEEROMPage09(ResponsePacket *packet);
-  void parseEEROMPage0a(ResponsePacket *packet);
-  void parseEEROMPage0b(ResponsePacket *packet);
-  void parseEEROMPage0c(ResponsePacket *packet);
   void parseStartCapture(ResponsePacket *packet);
   void parseRelay(ResponsePacket *packet);
   void parseTriggerSourceAndSlope(ResponsePacket *packet);
