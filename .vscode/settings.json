@@ -6,6 +6,8 @@
         "cstdlib": "cpp",
         "cstdio": "cpp",
         "deque": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "cstdint": "cpp",
+        "cstring": "cpp"
     }
 }

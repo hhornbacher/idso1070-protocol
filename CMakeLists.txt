@@ -37,7 +37,7 @@ find_package(PTHREAD REQUIRED)
 
 add_subdirectory(lib)
 add_subdirectory(src)
-#add_subdirectory(test)
+add_subdirectory(tests)
 
 # uninstall target
 # https://cmake.org/Wiki/CMake_FAQ#Can_I_do_.22make_uninstall.22_with_CMake.3F
