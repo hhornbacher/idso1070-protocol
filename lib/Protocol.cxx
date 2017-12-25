@@ -7,24 +7,6 @@ void printCommand(Command *cmd)
     printf("\e[0m");
 }
 
-Command::Command(CommandCode cmd)
-{
-    payload[0] = 0x55;
-    payload[1] = (uint8_t)cmd;
-    payload[2] = 0;
-    payload[3] = 0;
-}
-
-Command::Command(uint8_t *cmd)
-{
-    memcpy(payload, cmd, 4);
-}
-
-uint8_t *Command::getPayload()
-{
-    return payload;
-}
-
 Protocol::Protocol(char *host, int port) : connection(host, port)
 {
 }
@@ -151,7 +133,8 @@ void *Protocol::transmit(void *arg)
             self->commandQueue.pop_front();
             delete cmd;
         }
-        sleep(1);
+        // usleep(10000);
+        sleep(2);
     }
 
     pthread_exit(0);
@@ -179,7 +162,6 @@ void Protocol::waitForPackets(size_t count)
 
 void Protocol::parsePacket(ResponsePacket *packet)
 {
-    printf("parsePacket\n");
     switch (packet->getType())
     {
     case TYPE_AA:
@@ -196,45 +178,43 @@ void Protocol::parsePacket(ResponsePacket *packet)
         return;
     default:
         printf("Unknown response type: 0x%02x\n", (uint8_t)packet->getType());
+        packet->print();
         return;
     }
 }
 
 void Protocol::parseAAResponse(ResponsePacket *packet)
 {
-    printf("parseAAResponse\n");
     switch (packet->getHeader()[4])
     {
     case 0x04:
         parseSampleData(packet);
         return;
+    case 0x02:
+        // Probably some kind of ACK
+        return;
     default:
+        printf("Unknown AA response: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
+        packet->print();
         return;
     }
 }
 
 void Protocol::parseEEResponse(ResponsePacket *packet)
 {
-    printf("parseEEResponse\n");
     if (packet->getHeader()[4] == 0xaa)
     {
         switch (packet->getHeader()[5])
         {
         case 0x00:
-            eeromData.print();
             memcpy(eeromData.caliLevel, packet->getPayload(), 200);
-            eeromData.print();
             return;
         case 0x04:
-            eeromData.print();
             memcpy(eeromData.fpgaAlert, packet->getPayload(), 40);
-            eeromData.print();
             return;
         case 0x05:
-            eeromData.print();
             memcpy(eeromData.userName, packet->getPayload(), 12);
             memcpy(eeromData.productName, &packet->getPayload()[12], 20);
-            eeromData.print();
             return;
         case 0x07:
             memcpy(&eeromData.diffFixData[0][0], packet->getPayload(), 100);
@@ -253,10 +233,12 @@ void Protocol::parseEEResponse(ResponsePacket *packet)
             return;
         case 0x0c:
             memcpy(&eeromData.diffFixData[1][200], packet->getPayload(), 56);
+            eeromData.print();
             // readEEROMHasDone();
             return;
         default:
             printf("Unknown EEROM page: 0x%02x\n", (uint8_t)packet->getHeader()[5]);
+            packet->print();
             return;
         }
     }
@@ -264,7 +246,6 @@ void Protocol::parseEEResponse(ResponsePacket *packet)
 
 void Protocol::parseFPGAResponse(ResponsePacket *packet)
 {
-    printf("parseFPGAResponse\n");
     switch (packet->getHeader()[4])
     {
     case 0x02:
@@ -310,8 +291,13 @@ void Protocol::parseStateResponse(ResponsePacket *packet)
     case 0x03:
         device.batteryLevel = packet->getPayload()[0];
         break;
+    case 0x04:
+        memcpy(device.date, packet->getPayload(), 8);
+        device.date[8] = 0;
+        break;
     default:
         printf("Unknown state response type: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
+        packet->print();
         return;
     }
 }
@@ -423,50 +409,50 @@ void Protocol::process()
     ResponsePacket *packet;
     CommandQueue commands;
 
-    // sendCommand(new Command(RAM_CHANNEL_SELECTION));
-    // waitForPackets(1);
-    // packet = packetQueue.front();
-    // parsePacket(packet);
-    // packetQueue.pop_front();
-    // delete packet;
+    sendCommand(new Command(RAM_CHANNEL_SELECTION));
+    waitForPackets(1);
+    packet = packetQueue.front();
+    parsePacket(packet);
+    packetQueue.pop_front();
+    delete packet;
 
-    // sendCommand(new Command(RAM_CHANNEL_SELECTION));
-    // waitForPackets(1);
-    // packet = packetQueue.front();
-    // parsePacket(packet);
-    // packetQueue.pop_front();
-    // delete packet;
+    sendCommand(new Command(RAM_CHANNEL_SELECTION));
+    waitForPackets(1);
+    packet = packetQueue.front();
+    parsePacket(packet);
+    packetQueue.pop_front();
+    delete packet;
 
-    // sendCommands(cmdGen.readEEROM());
-    // waitForPackets(12);
-    // for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
-    // {
-    //     parsePacket((*i));
-    //     delete (*i);
-    // }
-    // packetQueue.clear();
+    sendCommands(cmdGen.readEEROM());
+    waitForPackets(19);
+    for (PacketQueue::iterator i = packetQueue.begin(); i != packetQueue.end(); i++)
+    {
+        parsePacket((*i));
+        delete (*i);
+    }
+    packetQueue.clear();
 
-    // sendCommand(cmdGen.readFPGAVersion());
-    // waitForPackets(1);
-    // packet = packetQueue.front();
-    // parsePacket(packet);
-    // packetQueue.pop_front();
-    // delete packet;
+    sendCommand(cmdGen.readFPGAVersion());
+    waitForPackets(1);
+    packet = packetQueue.front();
+    parsePacket(packet);
+    packetQueue.pop_front();
+    delete packet;
 
-    // uint8_t cmd01[4] = {0x57, 0x04, 0x00, 0x00};
-    // sendCommand(new Command(cmd01));
-    // waitForPackets(1);
-    // packet = packetQueue.front();
-    // parsePacket(packet);
-    // packetQueue.pop_front();
-    // delete packet;
+    uint8_t cmd01[4] = {0x57, 0x04, 0x00, 0x00};
+    sendCommand(new Command(cmd01));
+    waitForPackets(1);
+    packet = packetQueue.front();
+    parsePacket(packet);
+    packetQueue.pop_front();
+    delete packet;
 
-    // sendCommand(new Command(SAMPLE_RATE));
-    // waitForPackets(1);
-    // packet = packetQueue.front();
-    // parsePacket(packet);
-    // packetQueue.pop_front();
-    // delete packet;
+    sendCommand(new Command(SAMPLE_RATE));
+    waitForPackets(1);
+    packet = packetQueue.front();
+    parsePacket(packet);
+    packetQueue.pop_front();
+    delete packet;
 
     // sendCommand(new Command(FREQ_DIV_HIGH));
     // waitForPackets(1);
@@ -484,17 +470,15 @@ void Protocol::process()
     // }
     // packetQueue.clear();
 
-    while (transmitting)
-    {
-        // This is probably read battery level
-        sendCommand(cmdGen.getBatteryLevel());
-        waitForPackets(1);
-        packet = packetQueue.front();
-        parsePacket(packet);
-        packetQueue.clear();
-        delete packet;
-        sleep(5);
-    }
-
-    exit(0);
+    // while (transmitting)
+    // {
+    //     // This is probably read battery level
+    //     sendCommand(cmdGen.getBatteryLevel());
+    //     waitForPackets(1);
+    //     packet = packetQueue.front();
+    //     parsePacket(packet);
+    //     packetQueue.clear();
+    //     delete packet;
+    //     sleep(5);
+    // }
 }
