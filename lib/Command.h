@@ -2,6 +2,7 @@
 #define _COMMAND_H_
 
 #include <cstdint>
+#include <cstring>
 
 #include <deque>
 

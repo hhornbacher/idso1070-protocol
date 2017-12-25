@@ -43,6 +43,8 @@ void ResponsePacket::print()
 {
     printf("\e[38;5;75mGot packet:\n");
     printf("CommandID: %02x, Type: %s\n", getCommandID(), typeToString(getType()));
+    printf("Header:\n");
+    hexdump(getHeader(), 7);
     printf("Payload:\n");
     hexdump(getPayload(), getPayloadLength());
     printf("\e[0m");
@@ -58,5 +60,9 @@ const char *ResponsePacket::typeToString(PacketType type)
         return "TYPE_EE";
     case TYPE_FPGA:
         return "TYPE_FPGA";
+    case TYPE_STATE:
+        return "TYPE_STATE";
+    default:
+        return "UNKOWN";
     }
 }

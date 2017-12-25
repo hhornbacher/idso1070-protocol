@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <unistd.h>
 
 #include <pthread.h>
 
@@ -44,6 +45,7 @@ private:
 
   struct IDSO1070A
   {
+    char date[9];
     uint8_t batteryLevel;
     bool channel1;
     bool channel2;
@@ -54,12 +56,13 @@ private:
     {
       printf(
           "[IDSO1070A]\n"
+          "date = %s\n"
           "freqDiv = %ld\n"
           "batteryLevel = %d\n"
           "channel1 = %d\n"
           "channel2 = %d\n"
           "\n\n",
-          freqDiv, batteryLevel, channel1, channel2);
+          date, freqDiv, batteryLevel, channel1, channel2);
     }
   } device;
 
