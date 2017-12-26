@@ -12,6 +12,6 @@ configure_file (
 # Add binary dir as include directory, to be able to include config.h
 include_directories("${PROJECT_BINARY_DIR}")
 
-add_library(idso1070a Protocol.cxx Connector.cxx Command.cxx CommandsGenerator.cxx ResponsePacket.cxx hexdump.cxx)
+add_library(idso1070a IDSO1070A.cxx EEROMData.cxx Protocol.cxx Connector.cxx Command.cxx CommandsGenerator.cxx ResponsePacket.cxx hexdump.cxx)
 
 install (TARGETS idso1070a DESTINATION lib)

@@ -62,7 +62,7 @@ void Protocol::sendCommands(CommandQueue cmd)
     }
 }
 
-void Protocol::sendCommand(Command *cmd)
+void Protocol::sendCommands(Command *cmd)
 {
     commandQueue.push_back(cmd);
 }
@@ -238,7 +238,7 @@ void Protocol::parseFreqDivLowBytes(ResponsePacket *packet)
     {
         device.receiveFreqDivStatus = 0;
         device.freqDiv = i + device.freqDiv;
-        // syncTimeBaseFromFreqDiv(device.freqDiv);
+        syncTimeBaseFromFreqDiv();
     }
 }
 
@@ -256,7 +256,7 @@ void Protocol::parseFreqDivHighBytes(ResponsePacket *packet)
     {
         device.receiveFreqDivStatus = 0;
         device.freqDiv = (i << 16) + device.freqDiv;
-        // syncTimeBaseFromFreqDiv(device.freqDiv);
+        syncTimeBaseFromFreqDiv();
     }
 }
 
@@ -283,12 +283,85 @@ void Protocol::parseRamChannelSelection(ResponsePacket *packet)
     }
 }
 
+TimeBase Protocol::getTimebaseFromFreqDiv(uint32_t i)
+{
+    switch (i)
+    {
+    case 0:
+        return HDIV_2uS;
+    case 1:
+        return HDIV_5uS;
+    case 4:
+        return HDIV_10uS;
+    case 9:
+        return HDIV_20uS;
+    case 24:
+        return HDIV_50uS;
+    case 49:
+        return HDIV_100uS;
+    case 99:
+        return HDIV_200uS;
+    case 249:
+        return HDIV_500uS;
+    case 499:
+        return HDIV_1mS;
+    case 999:
+        return HDIV_2mS;
+    case 2499:
+        return HDIV_5mS;
+    case 4999:
+        return HDIV_10mS;
+    case 9999:
+        return HDIV_20mS;
+    case 24999:
+        return HDIV_50mS;
+    case 49999:
+        return HDIV_100mS;
+    case 99999:
+        return HDIV_200mS;
+    case 249999:
+        return HDIV_500mS;
+    case 499999:
+        return HDIV_1S;
+    case 999999:
+        return HDIV_2S;
+    case 2499999:
+        return HDIV_5S;
+    case 4999999:
+        return HDIV_10S;
+    case 9999999:
+        return HDIV_20S;
+    case 24999999:
+        return HDIV_50S;
+    case 49999999:
+        return HDIV_100S;
+    case 99999999:
+        return HDIV_200S;
+    case 249999999:
+        return HDIV_500S;
+    default:
+        return HDIV_1mS;
+    }
+}
+
+void Protocol::syncTimeBaseFromFreqDiv()
+{
+    TimeBase timebaseFromFreqDiv = getTimebaseFromFreqDiv(device.freqDiv);
+
+    if (timebaseFromFreqDiv == HDIV_2uS)
+    {
+        timebaseFromFreqDiv = HDIV_1mS;
+    }
+
+    // setTimeBase(timebaseFromFreqDiv);
+}
+
 void Protocol::process()
 {
     switch (state)
     {
     case STATE_IDLE:
-        sendCommand(new Command(RAM_CHANNEL_SELECTION));
+        sendCommands(new Command(RAM_CHANNEL_SELECTION));
         state = STATE_RAM_CHANNEL_SELECTION;
         break;
     case STATE_RAM_CHANNEL_SELECTION:
@@ -308,7 +381,7 @@ void Protocol::process()
                 parsePacket(getCurrentPacket());
                 removeCurrentPacket();
             }
-            sendCommand(new Command(SAMPLE_RATE));
+            sendCommands(new Command(SAMPLE_RATE));
             state = STATE_SAMPLE_RATE;
         }
         break;
@@ -317,7 +390,7 @@ void Protocol::process()
         {
             parsePacket(getCurrentPacket());
             removeCurrentPacket();
-            sendCommand(new Command(FREQ_DIV_HIGH));
+            sendCommands(new Command(FREQ_DIV_HIGH));
             state = STATE_FREQ_DIV_HIGH;
         }
         break;
@@ -326,7 +399,7 @@ void Protocol::process()
         {
             parsePacket(getCurrentPacket());
             removeCurrentPacket();
-            sendCommand(new Command(FREQ_DIV_LOW));
+            sendCommands(new Command(FREQ_DIV_LOW));
             state = STATE_FREQ_DIV_LOW;
         }
         break;
@@ -347,12 +420,32 @@ void Protocol::process()
                 parsePacket(getCurrentPacket());
                 removeCurrentPacket();
             }
+            sendCommands(cmdGen.getTriggerSource());
+            state = STATE_GET_TRIGGER_SOURCE;
+        }
+        break;
+    case STATE_GET_TRIGGER_SOURCE:
+        if (packetQueue.size() == 2)
+        {
+            while (packetQueue.size() > 0)
+            {
+                parsePacket(getCurrentPacket());
+                removeCurrentPacket();
+            }
+            sendCommands(cmdGen.readBatteryLevel());
             device.print();
             eeromData.print();
             state = STATE_DONE;
         }
         break;
     case STATE_DONE:
+        if (packetQueue.size() == 1)
+        {
+            sendCommands(cmdGen.readBatteryLevel());
+            parsePacket(getCurrentPacket());
+            removeCurrentPacket();
+            sleep(1);
+        }
         break;
     }
 }
