@@ -10,7 +10,9 @@ class CommandGenerator
 {
 private:
   Command *readEEROMPage(uint8_t address);
-  Command *updateTriggerPWM(int i);
+
+  float mapValue(int i, float f, float f2, float f3, float f4);
+  float mapValue(float f, float f2, float f3, float f4, float f5);
 
 public:
   CommandQueue readEEROM(IDSO1070A &device);
@@ -23,6 +25,9 @@ public:
   CommandQueue channelStatusOnly(IDSO1070A &device);
   CommandQueue levels(IDSO1070A &device);
   CommandQueue trigger(IDSO1070A &device);
+  CommandQueue xTriggerPos(IDSO1070A &device);
+  CommandQueue channel1VoltageDiv(IDSO1070A &device);
+  CommandQueue channel2VoltageDiv(IDSO1070A &device);
 
   Command *selectChannel(IDSO1070A &device);
   Command *selectRAMChannel(IDSO1070A &device);
@@ -35,6 +40,8 @@ public:
   Command *updateTriggerSourceAndSlope(IDSO1070A &device);
   Command *updateTriggerLevel(IDSO1070A &device);
   Command *updateChannelVolts125(IDSO1070A &device);
+  Command *updateTriggerMode(IDSO1070A &device);
+  Command *updateTriggerPWM(IDSO1070A &device, uint16_t pwm);
   Command *relay1(IDSO1070A &device);
   Command *relay2(IDSO1070A &device);
   Command *relay3(IDSO1070A &device);
@@ -43,9 +50,10 @@ public:
   Command *channel2Level(IDSO1070A &device);
   Command *channel1Coupling(IDSO1070A &device);
   Command *channel2Coupling(IDSO1070A &device);
-  Command *triggerMode(IDSO1070A &device);
   Command *preTrigger(IDSO1070A &device);
   Command *postTrigger(IDSO1070A &device);
+  Command *channel1PWM(IDSO1070A &device, uint16_t pwm);
+  Command *channel2PWM(IDSO1070A &device, uint16_t pwm);
 };
 
 #endif // _COMMANDS_GENERATOR_H_
