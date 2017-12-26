@@ -91,20 +91,20 @@ CommandQueue CommandGenerator::getTriggerSource(IDSO1070A &device)
     return cmds;
 }
 
-Command *CommandGenerator::channelSelection(IDSO1070A &device)
+Command *CommandGenerator::selectChannel(IDSO1070A &device)
 {
     uint8_t cmdBuffer[4] = {
         0x55, (uint8_t)CHANNEL_SELECTION,
         0x00, 0x00};
-    if (device.channel1 && !device.channel2 /*&& sampRate200Mor250M*/)
+    if (device.channel1.enabled && !device.channel2.enabled /*&& sampRate200Mor250M*/)
     {
         cmdBuffer[2] = 0x00;
     }
-    else if (device.channel2 && !device.channel1 /*&& sampRate200Mor250M*/)
+    else if (device.channel2.enabled && !device.channel1.enabled /*&& sampRate200Mor250M*/)
     {
         cmdBuffer[2] = 0x01;
     }
-    else if ((device.channel2 && device.channel1) /*|| (!sampRate200Mor250M && ((channel1 && !channel2) || (channel2 && !channel1)))*/)
+    else if ((device.channel2.enabled && device.channel1.enabled) /*|| (!sampRate200Mor250M && ((channel1 && !channel2) || (channel2 && !channel1)))*/)
     {
         cmdBuffer[2] = 0x02;
     }
@@ -162,7 +162,7 @@ CommandQueue CommandGenerator::initialize(IDSO1070A &device)
 CommandQueue CommandGenerator::voltageDiv(IDSO1070A &device)
 {
     CommandQueue cmds;
-    cmds.push_back(channelVolts125(device));
+    cmds.push_back(updateChannelVolts125(device));
     cmds.push_back(relay1(device));
     cmds.push_back(relay2(device));
     cmds.push_back(channel1Level(device));
@@ -194,68 +194,124 @@ CommandQueue CommandGenerator::channelStatus(IDSO1070A &device)
 CommandQueue CommandGenerator::channelStatusOnly(IDSO1070A &device)
 {
     CommandQueue cmds;
-    cmds.push_back(channelSelection(device));
-    cmds.push_back(ramChannelSelection(device));
+    cmds.push_back(selectChannel(device));
+    cmds.push_back(selectRAMChannel(device));
     cmds.push_back(readRamCount(device));
     return cmds;
 }
-Command *CommandGenerator::ramChannelSelection(IDSO1070A &device)
+
+Command *CommandGenerator::selectRAMChannel(IDSO1070A &device)
 {
-    printf("ramChannelSelection\n");
-    return NULL;
+    uint8_t cmdBuffer[4] = {
+        0x55, (uint8_t)CHANNEL_SELECTION,
+        0x00, 0x00};
+    if (device.channel1.enabled && !device.channel2.enabled)
+    {
+        cmdBuffer[2] = 0x08;
+    }
+    else if (device.channel2.enabled && !device.channel1.enabled)
+    {
+        cmdBuffer[2] = 0x09;
+    }
+    else if (device.channel2.enabled && device.channel1.enabled)
+    {
+        cmdBuffer[2] = 0x00;
+    }
+    else
+    {
+        cmdBuffer[2] = 0x01;
+    }
+    return new Command(cmdBuffer);
 }
-Command *CommandGenerator::channelVolts125(IDSO1070A &device)
+
+Command *CommandGenerator::updateChannelVolts125(IDSO1070A &device)
 {
-    printf("channelVolts125\n");
-    return NULL;
+    uint8_t b = 0;
+    switch (device.channel1.verticalDiv)
+    {
+    case VDIV_10mV:
+    case VDIV_100mV:
+    case VDIV_1V:
+        b &= ~0x03;
+        break;
+    case VDIV_20mV:
+    case VDIV_200mV:
+    case VDIV_2V:
+        b &= ~0x02;
+        b |= 0x01;
+        break;
+    case VDIV_50mV:
+    case VDIV_500mV:
+    case VDIV_5V:
+        b &= ~0x01;
+        b |= 0x02;
+        break;
+    }
+
+    switch (device.channel2.verticalDiv)
+    {
+    case VDIV_10mV:
+    case VDIV_100mV:
+    case VDIV_1V:
+        b &= ~0x0c;
+        break;
+    case VDIV_20mV:
+    case VDIV_200mV:
+    case VDIV_2V:
+        b &= ~0x08;
+        b |= 0x04;
+        break;
+    case VDIV_50mV:
+    case VDIV_500mV:
+    case VDIV_5V:
+        b &= ~0x04;
+        b |= 0x08;
+        break;
+    }
+    b &= ~0x30;
+    uint8_t cmdBuffer[4] = {
+        0x55, (uint8_t)CHANNEL_VOLTS_DIV_125,
+        b, 0x00};
+    return new Command(cmdBuffer);
 }
+
 Command *CommandGenerator::relay1(IDSO1070A &device)
 {
-    printf("relay1\n");
     return NULL;
 }
 Command *CommandGenerator::relay2(IDSO1070A &device)
 {
-    printf("relay2\n");
     return NULL;
 }
 Command *CommandGenerator::relay3(IDSO1070A &device)
 {
-    printf("relay3\n");
     return NULL;
 }
 Command *CommandGenerator::relay4(IDSO1070A &device)
 {
-    printf("relay4\n");
     return NULL;
 }
 Command *CommandGenerator::channel1Level(IDSO1070A &device)
 {
-    printf("channel1Level\n");
     return NULL;
 }
 Command *CommandGenerator::channel2Level(IDSO1070A &device)
 {
-    printf("channel2Level\n");
     return NULL;
 }
 Command *CommandGenerator::channel1Coupling(IDSO1070A &device)
 {
-    printf("channel1Coupling\n");
     return NULL;
 }
 Command *CommandGenerator::channel2Coupling(IDSO1070A &device)
 {
-    printf("channel2Coupling\n");
     return NULL;
 }
 Command *CommandGenerator::triggerMode(IDSO1070A &device)
 {
-    printf("triggerMode\n");
     return NULL;
 }
 Command *CommandGenerator::readRamCount(IDSO1070A &device)
 {
-    printf("readRamCount\n");
     return NULL;
 }
