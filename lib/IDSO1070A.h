@@ -16,6 +16,12 @@ struct IDSO1070A
         TriggerMode mode;
         TriggerSlope slope;
         double xPosition;
+        uint16_t innerTriggerPWM[4];
+        uint16_t outerTriggerPWM[2];
+
+        uint16_t getBottomPWM();
+        uint16_t getTopPWM();
+        void print();
     };
 
     struct Channel
@@ -26,17 +32,7 @@ struct IDSO1070A
         InputCoupling coupling;
         int verticalPosition;
 
-        void print()
-        {
-            printf(
-                "[Channel]\n"
-                //"name = %s\n"
-                "enabled = %d\n"
-                "verticalDiv = %d\n"
-                "coupling = %d\n"
-                "\n\n",
-                /*name,*/ enabled, verticalDiv, coupling);
-        }
+        void print();
     };
     const size_t samplesCountPerPacket = 500;
     const size_t memoryDepth = 2000;
@@ -56,36 +52,12 @@ struct IDSO1070A
     ScopeMode scopeMode;
 
     bool isSampleRate200Mor250M();
-    size_t getSamplesNumberOfOneFrame()
-    {
-        return (memoryDepth == 2000 && timeBase == HDIV_5uS) ? 2500 : memoryDepth;
-    };
-    uint8_t getEnabledChannelsCount()
-    {
-        if (channel1.enabled && channel2.enabled)
-            return 2;
-        else if (channel1.enabled || channel2.enabled)
-            return 1;
-        return 0;
-    }
-    uint8_t getPacketsNumber()
-    {
-        int enabledChannelsCount = getEnabledChannelsCount();
-        return enabledChannelsCount == 0 ? 0 : (enabledChannelsCount * getSamplesNumberOfOneFrame()) / samplesCountPerPacket;
-    }
+    size_t getSamplesNumberOfOneFrame();
+    uint8_t getEnabledChannelsCount();
+    uint8_t getPacketsNumber();
+    TimeBase getTimebaseFromFreqDiv();
 
-    void print()
-    {
-        printf(
-            "[IDSO1070A]\n"
-            "date = %s\n"
-            "freqDiv = %d\n"
-            "batteryLevel = %d\n",
-            date, freqDiv, batteryLevel);
-        channel1.print();
-        channel2.print();
-        printf("\n\n");
-    }
+    void print();
 };
 
 #endif // _IDSO1070A_H_
