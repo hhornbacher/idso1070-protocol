@@ -4,15 +4,34 @@
 #include <cstdio>
 #include <cstdint>
 
+#include "VoltageDiv.h"
 #include "TimeBase.h"
 
 struct IDSO1070A
 {
+    struct Channel
+    {
+        char *name;
+        bool enabled;
+        VoltageDiv verticalDiv;
+
+        void print()
+        {
+            printf(
+                "[Channel]\n"
+                //"name = %s\n"
+                "enabled = %d\n"
+                "verticalDiv = %d\n"
+                "\n\n",
+                /*name,*/ enabled, verticalDiv);
+        }
+    };
+
     const uint16_t maxPWM = 4095;
     char date[9];
     uint8_t batteryLevel;
-    bool channel1;
-    bool channel2;
+    Channel channel1;
+    Channel channel2;
     uint8_t receiveFreqDivStatus;
     uint32_t freqDiv;
 
@@ -24,11 +43,11 @@ struct IDSO1070A
             "[IDSO1070A]\n"
             "date = %s\n"
             "freqDiv = %d\n"
-            "batteryLevel = %d\n"
-            "channel1 = %d\n"
-            "channel2 = %d\n"
-            "\n\n",
-            date, freqDiv, batteryLevel, channel1, channel2);
+            "batteryLevel = %d\n",
+            date, freqDiv, batteryLevel);
+        channel1.print();
+        channel2.print();
+        printf("\n\n");
     }
 };
 
