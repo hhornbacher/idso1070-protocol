@@ -13,14 +13,14 @@
 #include "EEROMData.h"
 #include "ResponsePacket.h"
 #include "Command.h"
-#include "CommandsGenerator.h"
+#include "CommandGenerator.h"
 
 class Protocol
 {
 private:
   Connector connection;
 
-  CommandsGenerator cmdGen;
+  CommandGenerator cmdGen;
 
   size_t expectedResponseCount = 0;
   PacketQueue packetQueue;
@@ -32,6 +32,7 @@ private:
   enum States
   {
     STATE_IDLE,
+    STATE_INIT,
     STATE_RAM_CHANNEL_SELECTION,
     STATE_READ_EEROM,
     STATE_SAMPLE_RATE,
