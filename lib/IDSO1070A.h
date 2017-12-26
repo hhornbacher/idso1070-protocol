@@ -8,12 +8,23 @@
 
 struct IDSO1070A
 {
+    struct Trigger
+    {
+        bool isHold;
+        TriggerChannel channel;
+        int level;
+        TriggerMode mode;
+        TriggerSlope slope;
+        double xPosition;
+    };
+
     struct Channel
     {
         char *name;
         bool enabled;
         VoltageDiv verticalDiv;
         InputCoupling coupling;
+        int verticalPosition;
 
         void print()
         {
@@ -34,8 +45,10 @@ struct IDSO1070A
     uint8_t batteryLevel;
     Channel channel1;
     Channel channel2;
+    Trigger trigger;
     uint8_t receiveFreqDivStatus;
     uint32_t freqDiv;
+    uint16_t pwmArray[9][2];
 
     TimeBase timeBase;
 
