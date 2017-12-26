@@ -1,5 +1,5 @@
-#ifndef _TIME_BASE_H_
-#define _TIME_BASE_H_
+#ifndef _ENUMS_H_
+#define _ENUMS_H_
 
 enum TimeBase
 {
@@ -39,4 +39,37 @@ enum TimeBase
     HDIV_500S = 33
 };
 
-#endif // _TIME_BASE_H_
+enum VoltageDiv
+{
+    VDIV_10mV,
+    VDIV_20mV,
+    VDIV_50mV,
+    VDIV_100mV,
+    VDIV_200mV,
+    VDIV_500mV,
+    VDIV_1V,
+    VDIV_2V,
+    VDIV_5V
+};
+
+enum InputCoupling
+{
+    COUPLING_AC,
+    COUPLING_DC,
+    COUPLING_GND
+};
+
+enum CaptureMode
+{
+    CAPMODE_ROLL,
+    CAPMODE_SCAN,
+    CAPMODE_NORMAL
+};
+
+enum ScopeMode
+{
+    SCOMODE_ANALOG,
+    SCOMODE_DIGITAL
+};
+
+#endif // _ENUMS_H_

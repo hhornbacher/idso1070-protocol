@@ -4,8 +4,7 @@
 #include <cstdio>
 #include <cstdint>
 
-#include "VoltageDiv.h"
-#include "TimeBase.h"
+#include "enums.h"
 
 struct IDSO1070A
 {
@@ -14,6 +13,7 @@ struct IDSO1070A
         char *name;
         bool enabled;
         VoltageDiv verticalDiv;
+        InputCoupling coupling;
 
         void print()
         {
@@ -22,11 +22,13 @@ struct IDSO1070A
                 //"name = %s\n"
                 "enabled = %d\n"
                 "verticalDiv = %d\n"
+                "coupling = %d\n"
                 "\n\n",
-                /*name,*/ enabled, verticalDiv);
+                /*name,*/ enabled, verticalDiv, coupling);
         }
     };
-
+    const size_t samplesCountPerPacket = 500;
+    const size_t memoryDepth = 2000;
     const uint16_t maxPWM = 4095;
     char date[9];
     uint8_t batteryLevel;
@@ -36,6 +38,28 @@ struct IDSO1070A
     uint32_t freqDiv;
 
     TimeBase timeBase;
+
+    CaptureMode captureMode;
+    ScopeMode scopeMode;
+
+    bool isSampleRate200Mor250M();
+    size_t getSamplesNumberOfOneFrame()
+    {
+        return (memoryDepth == 2000 && timeBase == HDIV_5uS) ? 2500 : memoryDepth;
+    };
+    uint8_t getEnabledChannelsCount()
+    {
+        if (channel1.enabled && channel2.enabled)
+            return 2;
+        else if (channel1.enabled || channel2.enabled)
+            return 1;
+        return 0;
+    }
+    uint8_t getPacketsNumber()
+    {
+        int enabledChannelsCount = getEnabledChannelsCount();
+        return enabledChannelsCount == 0 ? 0 : (enabledChannelsCount * getSamplesNumberOfOneFrame()) / samplesCountPerPacket;
+    }
 
     void print()
     {

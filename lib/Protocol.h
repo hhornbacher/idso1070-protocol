@@ -8,7 +8,7 @@
 
 #include "hexdump.h"
 #include "Connector.h"
-#include "TimeBase.h"
+#include "enums.h"
 #include "IDSO1070A.h"
 #include "EEROMData.h"
 #include "ResponsePacket.h"
