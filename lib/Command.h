@@ -47,6 +47,19 @@ public:
   uint8_t getResponseCount();
 };
 
-typedef std::deque<Command *> CommandQueue;
+class CommandQueue : private std::deque<Command *>
+{
+private:
+  size_t totalResponseCount = 0;
+
+public:
+  void add(Command *cmd);
+  void add(CommandQueue cmds);
+
+  size_t getTotalResponseCount();
+  size_t getSize();
+  Command *getNext();
+};
+// typedef std::deque<Command *> CommandQueue;
 
 #endif // _COMMAND_H_
