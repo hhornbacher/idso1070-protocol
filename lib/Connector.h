@@ -16,26 +16,20 @@
 
 class Connector
 {
-private:
-  int socketHandle;
-  sockaddr_in serverAddress;
-
+protected:
   uint8_t packetBuffer[PACKETBUFFER_LENGTH];
   size_t packetBufferLength = 0;
 
 public:
-  Connector(char *host, int port);
-  ~Connector();
+  virtual void transmit(uint8_t *data, size_t length) = 0;
+  virtual size_t receive() = 0;
 
-  void transmit(uint8_t *data, size_t length);
-  size_t receive();
+  virtual void start() = 0;
+  virtual void stop() = 0;
 
   uint8_t *getPacketBuffer();
   size_t getPacketBufferLength();
   void clearPacketBuffer();
-
-  void start();
-  void stop();
 };
 
 #endif // _CONNECTOR_H_
