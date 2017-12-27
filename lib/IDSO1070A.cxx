@@ -1,5 +1,10 @@
 #include "IDSO1070A.h"
 
+uint16_t IDSO1070A::maxSample = 248;
+size_t IDSO1070A::samplesCountPerPacket = 500;
+size_t IDSO1070A::memoryDepth = 2000;
+uint16_t IDSO1070A::maxPWM = 4095;
+
 bool IDSO1070A::isSampleRate200Mor250M()
 {
     return timeBase <= HDIV_1uS;
@@ -86,34 +91,53 @@ TimeBase IDSO1070A::getTimebaseFromFreqDiv()
 
 void IDSO1070A::print()
 {
-    printf(
-        "[IDSO1070A]\n"
-        "date = %s\n"
-        "freqDiv = %d\n"
-        "batteryLevel = %d\n",
-        date, freqDiv, batteryLevel);
+    printf("[IDSO1070A]\n");
     channel1.print();
     channel2.print();
+    trigger.print();
+    printf("batteryLevel = %d\n", batteryLevel);
+    printf("date = %s\n", date);
+    printf("receiveFreqDivStatus = 0x%02x\n", receiveFreqDivStatus);
+    printf("freqDiv = %d\n", freqDiv);
+    printf("timeBase = %d\n", timeBase);
+    printf("captureMode = %d\n", captureMode);
+    printf("scopeMode = %d\n", scopeMode);
     printf("\n\n");
 }
 
 void IDSO1070A::Channel::print()
 {
-    printf(
-        "[Channel]\n"
-        //"name = %s\n"
-        "enabled = %d\n"
-        "verticalDiv = %d\n"
-        "coupling = %d\n"
-        "\n\n",
-        /*name,*/ enabled, verticalDiv, coupling);
+    printf("[Channel]\n");
+    printf("enabled = %d\n", enabled);
+    printf("verticalDiv = %d\n", verticalDiv);
+    printf("coupling = %d\n", coupling);
+    printf("verticalPosition = %d\n", coupling);
+    printf("\n\n");
+}
+
+void IDSO1070A::Channel::setVerticalPosition(int i)
+{
+    if (i < 8)
+    {
+        i = 8;
+    }
+    else if (i > IDSO1070A::maxSample)
+    {
+        i = IDSO1070A::maxSample;
+    }
+    verticalPosition = i;
 }
 
 void IDSO1070A::Trigger::print()
 {
-    printf(
-        "[Trigger]\n"
-        "\n\n");
+    printf("[Trigger]\n");
+    printf("isHold = %d\n", isHold);
+    printf("mode = %d\n", mode);
+    printf("channel = %d\n", channel);
+    printf("slope = %d\n", slope);
+    printf("level = %d\n", level);
+    printf("xPosition = %lf\n", xPosition);
+    printf("\n\n");
 }
 
 uint16_t IDSO1070A::Trigger::getBottomPWM()
@@ -132,4 +156,17 @@ uint16_t IDSO1070A::Trigger::getTopPWM()
     else if (channel == TRIGCHAN_CH2)
         return innerTriggerPWM[3];
     return -1;
+}
+
+void IDSO1070A::Trigger::setTriggerLevel(int i)
+{
+    if (i < 8)
+    {
+        i = 8;
+    }
+    else if (i > IDSO1070A::maxSample)
+    {
+        i = IDSO1070A::maxSample;
+    }
+    level = i;
 }

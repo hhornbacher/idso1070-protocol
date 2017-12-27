@@ -9,9 +9,10 @@
 struct IDSO1070A
 {
 
-    const size_t samplesCountPerPacket = 500;
-    const size_t memoryDepth = 2000;
-    const uint16_t maxPWM = 4095;
+    static size_t samplesCountPerPacket;
+    static size_t memoryDepth;
+    static uint16_t maxPWM;
+    static uint16_t maxSample;
 
     struct Trigger
     {
@@ -27,6 +28,7 @@ struct IDSO1070A
         uint16_t getBottomPWM();
         uint16_t getTopPWM();
         void print();
+        void setTriggerLevel(int i);
     };
 
     struct Channel
@@ -36,8 +38,10 @@ struct IDSO1070A
         VoltageDiv verticalDiv;
         InputCoupling coupling;
         int verticalPosition;
+        uint16_t pwmArray[9][2];
 
         void print();
+        void setVerticalPosition(int i);
     };
 
     Channel channel1;
@@ -50,7 +54,6 @@ struct IDSO1070A
     char date[9];
     uint8_t receiveFreqDivStatus;
     uint32_t freqDiv;
-    uint16_t pwmArray[9][2];
 
     TimeBase timeBase;
 
