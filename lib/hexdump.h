@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <cstring>
 
-#define HEXDUMP_COLS 16
+#define HEXDUMP_COLS 32
 
 void hexdump(uint8_t *data, size_t length);
 

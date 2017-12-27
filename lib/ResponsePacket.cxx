@@ -41,13 +41,13 @@ PacketType ResponsePacket::getType()
 
 void ResponsePacket::print()
 {
-    printf("\e[38;5;75mGot packet:\n");
-    printf("CommandID: %02x, Type: %s\n", getCommandID(), typeToString(getType()));
-    printf("Header:\n");
-    hexdump(getHeader(), 7);
-    printf("Payload:\n");
+    printf("[ResponsePacket]\n");
+    printf("commandID = %02x\n", getCommandID());
+    printf("packetType = %s\n", typeToString(getType()));
+    printf("payloadLength = %ld\n", getPayloadLength());
+    printf("[Payload]\n");
     hexdump(getPayload(), getPayloadLength());
-    printf("\e[0m");
+    printf("\n\n");
 }
 
 const char *ResponsePacket::typeToString(PacketType type)
