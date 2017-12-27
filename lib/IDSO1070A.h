@@ -8,14 +8,19 @@
 
 struct IDSO1070A
 {
+
+    const size_t samplesCountPerPacket = 500;
+    const size_t memoryDepth = 2000;
+    const uint16_t maxPWM = 4095;
+
     struct Trigger
     {
-        bool isHold;
-        TriggerChannel channel;
-        int level;
-        TriggerMode mode;
-        TriggerSlope slope;
-        double xPosition;
+        bool isHold = false;
+        TriggerMode mode = TRIGMODE_AUTO;
+        TriggerChannel channel = TRIGCHAN_CH1;
+        TriggerSlope slope = TRIGSLOPE_RISING;
+        int level = 0;
+        double xPosition = 0.5;
         uint16_t innerTriggerPWM[4];
         uint16_t outerTriggerPWM[2];
 
@@ -34,14 +39,15 @@ struct IDSO1070A
 
         void print();
     };
-    const size_t samplesCountPerPacket = 500;
-    const size_t memoryDepth = 2000;
-    const uint16_t maxPWM = 4095;
-    char date[9];
-    uint8_t batteryLevel;
+
     Channel channel1;
     Channel channel2;
+    Channel *selectedChannel = &channel1;
     Trigger trigger;
+
+    uint8_t batteryLevel;
+
+    char date[9];
     uint8_t receiveFreqDivStatus;
     uint32_t freqDiv;
     uint16_t pwmArray[9][2];

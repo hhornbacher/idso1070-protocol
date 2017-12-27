@@ -23,7 +23,6 @@ private:
   CommandGenerator cmdGen;
 
   size_t expectedResponseCount = 0;
-  PacketQueue packetQueue;
   bool receiving = true;
 
   CommandQueue commandQueue;
@@ -48,6 +47,7 @@ private:
 
   void sendCommands(CommandQueue cmd);
   void sendCommands(Command *cmd);
+  void sendSettings();
 
   void parsePacket(ResponsePacket *packet);
   void parseAAResponse(ResponsePacket *packet);
@@ -59,11 +59,7 @@ private:
   void parseFreqDivHighBytes(ResponsePacket *packet);
   void parseRamChannelSelection(ResponsePacket *packet);
 
-  TimeBase getTimebaseFromFreqDiv(uint32_t i);
   void syncTimeBaseFromFreqDiv();
-
-  ResponsePacket *getCurrentPacket();
-  void removeCurrentPacket();
 
 public:
   Protocol(char *host, int port);
@@ -72,7 +68,6 @@ public:
   void start();
   void stop();
   void process();
-
   void receive();
   void transmit();
 };

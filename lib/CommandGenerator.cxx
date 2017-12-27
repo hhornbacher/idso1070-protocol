@@ -10,7 +10,7 @@ float CommandGenerator::mapValue(float f, float f2, float f3, float f4, float f5
     return (((f - f2) / (f3 - f2)) * (f5 - f4)) + f4;
 }
 
-CommandQueue CommandGenerator::readEEROM(IDSO1070A &device)
+CommandQueue CommandGenerator::readFPGAVersionAndEEROM(IDSO1070A &device)
 {
     CommandQueue cmds;
     cmds.add(readFPGAVersion(device));

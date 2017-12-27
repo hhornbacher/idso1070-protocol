@@ -15,7 +15,7 @@ private:
   float mapValue(float f, float f2, float f3, float f4, float f5);
 
 public:
-  CommandQueue readEEROM(IDSO1070A &device);
+  CommandQueue readFPGAVersionAndEEROM(IDSO1070A &device);
   CommandQueue updateTriggerSource(IDSO1070A &device);
   CommandQueue updateTimeBase(IDSO1070A &device);
   CommandQueue initialize(IDSO1070A &device);

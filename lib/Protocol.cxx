@@ -13,6 +13,13 @@ Protocol::~Protocol()
 void Protocol::start()
 {
     connection.start();
+    receiving = true;
+    transmitting = true;
+    sendCommands(cmdGen.readFPGAVersionAndEEROM(device));
+    sendCommands(cmdGen.initialize(device));
+    // sendCommands(cmdGen.updateTimeBase(device));
+    // sendCommands(cmdGen.channelStatus(device));
+    // sendCommands(cmdGen.updateTriggerSource(device));
 }
 
 void Protocol::stop()
@@ -29,12 +36,13 @@ void Protocol::receive()
         connection.receive();
         if (connection.getPacketBufferLength() == IDSO1070A_PACKET_SIZE)
         {
-            ResponsePacket *packet = new ResponsePacket(connection.getPacketBuffer());
-            packetQueue.push_back(packet);
-            connection.clearPacketBuffer();
+            ResponsePacket packet(connection.getPacketBuffer());
+
+            parsePacket(&packet);
             if (expectedResponseCount > 0)
                 expectedResponseCount--;
-            printf("\e[38;5;73mpacketQueue size: %ld\e[0m\n", packetQueue.size());
+
+            connection.clearPacketBuffer();
         }
     }
 }
@@ -43,12 +51,11 @@ void Protocol::transmit()
 {
     if (transmitting)
     {
-        if (commandQueue.size() > 0 && expectedResponseCount == 0)
+        if (commandQueue.getSize() > 0 && expectedResponseCount == 0)
         {
-            Command *cmd = commandQueue.front();
+            Command *cmd = commandQueue.getNext();
             connection.transmit(cmd->getPayload(), 4);
             expectedResponseCount = cmd->getResponseCount();
-            commandQueue.pop_front();
             delete cmd;
         }
     }
@@ -56,26 +63,17 @@ void Protocol::transmit()
 
 void Protocol::sendCommands(CommandQueue cmd)
 {
-    for (CommandQueue::iterator i = cmd.begin(); i != cmd.end(); i++)
-    {
-        commandQueue.push_back(*i);
-    }
+    commandQueue.add(cmd);
 }
 
 void Protocol::sendCommands(Command *cmd)
 {
-    commandQueue.push_back(cmd);
+    commandQueue.add(cmd);
 }
 
-ResponsePacket *Protocol::getCurrentPacket()
+void Protocol::sendSettings()
 {
-    return packetQueue.front();
-}
-
-void Protocol::removeCurrentPacket()
-{
-    delete getCurrentPacket();
-    packetQueue.pop_front();
+    sendCommands(cmdGen.initialize(device));
 }
 
 void Protocol::parsePacket(ResponsePacket *packet)
@@ -96,7 +94,7 @@ void Protocol::parsePacket(ResponsePacket *packet)
         return;
     default:
         printf("Unknown response type: 0x%02x\n", (uint8_t)packet->getType());
-        packet->print();
+        // packet->print();
         return;
     }
 }
@@ -151,7 +149,7 @@ void Protocol::parseEEResponse(ResponsePacket *packet)
             return;
         case 0x0c:
             memcpy(&eeromData.diffFixData[1][200], packet->getPayload(), 56);
-            // readEEROMHasDone();
+            // readFPGAVersionAndEEROMHasDone();
             return;
         default:
             printf("Unknown EEROM page: 0x%02x\n", (uint8_t)packet->getHeader()[5]);
@@ -170,6 +168,8 @@ void Protocol::parseFPGAResponse(ResponsePacket *packet)
         return;
     case 0x03:
         printf("parseRelay\n");
+        return;
+    case 0x04:
         return;
     case 0x05:
         printf("parseTriggerSourceAndSlope\n");
@@ -197,7 +197,7 @@ void Protocol::parseFPGAResponse(ResponsePacket *packet)
         return;
     default:
         printf("Unknown FPGA response type: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
-        packet->print();
+        // packet->print();
         return;
     }
 }
@@ -265,88 +265,27 @@ void Protocol::parseRamChannelSelection(ResponsePacket *packet)
     switch (packet->getHeader()[5])
     {
     case 0x00:
-        device.channel1 = true;
-        device.channel2 = true;
+        device.channel1.enabled = true;
+        device.channel2.enabled = true;
         break;
     case 0x01:
-        device.channel1 = false;
-        device.channel2 = false;
+        device.channel1.enabled = false;
+        device.channel2.enabled = false;
         break;
     case 0x08:
-        device.channel1 = true;
-        device.channel2 = false;
+        device.channel1.enabled = true;
+        device.channel2.enabled = false;
         break;
     case 0x09:
-        device.channel1 = false;
-        device.channel2 = true;
+        device.channel1.enabled = false;
+        device.channel2.enabled = true;
         break;
-    }
-}
-
-TimeBase Protocol::getTimebaseFromFreqDiv(uint32_t i)
-{
-    switch (i)
-    {
-    case 0:
-        return HDIV_2uS;
-    case 1:
-        return HDIV_5uS;
-    case 4:
-        return HDIV_10uS;
-    case 9:
-        return HDIV_20uS;
-    case 24:
-        return HDIV_50uS;
-    case 49:
-        return HDIV_100uS;
-    case 99:
-        return HDIV_200uS;
-    case 249:
-        return HDIV_500uS;
-    case 499:
-        return HDIV_1mS;
-    case 999:
-        return HDIV_2mS;
-    case 2499:
-        return HDIV_5mS;
-    case 4999:
-        return HDIV_10mS;
-    case 9999:
-        return HDIV_20mS;
-    case 24999:
-        return HDIV_50mS;
-    case 49999:
-        return HDIV_100mS;
-    case 99999:
-        return HDIV_200mS;
-    case 249999:
-        return HDIV_500mS;
-    case 499999:
-        return HDIV_1S;
-    case 999999:
-        return HDIV_2S;
-    case 2499999:
-        return HDIV_5S;
-    case 4999999:
-        return HDIV_10S;
-    case 9999999:
-        return HDIV_20S;
-    case 24999999:
-        return HDIV_50S;
-    case 49999999:
-        return HDIV_100S;
-    case 99999999:
-        return HDIV_200S;
-    case 249999999:
-        return HDIV_500S;
-    default:
-        return HDIV_1mS;
     }
 }
 
 void Protocol::syncTimeBaseFromFreqDiv()
 {
-    TimeBase timebaseFromFreqDiv = getTimebaseFromFreqDiv(device.freqDiv);
+    TimeBase timebaseFromFreqDiv = device.getTimebaseFromFreqDiv();
 
     if (timebaseFromFreqDiv == HDIV_2uS)
     {
@@ -358,94 +297,106 @@ void Protocol::syncTimeBaseFromFreqDiv()
 
 void Protocol::process()
 {
-    switch (state)
+    if (commandQueue.getSize() == 0)
     {
-    case STATE_IDLE:
-        sendCommands(new Command(RAM_CHANNEL_SELECTION));
-        state = STATE_RAM_CHANNEL_SELECTION;
-        break;
-    case STATE_RAM_CHANNEL_SELECTION:
-        if (packetQueue.size() == 1)
-        {
-            parsePacket(getCurrentPacket());
-            removeCurrentPacket();
-            sendCommands(cmdGen.readEEROM());
-            state = STATE_READ_EEROM;
-        }
-        break;
-    case STATE_READ_EEROM:
-        if (packetQueue.size() == 19)
-        {
-            while (packetQueue.size() > 0)
-            {
-                parsePacket(getCurrentPacket());
-                removeCurrentPacket();
-            }
-            sendCommands(new Command(SAMPLE_RATE));
-            state = STATE_SAMPLE_RATE;
-        }
-        break;
-    case STATE_SAMPLE_RATE:
-        if (packetQueue.size() == 1)
-        {
-            parsePacket(getCurrentPacket());
-            removeCurrentPacket();
-            sendCommands(new Command(FREQ_DIV_HIGH));
-            state = STATE_FREQ_DIV_HIGH;
-        }
-        break;
-    case STATE_FREQ_DIV_HIGH:
-        if (packetQueue.size() == 1)
-        {
-            parsePacket(getCurrentPacket());
-            removeCurrentPacket();
-            sendCommands(new Command(FREQ_DIV_LOW));
-            state = STATE_FREQ_DIV_LOW;
-        }
-        break;
-    case STATE_FREQ_DIV_LOW:
-        if (packetQueue.size() == 1)
-        {
-            parsePacket(getCurrentPacket());
-            removeCurrentPacket();
-            sendCommands(cmdGen.getTimebase());
-            state = STATE_GET_TIMEBASE;
-        }
-        break;
-    case STATE_GET_TIMEBASE:
-        if (packetQueue.size() == 3)
-        {
-            while (packetQueue.size() > 0)
-            {
-                parsePacket(getCurrentPacket());
-                removeCurrentPacket();
-            }
-            sendCommands(cmdGen.getTriggerSource());
-            state = STATE_GET_TRIGGER_SOURCE;
-        }
-        break;
-    case STATE_GET_TRIGGER_SOURCE:
-        if (packetQueue.size() == 2)
-        {
-            while (packetQueue.size() > 0)
-            {
-                parsePacket(getCurrentPacket());
-                removeCurrentPacket();
-            }
-            sendCommands(cmdGen.readBatteryLevel());
-            device.print();
-            eeromData.print();
-            state = STATE_DONE;
-        }
-        break;
-    case STATE_DONE:
-        if (packetQueue.size() == 1)
-        {
-            sendCommands(cmdGen.readBatteryLevel());
-            parsePacket(getCurrentPacket());
-            removeCurrentPacket();
-            sleep(1);
-        }
-        break;
+        device.print();
+        eeromData.print();
+        exit(0);
     }
+    // CommandQueue eeromCmds = cmdGen.readFPGAVersionAndEEROM(device);
+    // switch (state)
+    // {
+    // case STATE_IDLE:
+    //     sendCommands(cmdGen.initialize(device));
+    //     state = STATE_INIT;
+    //     break;
+    // case STATE_INIT:
+    //     if (packetQueue.size() == responseCount)
+    //     {
+    //         sendCommands(cmdGen.readFPGAVersionAndEEROM(device));
+    //         state = STATE_READ_EEROM;
+    //     }
+    //     break;
+    // case STATE_READ_EEROM:
+    //     if (packetQueue.size() == responseCount)
+    //     {
+    //         while (packetQueue.size() > 0)
+    //         {
+    //             parsePacket(getCurrentPacket());
+    //             removeCurrentPacket();
+    //         }
+    //         // responseCount = 1;
+    //         // sendCommands(new Command(CMD_SAMPLE_RATE));
+    //         // state = STATE_SAMPLE_RATE;
+    //         eeromData.print();
+    //         device.print();
+    //         state = STATE_DONE;
+    //     }
+    //     break;
+    // // case STATE_SAMPLE_RATE:
+    // //     if (packetQueue.size() == responseCount)
+    // //     {
+    // //         parsePacket(getCurrentPacket());
+    // //         removeCurrentPacket();
+    // //         responseCount = 1;
+    // //         sendCommands(new Command(CMD_FREQ_DIV_HIGH));
+    // //         state = STATE_FREQ_DIV_HIGH;
+    // //     }
+    // //     break;
+    // // case STATE_FREQ_DIV_HIGH:
+    // //     if (packetQueue.size() == responseCount)
+    // //     {
+    // //         parsePacket(getCurrentPacket());
+    // //         removeCurrentPacket();
+    // //         responseCount = 1;
+    // //         sendCommands(new Command(CMD_FREQ_DIV_LOW));
+    // //         state = STATE_FREQ_DIV_LOW;
+    // //     }
+    // //     break;
+    // // case STATE_FREQ_DIV_LOW:
+    // //     if (packetQueue.size() == responseCount)
+    // //     {
+    // //         parsePacket(getCurrentPacket());
+    // //         removeCurrentPacket();
+    // //         sendCommands(cmdGen.updateTimeBase());
+    // //         state = STATE_GET_TIMEBASE;
+    // //     }
+    // //     break;
+    // // case STATE_GET_TIMEBASE:
+    // //     if (packetQueue.size() == responseCount)
+    // //     {
+    // //         while (packetQueue.size() > 0)
+    // //         {
+    // //             parsePacket(getCurrentPacket());
+    // //             removeCurrentPacket();
+    // //         }
+    // //         sendCommands(cmdGen.updateTriggerSource());
+    // //         state = STATE_GET_TRIGGER_SOURCE;
+    // //     }
+    // //     break;
+    // // case STATE_GET_TRIGGER_SOURCE:
+    // //     if (packetQueue.size() == responseCount)
+    // //     {
+    // //         while (packetQueue.size() > 0)
+    // //         {
+    // //             parsePacket(getCurrentPacket());
+    // //             removeCurrentPacket();
+    // //         }
+    // //         sendCommands(cmdGen.readBatteryLevel());
+    // //         device.print();
+    // //         eeromData.print();
+    // //         state = STATE_DONE;
+    // //     }
+    // //     break;
+    // case STATE_DONE:
+    //     exit(0);
+    //     // if (packetQueue.size() == 1)
+    //     // {
+    //     //     sendCommands(cmdGen.readBatteryLevel());
+    //     //     parsePacket(getCurrentPacket());
+    //     //     removeCurrentPacket();
+    //     //     sleep(1);
+    //     // }
+    //     break;
+    // }
 }
