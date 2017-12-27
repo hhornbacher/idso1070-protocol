@@ -2,6 +2,7 @@
 #define _COMMAND_H_
 
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 
 #include <deque>
@@ -11,16 +12,20 @@
 class Command
 {
 private:
+  char name[256];
   uint8_t payload[4];
   uint8_t responseCount = 1;
 
 public:
-  Command(CommandCode cmd);
-  Command(uint8_t *cmd);
-  Command(uint8_t *cmd, uint8_t responseCount);
+  Command(CommandCode cmd, uint8_t param1 = 0, uint8_t param2 = 0);
+  Command(uint8_t *payload);
 
   uint8_t *getPayload();
   uint8_t getResponseCount();
+  uint8_t setResponseCount(uint8_t responseCount);
+  void setName(char *name);
+
+  void print();
 };
 
 class CommandQueue : private std::deque<Command *>

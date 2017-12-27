@@ -11,10 +11,10 @@ class CommandGenerator
 private:
   Command *readEEROMPage(uint8_t address);
 
+public:
   float mapValue(int i, float f, float f2, float f3, float f4);
   float mapValue(float f, float f2, float f3, float f4, float f5);
 
-public:
   CommandQueue readFPGAVersionAndEEROM(IDSO1070A &device);
   CommandQueue updateTriggerSource(IDSO1070A &device);
   CommandQueue updateTimeBase(IDSO1070A &device);

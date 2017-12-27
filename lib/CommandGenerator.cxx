@@ -151,19 +151,26 @@ CommandQueue CommandGenerator::channel2VoltageDiv(IDSO1070A &device)
 Command *CommandGenerator::readEEROMPage(uint8_t address)
 {
     uint8_t cmdBuffer[4] = {0xee, 0xaa, address, 0x00};
-    return new Command(cmdBuffer, 2);
+    Command *cmd = new Command(cmdBuffer);
+    cmd->setResponseCount(2);
+    cmd->setName("readEEROMPage");
+    return cmd;
 }
 
 Command *CommandGenerator::readFPGAVersion(IDSO1070A &device)
 {
     uint8_t cmdBuffer[4] = {0xaa, 0x02, 0x00, 0x00};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(cmdBuffer);
+    cmd->setName("readFPGAVersion");
+    return cmd;
 }
 
 Command *CommandGenerator::readBatteryLevel(IDSO1070A &device)
 {
     uint8_t cmdBuffer[4] = {0x57, 0x03, 0x00, 0x00};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(cmdBuffer);
+    cmd->setName("readBatteryLevel");
+    return cmd;
 }
 
 Command *CommandGenerator::updateSampleRate(IDSO1070A &device)
@@ -258,53 +265,46 @@ Command *CommandGenerator::updateSampleRate(IDSO1070A &device)
         }
     }
     b &= ~0x02;
-    uint8_t cmdBuffer[4] = {0x55, (uint8_t)CMD_SAMPLE_RATE, b, 0x00};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_SAMPLE_RATE, b);
+    cmd->setName("updateSampleRate");
+    return cmd;
 }
 
 Command *CommandGenerator::getFreqDivLowBytes(IDSO1070A &device)
 {
     // newTimeBase = idso1070.timeBase;
     uint16_t freqDiv = (uint16_t)(device.getTimebaseFromFreqDiv() & 0xffff);
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_FREQ_DIV_LOW,
-        (uint8_t)(freqDiv & 0xff),
-        (uint8_t)((freqDiv >> 8) & 0xff)};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_FREQ_DIV_LOW, (uint8_t)(freqDiv & 0xff), (uint8_t)((freqDiv >> 8) & 0xff));
+    cmd->setName("getFreqDivLowBytes");
+    return cmd;
 }
 
 Command *CommandGenerator::getFreqDivHighBytes(IDSO1070A &device)
 {
     uint16_t freqDiv = (uint16_t)((device.getTimebaseFromFreqDiv() >> 16) & 0xffff);
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_FREQ_DIV_HIGH,
-        (uint8_t)(freqDiv & 0xff),
-        (uint8_t)((freqDiv >> 8) & 0xff)};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_FREQ_DIV_HIGH, (uint8_t)(freqDiv & 0xff), (uint8_t)((freqDiv >> 8) & 0xff));
+    cmd->setName("getFreqDivHighBytes");
+    return cmd;
 }
 
 Command *CommandGenerator::selectRAMChannel(IDSO1070A &device)
 {
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_CHANNEL_SELECTION,
-        0x00, 0x00};
+    uint8_t b = 0x01;
     if (device.channel1.enabled && !device.channel2.enabled)
     {
-        cmdBuffer[2] = 0x08;
+        b = 0x08;
     }
     else if (device.channel2.enabled && !device.channel1.enabled)
     {
-        cmdBuffer[2] = 0x09;
+        b = 0x09;
     }
     else if (device.channel2.enabled && device.channel1.enabled)
     {
-        cmdBuffer[2] = 0x00;
+        b = 0x00;
     }
-    else
-    {
-        cmdBuffer[2] = 0x01;
-    }
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_RAM_CHANNEL_SELECTION, b);
+    cmd->setName("selectRAMChannel");
+    return cmd;
 }
 
 Command *CommandGenerator::updateChannelVolts125(IDSO1070A &device)
@@ -352,10 +352,9 @@ Command *CommandGenerator::updateChannelVolts125(IDSO1070A &device)
         break;
     }
     b &= ~0x30;
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_CHANNEL_VOLTS_DIV_125,
-        b, 0x00};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_CHANNEL_VOLTS_DIV_125, b);
+    cmd->setName("updateChannelVolts125");
+    return cmd;
 }
 
 Command *CommandGenerator::relay1(IDSO1070A &device)
@@ -378,11 +377,9 @@ Command *CommandGenerator::relay1(IDSO1070A &device)
         b = 0x80;
         break;
     }
-
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_SET_RELAY,
-        b, 0x00};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_SET_RELAY, b);
+    cmd->setName("relay1");
+    return cmd;
 }
 
 Command *CommandGenerator::relay2(IDSO1070A &device)
@@ -406,10 +403,9 @@ Command *CommandGenerator::relay2(IDSO1070A &device)
         break;
     }
 
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_SET_RELAY,
-        b, 0x00};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_SET_RELAY, b);
+    cmd->setName("relay2");
+    return cmd;
 }
 
 Command *CommandGenerator::relay3(IDSO1070A &device)
@@ -433,10 +429,9 @@ Command *CommandGenerator::relay3(IDSO1070A &device)
         break;
     }
 
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_SET_RELAY,
-        b, 0x00};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_SET_RELAY, b);
+    cmd->setName("relay3");
+    return cmd;
 }
 
 Command *CommandGenerator::relay4(IDSO1070A &device)
@@ -460,52 +455,51 @@ Command *CommandGenerator::relay4(IDSO1070A &device)
         break;
     }
 
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_SET_RELAY,
-        b, 0x00};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_SET_RELAY, b);
+    cmd->setName("relay4");
+    return cmd;
 }
 
 Command *CommandGenerator::channel1Coupling(IDSO1070A &device)
 {
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_SET_RELAY,
-        0x00, 0x00};
+    uint8_t b1 = 0, b2 = 0;
     if (device.channel1.coupling == COUPLING_GND)
     {
-        cmdBuffer[2] = 0xff;
-        cmdBuffer[3] = 0x01;
+        b1 = 0xff;
+        b2 = 0x01;
     }
     else if (device.channel1.coupling == COUPLING_DC)
     {
-        cmdBuffer[2] = 0xef;
+        b1 = 0xef;
     }
     else
     {
-        cmdBuffer[2] = 0x10;
+        b1 = 0x10;
     }
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_SET_RELAY, b1, b2);
+    cmd->setName("channel1Coupling");
+    return cmd;
 }
 
 Command *CommandGenerator::channel2Coupling(IDSO1070A &device)
 {
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_SET_RELAY,
-        0x00, 0x00};
+    uint8_t b1 = 0, b2 = 0;
     if (device.channel2.coupling == COUPLING_GND)
     {
-        cmdBuffer[2] = 0xff;
-        cmdBuffer[3] = 0x02;
+        b1 = 0xff;
+        b2 = 0x02;
     }
     else if (device.channel2.coupling == COUPLING_DC)
     {
-        cmdBuffer[2] = 0xfe;
+        b1 = 0xfe;
     }
     else
     {
-        cmdBuffer[2] = 0x01;
+        b1 = 0x01;
     }
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_SET_RELAY, b1, b2);
+    cmd->setName("channel2Coupling");
+    return cmd;
 }
 
 Command *CommandGenerator::updateTriggerMode(IDSO1070A &device)
@@ -513,18 +507,17 @@ Command *CommandGenerator::updateTriggerMode(IDSO1070A &device)
     uint8_t b = 0;
     if (device.captureMode == CAPMODE_ROLL)
         b = (1 << 0);
+    else if (device.captureMode != CAPMODE_NORMAL)
+        b |= (1 << 3);
     if (device.trigger.mode == TRIGMODE_AUTO)
         b |= (1 << 1);
     else if (device.trigger.mode == TRIGMODE_SINGLE)
         b |= (1 << 2);
-    else if (device.captureMode != CAPMODE_NORMAL)
-        b |= (1 << 3);
-    else if (device.scopeMode == SCOMODE_DIGITAL)
+    if (device.scopeMode == SCOMODE_DIGITAL)
         b |= (1 << 4);
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_TRIGGER_MODE,
-        b, 0x00};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_TRIGGER_MODE, b);
+    cmd->setName("updateTriggerMode");
+    return cmd;
 }
 
 Command *CommandGenerator::readRamCount(IDSO1070A &device)
@@ -544,33 +537,35 @@ Command *CommandGenerator::readRamCount(IDSO1070A &device)
             b = (uint16_t)x;
         }
     }
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_READ_RAM_COUNT,
-        (uint8_t)(b & 0xff),
-        (uint8_t)((b >> 8) & 0xf + ((device.getPacketsNumber() - 1) << 4))};
-    return new Command(cmdBuffer);
-    return NULL;
+    Command *cmd = new Command(CMD_READ_RAM_COUNT, (uint8_t)(b & 0xff), (uint8_t)((b >> 8) & 0xf + ((device.getPacketsNumber() - 1) << 4)));
+    cmd->setName("readRamCount");
+    return cmd;
 }
 
 Command *CommandGenerator::channel1Level(IDSO1070A &device)
 {
     int verticalDiv = (int)device.channel1.verticalDiv;
-    return channel1PWM(
+    Command *cmd = channel1PWM(
         device,
         (uint16_t)mapValue(
             device.channel1.verticalPosition,
             8.0f, 248.0f,
-            (float)device.pwmArray[verticalDiv][0], (float)device.pwmArray[verticalDiv][1]));
+            (float)device.channel1.pwmArray[verticalDiv][0], (float)device.channel1.pwmArray[verticalDiv][1]));
+    cmd->setName("channel1Level");
+    return cmd;
 }
+
 Command *CommandGenerator::channel2Level(IDSO1070A &device)
 {
     int verticalDiv = (int)device.channel2.verticalDiv;
-    return channel1PWM(
+    Command *cmd = channel2PWM(
         device,
         (uint16_t)mapValue(
             device.channel2.verticalPosition,
             8.0f, 248.0f,
-            (float)device.pwmArray[verticalDiv][0], (float)device.pwmArray[verticalDiv][1]));
+            (float)device.channel2.pwmArray[verticalDiv][0], (float)device.channel2.pwmArray[verticalDiv][1]));
+    cmd->setName("channel2Level");
+    return cmd;
 }
 
 Command *CommandGenerator::updateTriggerSourceAndSlope(IDSO1070A &device)
@@ -588,88 +583,85 @@ Command *CommandGenerator::updateTriggerSourceAndSlope(IDSO1070A &device)
     else
         b &= ~0x80;
 
-    uint8_t cmdBuffer[4] = {0x55, (uint8_t)CMD_TRIGGER_SOURCE, b, 0x00};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_TRIGGER_SOURCE, b);
+    cmd->setName("updateTriggerSourceAndSlope");
+    return cmd;
 }
 
 Command *CommandGenerator::updateTriggerLevel(IDSO1070A &device)
 {
-    uint16_t pwm = mapValue(device.trigger.level, 8.0f, 248.0f, (float)device.trigger.getBottomPWM(), (float)device.trigger.getTopPWM());
-    return updateTriggerPWM(device, pwm);
+    Command *cmd = updateTriggerPWM(device, mapValue(device.trigger.level, 8.0f, 248.0f, (float)device.trigger.getBottomPWM(), (float)device.trigger.getTopPWM()));
+    cmd->setName("updateTriggerLevel");
+    return cmd;
 }
 
 Command *CommandGenerator::updateTriggerPWM(IDSO1070A &device, uint16_t pwm)
 {
-    if (pwm<0 | pwm> device.maxPWM)
+    if (pwm < 0 || pwm > device.maxPWM)
         return NULL;
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_TRIGGER_PWM,
-        (uint8_t)(pwm & 0xff),
-        (uint8_t)((pwm >> 8) & 0x0f)};
-    return new Command(cmdBuffer);
+    return new Command(CMD_TRIGGER_PWM,
+                       (uint8_t)(pwm & 0xff),
+                       (uint8_t)((pwm >> 8) & 0x0f));
 }
 
 Command *CommandGenerator::selectChannel(IDSO1070A &device)
 {
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_CHANNEL_SELECTION,
-        0x00, 0x00};
+    uint8_t b = 0;
     if (device.channel1.enabled && !device.channel2.enabled && device.isSampleRate200Mor250M())
     {
-        cmdBuffer[2] = 0x00;
+        b = 0x00;
     }
     else if (device.channel2.enabled && !device.channel1.enabled && device.isSampleRate200Mor250M())
     {
-        cmdBuffer[2] = 0x01;
+        b = 0x01;
     }
     else if (device.getEnabledChannelsCount() == 2 || (!device.isSampleRate200Mor250M() && device.getEnabledChannelsCount() == 1))
     {
-        cmdBuffer[2] = 0x02;
+        b = 0x02;
     }
     else
     {
-        cmdBuffer[2] = 0x03;
+        b = 0x03;
     }
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_CHANNEL_SELECTION, b);
+    cmd->setName("selectChannel");
+    return cmd;
 }
 
 Command *CommandGenerator::preTrigger(IDSO1070A &device)
 {
     uint16_t i = ((uint16_t)(((double)device.getSamplesNumberOfOneFrame()) * device.trigger.xPosition)) + 5;
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_PRE_TRIGGER_LENGTH,
-        (uint8_t)(i & 0xff),
-        (uint8_t)((i >> 8) & 0xff)};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_PRE_TRIGGER_LENGTH,
+                               (uint8_t)(i & 0xff),
+                               (uint8_t)((i >> 8) & 0xff));
+    cmd->setName("preTrigger");
+    return cmd;
 }
+
 Command *CommandGenerator::postTrigger(IDSO1070A &device)
 {
     uint16_t i = ((uint16_t)(((double)device.getSamplesNumberOfOneFrame()) * (1 - device.trigger.xPosition)));
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_POST_TRIGGER_LENGTH,
-        (uint8_t)(i & 0xff),
-        (uint8_t)((i >> 8) & 0xff)};
-    return new Command(cmdBuffer);
+    Command *cmd = new Command(CMD_POST_TRIGGER_LENGTH,
+                               (uint8_t)(i & 0xff),
+                               (uint8_t)((i >> 8) & 0xff));
+    cmd->setName("preTrigger");
+    return cmd;
 }
 
 Command *CommandGenerator::channel1PWM(IDSO1070A &device, uint16_t pwm)
 {
     if (pwm < 0 || pwm > device.maxPWM)
         return NULL;
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_CH1_PWM,
-        (uint8_t)(pwm & 0xff),
-        (uint8_t)((pwm >> 8) & 0x0f)};
-    return new Command(cmdBuffer);
+    return new Command(CMD_CH1_PWM,
+                       (uint8_t)(pwm & 0xff),
+                       (uint8_t)((pwm >> 8) & 0x0f));
 }
 
 Command *CommandGenerator::channel2PWM(IDSO1070A &device, uint16_t pwm)
 {
     if (pwm < 0 || pwm > device.maxPWM)
         return NULL;
-    uint8_t cmdBuffer[4] = {
-        0x55, (uint8_t)CMD_CH2_PWM,
-        (uint8_t)(pwm & 0xff),
-        (uint8_t)((pwm >> 8) & 0x0f)};
-    return new Command(cmdBuffer);
+    return new Command(CMD_CH2_PWM,
+                       (uint8_t)(pwm & 0xff),
+                       (uint8_t)((pwm >> 8) & 0x0f));
 }

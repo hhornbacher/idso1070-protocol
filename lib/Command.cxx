@@ -1,21 +1,18 @@
 #include "Command.h"
 
-Command::Command(CommandCode cmd)
+Command::Command(CommandCode cmd, uint8_t param1, uint8_t param2)
 {
+    name[0] = 0;
     payload[0] = 0x55;
     payload[1] = (uint8_t)cmd;
-    payload[2] = 0;
-    payload[3] = 0;
+    payload[2] = param1;
+    payload[3] = param2;
 }
 
-Command::Command(uint8_t *cmd)
+Command::Command(uint8_t *payload)
 {
-    memcpy(payload, cmd, 4);
-}
-
-Command::Command(uint8_t *cmd, uint8_t responseCount) : responseCount(responseCount)
-{
-    memcpy(payload, cmd, 4);
+    name[0] = 0;
+    memcpy(this->payload, payload, 4);
 }
 
 uint8_t *Command::getPayload()
@@ -25,6 +22,24 @@ uint8_t *Command::getPayload()
 uint8_t Command::getResponseCount()
 {
     return responseCount;
+}
+uint8_t Command::setResponseCount(uint8_t responseCount)
+{
+    this->responseCount = responseCount;
+}
+
+void Command::setName(char *name)
+{
+    strncpy(this->name, name, 256);
+}
+
+void Command::print()
+{
+    printf("[Command:%s]\n", name);
+    printf("commandID = %02x\n", payload[1]);
+    printf("args = %02x %02x\n", payload[2], payload[3]);
+    printf("responseCount = %d\n", responseCount);
+    printf("\n\n");
 }
 
 void CommandQueue::add(Command *cmd)
