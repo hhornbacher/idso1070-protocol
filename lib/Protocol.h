@@ -4,10 +4,12 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <cmath>
 #include <unistd.h>
 
 #include "hexdump.h"
-#include "Connector.h"
+#include "TCPConnector.h"
+#include "USBConnector.h"
 #include "enums.h"
 #include "IDSO1070A.h"
 #include "EEROMData.h"
@@ -18,11 +20,13 @@
 class Protocol
 {
 private:
-  Connector connection;
+  Connector *connection;
 
   CommandGenerator cmdGen;
 
   size_t expectedResponseCount = 0;
+  bool responseSuccess = false;
+  Command *lastCommand = NULL;
   bool receiving = true;
 
   CommandQueue commandQueue;
@@ -49,6 +53,9 @@ private:
   void sendCommands(Command *cmd);
   void sendSettings();
 
+  void resolveCommandResponse(ResponsePacket *packet);
+  void rejectCommandResponse(ResponsePacket *packet);
+
   void parsePacket(ResponsePacket *packet);
   void parseAAResponse(ResponsePacket *packet);
   void parseEEResponse(ResponsePacket *packet);
@@ -58,11 +65,18 @@ private:
   void parseFreqDivLowBytes(ResponsePacket *packet);
   void parseFreqDivHighBytes(ResponsePacket *packet);
   void parseRamChannelSelection(ResponsePacket *packet);
+  void parseCh1ZeroLevel(ResponsePacket *packet);
+  void parseCh2ZeroLevel(ResponsePacket *packet);
+  void parseRelay(ResponsePacket *packet);
+  void parseVoltsDiv125(ResponsePacket *packet);
+  void parseTriggerLevel(ResponsePacket *packet);
+  void parseTriggerSourceAndSlope(ResponsePacket *packet);
+  void parseStartCapture(ResponsePacket *packet);
 
   void syncTimeBaseFromFreqDiv();
 
 public:
-  Protocol(char *host, int port);
+  Protocol(Connector *connection);
   ~Protocol();
 
   void start();
@@ -70,6 +84,7 @@ public:
   void process();
   void receive();
   void transmit();
+  IDSO1070A &getIDSO1070A();
 };
 
 #endif // _PROTOCOL_H_

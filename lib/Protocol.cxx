@@ -1,6 +1,6 @@
 #include "Protocol.h"
 
-Protocol::Protocol(char *host, int port) : connection(host, port)
+Protocol::Protocol(Connector *connection) : connection(connection)
 {
 }
 
@@ -12,19 +12,14 @@ Protocol::~Protocol()
 
 void Protocol::start()
 {
-    connection.start();
+    connection->start();
     receiving = true;
     transmitting = true;
-    sendCommands(cmdGen.readFPGAVersionAndEEROM(device));
-    sendCommands(cmdGen.initialize(device));
-    // sendCommands(cmdGen.updateTimeBase(device));
-    // sendCommands(cmdGen.channelStatus(device));
-    // sendCommands(cmdGen.updateTriggerSource(device));
 }
 
 void Protocol::stop()
 {
-    connection.stop();
+    connection->stop();
     receiving = false;
     transmitting = false;
 }
@@ -33,16 +28,16 @@ void Protocol::receive()
 {
     if (receiving)
     {
-        connection.receive();
-        if (connection.getPacketBufferLength() == IDSO1070A_PACKET_SIZE)
+        connection->receive();
+        if (connection->getPacketBufferLength() == IDSO1070A_PACKET_SIZE)
         {
-            ResponsePacket packet(connection.getPacketBuffer());
-
+            ResponsePacket packet(connection->getPacketBuffer());
+            packet.print();
             parsePacket(&packet);
             if (expectedResponseCount > 0)
                 expectedResponseCount--;
 
-            connection.clearPacketBuffer();
+            connection->clearPacketBuffer();
         }
     }
 }
@@ -54,11 +49,18 @@ void Protocol::transmit()
         if (commandQueue.getSize() > 0 && expectedResponseCount == 0)
         {
             Command *cmd = commandQueue.getNext();
-            connection.transmit(cmd->getPayload(), 4);
+            cmd->print();
+            lastCommand = cmd;
+            connection->transmit(cmd->getPayload(), 4);
             expectedResponseCount = cmd->getResponseCount();
             delete cmd;
         }
     }
+}
+
+IDSO1070A &Protocol::getIDSO1070A()
+{
+    return device;
 }
 
 void Protocol::sendCommands(CommandQueue cmd)
@@ -106,9 +108,6 @@ void Protocol::parseAAResponse(ResponsePacket *packet)
     case 0x04:
         parseSampleData(packet);
         return;
-    case 0x02:
-        // Probably some kind of ACK
-        return;
     default:
         printf("Unknown AA response: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
         packet->print();
@@ -150,6 +149,15 @@ void Protocol::parseEEResponse(ResponsePacket *packet)
         case 0x0c:
             memcpy(&eeromData.diffFixData[1][200], packet->getPayload(), 56);
             // readFPGAVersionAndEEROMHasDone();
+
+            //TEST
+            // sendCommands(cmdGen.initialize(device));
+            // sendCommands(cmdGen.updateTimeBase(device));
+            // sendCommands(cmdGen.channelStatus(device));
+            // sendCommands(cmdGen.updateTriggerSource(device));
+            // sendCommands(cmdGen.readBatteryLevel(device));
+            // sendCommands(cmdGen.levels(device));
+
             return;
         default:
             printf("Unknown EEROM page: 0x%02x\n", (uint8_t)packet->getHeader()[5]);
@@ -164,27 +172,28 @@ void Protocol::parseFPGAResponse(ResponsePacket *packet)
     switch (packet->getHeader()[4])
     {
     case 0x02:
-        printf("parseStartCapture\n");
+        parseStartCapture(packet);
         return;
     case 0x03:
-        printf("parseRelay\n");
+        parseRelay(packet);
         return;
     case 0x04:
+        // Select Channel
         return;
     case 0x05:
-        printf("parseTriggerSourceAndSlope\n");
+        parseTriggerSourceAndSlope(packet);
         return;
     case 0x06:
-        printf("parseVoltsDiv125\n");
+        parseVoltsDiv125(packet);
         return;
     case 0x0b:
-        printf("parseCh1ZeroLevel\n");
+        parseCh1ZeroLevel(packet);
         return;
     case 0x0c:
-        printf("parseCh2ZeroLevel\n");
+        parseCh2ZeroLevel(packet);
         return;
     case 0x0d:
-        printf("parseTriggerLevel\n");
+        parseTriggerLevel(packet);
         return;
     case 0x12:
         parseFreqDivLowBytes(packet);
@@ -194,6 +203,9 @@ void Protocol::parseFPGAResponse(ResponsePacket *packet)
         return;
     case 0x15:
         parseRamChannelSelection(packet);
+        return;
+    case 0x16:
+        // RAM COUNT
         return;
     default:
         printf("Unknown FPGA response type: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
@@ -275,11 +287,186 @@ void Protocol::parseRamChannelSelection(ResponsePacket *packet)
     case 0x08:
         device.channel1.enabled = true;
         device.channel2.enabled = false;
+        device.selectedChannel = &device.channel1;
         break;
     case 0x09:
         device.channel1.enabled = false;
         device.channel2.enabled = true;
+        device.selectedChannel = &device.channel2;
         break;
+    }
+}
+
+void Protocol::parseRelay(ResponsePacket *packet)
+{
+    switch (packet->getHeader()[5])
+    {
+    case 0x80:
+        // ch1VoltageRL1 = 1.0;
+        break;
+    case 0xbf:
+        // ch2VoltageRL3 = 0.1;
+        break;
+    case 0xfb:
+        // ch2VoltageRL4 = 0.1;
+        break;
+    case 0xfd:
+        // ch1VoltageRL2 = 0.1;
+        break;
+    case 0x02:
+        // ch1VoltageRL2 = 1.0;
+        break;
+    case 0x04:
+        // ch2VoltageRL4 = 1.0;
+        break;
+    case 0x40:
+        // ch2VoltageRL3 = 1.0;
+        break;
+    case 0x7f:
+        // ch1VoltageRL1 = 0.1;
+        break;
+    default:
+        // parseCouplingReply(replyPacket);
+        break;
+    }
+    switch (packet->getHeader()[5])
+    {
+    case 0x80:
+    case 0x7f:
+        // updateCh1VoltsDivStatusAfterReceivedRL1();
+        return;
+    case 0xbf:
+    case 0x40:
+        // updateCh2VoltsDivStatusAfterReceivedRL3();
+        return;
+    case 0xfb:
+    case 0x04:
+        // updateCh2VoltsDivStatusAfterReceivedRL4();
+        return;
+    case 0xfd:
+    case 0x02:
+        // updateCh1VoltsDivStatusAfterReceivedRL2();
+        return;
+    default:
+        return;
+    }
+}
+
+void Protocol::parseCh1ZeroLevel(ResponsePacket *packet)
+{
+    int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
+    int ordinal = (int)device.channel1.verticalDiv;
+    i = (int)roundf(cmdGen.mapValue(i, (float)device.channel1.pwmArray[ordinal][0], (float)device.channel1.pwmArray[ordinal][1], 8.0f, 248.0f));
+    device.channel1.setVerticalPosition(i);
+}
+
+void Protocol::parseCh2ZeroLevel(ResponsePacket *packet)
+{
+    int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
+    int ordinal = (int)device.channel2.verticalDiv;
+    i = (int)roundf(cmdGen.mapValue(i, (float)device.channel2.pwmArray[ordinal][0], (float)device.channel2.pwmArray[ordinal][1], 8.0f, 248.0f));
+    device.channel2.setVerticalPosition(i);
+}
+
+void Protocol::parseVoltsDiv125(ResponsePacket *packet)
+{
+    switch (packet->getHeader()[5] & 3)
+    {
+    case 0:
+        // ch1Voltage125 = 1.0;
+        break;
+    case 1:
+        // ch1Voltage125 = 2.0;
+        break;
+    case 2:
+        // ch1Voltage125 = 5.0;
+        break;
+    }
+    // updateCh1VoltsDivStatusAfterReceived125();
+    switch ((packet->getHeader()[5] >> 2) & 3)
+    {
+    case 0:
+        // ch2Voltage125 = 1.0;
+        break;
+    case 1:
+        // ch2Voltage125 = 2.0;
+        break;
+    case 2:
+        // ch2Voltage125 = 5.0;
+        break;
+    }
+    // updateCh2VoltsDivStatusAfterReceived125();
+}
+
+void Protocol::parseTriggerLevel(ResponsePacket *packet)
+{
+    int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
+    i = (int)roundf(cmdGen.mapValue(i, (float)device.trigger.getBottomPWM(), (float)device.trigger.getTopPWM(), 8.0f, 248.0f));
+    device.trigger.setTriggerLevel(i);
+}
+
+void Protocol::parseTriggerSourceAndSlope(ResponsePacket *packet)
+{
+    uint8_t i = packet->getHeader()[5] & 3;
+
+    if (i == 0)
+    {
+        device.trigger.channel = TRIGCHAN_CH2;
+    }
+    else if (i == 1)
+    {
+        device.trigger.channel = TRIGCHAN_CH1;
+    }
+    else if (i == 2)
+    {
+        device.trigger.channel = TRIGCHAN_EXT;
+    }
+    if (packet->getHeader()[5] & (1 << 4))
+    {
+        device.scopeMode = SCOMODE_ANALOG;
+    }
+    else
+    {
+        device.scopeMode = SCOMODE_DIGITAL;
+    }
+    if (packet->getHeader()[5] & (1 << 7))
+    {
+        device.trigger.slope = TRIGSLOPE_RISING;
+    }
+    else
+    {
+        device.trigger.slope = TRIGSLOPE_FALLING;
+    }
+}
+
+void Protocol::parseStartCapture(ResponsePacket *packet)
+{
+    // this.littlePacketStatus = 0;
+
+    uint8_t b = packet->getHeader()[5];
+    if (b & (1 << 0))
+    {
+        device.captureMode = CAPMODE_ROLL;
+    }
+    else if (b & (1 << 3))
+    {
+        device.captureMode = CAPMODE_SCAN;
+    }
+    else
+    {
+        device.captureMode = CAPMODE_NORMAL;
+    }
+    if (b & (1 << 1))
+    {
+        device.trigger.mode = TRIGMODE_AUTO;
+    }
+    else if (b & (1 << 2))
+    {
+        device.trigger.mode = TRIGMODE_SINGLE;
+    }
+    else
+    {
+        device.trigger.mode = TRIGMODE_NORMAL;
     }
 }
 
@@ -297,106 +484,10 @@ void Protocol::syncTimeBaseFromFreqDiv()
 
 void Protocol::process()
 {
-    if (commandQueue.getSize() == 0)
+    if (commandQueue.getSize() == 0 && expectedResponseCount == 0)
     {
         device.print();
         eeromData.print();
         exit(0);
     }
-    // CommandQueue eeromCmds = cmdGen.readFPGAVersionAndEEROM(device);
-    // switch (state)
-    // {
-    // case STATE_IDLE:
-    //     sendCommands(cmdGen.initialize(device));
-    //     state = STATE_INIT;
-    //     break;
-    // case STATE_INIT:
-    //     if (packetQueue.size() == responseCount)
-    //     {
-    //         sendCommands(cmdGen.readFPGAVersionAndEEROM(device));
-    //         state = STATE_READ_EEROM;
-    //     }
-    //     break;
-    // case STATE_READ_EEROM:
-    //     if (packetQueue.size() == responseCount)
-    //     {
-    //         while (packetQueue.size() > 0)
-    //         {
-    //             parsePacket(getCurrentPacket());
-    //             removeCurrentPacket();
-    //         }
-    //         // responseCount = 1;
-    //         // sendCommands(new Command(CMD_SAMPLE_RATE));
-    //         // state = STATE_SAMPLE_RATE;
-    //         eeromData.print();
-    //         device.print();
-    //         state = STATE_DONE;
-    //     }
-    //     break;
-    // // case STATE_SAMPLE_RATE:
-    // //     if (packetQueue.size() == responseCount)
-    // //     {
-    // //         parsePacket(getCurrentPacket());
-    // //         removeCurrentPacket();
-    // //         responseCount = 1;
-    // //         sendCommands(new Command(CMD_FREQ_DIV_HIGH));
-    // //         state = STATE_FREQ_DIV_HIGH;
-    // //     }
-    // //     break;
-    // // case STATE_FREQ_DIV_HIGH:
-    // //     if (packetQueue.size() == responseCount)
-    // //     {
-    // //         parsePacket(getCurrentPacket());
-    // //         removeCurrentPacket();
-    // //         responseCount = 1;
-    // //         sendCommands(new Command(CMD_FREQ_DIV_LOW));
-    // //         state = STATE_FREQ_DIV_LOW;
-    // //     }
-    // //     break;
-    // // case STATE_FREQ_DIV_LOW:
-    // //     if (packetQueue.size() == responseCount)
-    // //     {
-    // //         parsePacket(getCurrentPacket());
-    // //         removeCurrentPacket();
-    // //         sendCommands(cmdGen.updateTimeBase());
-    // //         state = STATE_GET_TIMEBASE;
-    // //     }
-    // //     break;
-    // // case STATE_GET_TIMEBASE:
-    // //     if (packetQueue.size() == responseCount)
-    // //     {
-    // //         while (packetQueue.size() > 0)
-    // //         {
-    // //             parsePacket(getCurrentPacket());
-    // //             removeCurrentPacket();
-    // //         }
-    // //         sendCommands(cmdGen.updateTriggerSource());
-    // //         state = STATE_GET_TRIGGER_SOURCE;
-    // //     }
-    // //     break;
-    // // case STATE_GET_TRIGGER_SOURCE:
-    // //     if (packetQueue.size() == responseCount)
-    // //     {
-    // //         while (packetQueue.size() > 0)
-    // //         {
-    // //             parsePacket(getCurrentPacket());
-    // //             removeCurrentPacket();
-    // //         }
-    // //         sendCommands(cmdGen.readBatteryLevel());
-    // //         device.print();
-    // //         eeromData.print();
-    // //         state = STATE_DONE;
-    // //     }
-    // //     break;
-    // case STATE_DONE:
-    //     exit(0);
-    //     // if (packetQueue.size() == 1)
-    //     // {
-    //     //     sendCommands(cmdGen.readBatteryLevel());
-    //     //     parsePacket(getCurrentPacket());
-    //     //     removeCurrentPacket();
-    //     //     sleep(1);
-    //     // }
-    //     break;
-    // }
 }
