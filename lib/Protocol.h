@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "hexdump.h"
+#include "Timeout.h"
 #include "TCPConnector.h"
 #include "USBConnector.h"
 #include "enums.h"
@@ -17,6 +18,12 @@
 #include "Command.h"
 #include "CommandGenerator.h"
 
+class ResponseHandler
+{
+public:
+  virtual bool onResponse(Command *cmd, bool success) = 0;
+};
+
 class Protocol
 {
 private:
@@ -25,33 +32,21 @@ private:
   CommandGenerator cmdGen;
 
   size_t expectedResponseCount = 0;
-  bool responseSuccess = false;
+  bool requestSuccess = false;
+  ResponseHandler *responseHandler;
   Command *lastCommand = NULL;
-  bool receiving = true;
-
   CommandQueue commandQueue;
-  bool transmitting = true;
 
   enum States
   {
     STATE_IDLE,
-    STATE_INIT,
-    STATE_RAM_CHANNEL_SELECTION,
-    STATE_READ_EEROM,
-    STATE_SAMPLE_RATE,
-    STATE_FREQ_DIV_HIGH,
-    STATE_FREQ_DIV_LOW,
-    STATE_GET_TIMEBASE,
-    STATE_GET_TRIGGER_SOURCE,
+    STATE_REQUEST,
+    STATE_RESPONSE,
     STATE_DONE
   } state = STATE_IDLE;
 
   IDSO1070A device;
   EEROMData eeromData;
-
-  void sendCommands(CommandQueue cmd);
-  void sendCommands(Command *cmd);
-  void sendSettings();
 
   void resolveCommandResponse(ResponsePacket *packet);
   void rejectCommandResponse(ResponsePacket *packet);
@@ -75,16 +70,25 @@ private:
 
   void syncTimeBaseFromFreqDiv();
 
+  void receive();
+  void transmit();
+
 public:
-  Protocol(Connector *connection);
+  Protocol(Connector *connection, ResponseHandler *responseHandler);
   ~Protocol();
 
   void start();
   void stop();
   void process();
-  void receive();
-  void transmit();
-  IDSO1070A &getIDSO1070A();
+  IDSO1070A &getDevice();
+  EEROMData &getEEROMData();
+
+  void sendCommands(CommandQueue cmd);
+  void sendCommands(Command *cmd);
+  CommandGenerator &getCmdGen();
+
+  void resendLastCommand();
+  void removeLastCommand();
 };
 
 #endif // _PROTOCOL_H_

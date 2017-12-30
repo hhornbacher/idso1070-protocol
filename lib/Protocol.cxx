@@ -1,66 +1,32 @@
 #include "Protocol.h"
 
-Protocol::Protocol(Connector *connection) : connection(connection)
+Protocol::Protocol(Connector *connection, ResponseHandler *responseHandler) : cmdGen(&device), connection(connection), responseHandler(responseHandler)
 {
+    memset(&eeromData, 0, sizeof(EEROMData));
 }
 
 Protocol::~Protocol()
 {
-    receiving = false;
-    transmitting = false;
 }
 
 void Protocol::start()
 {
     connection->start();
-    receiving = true;
-    transmitting = true;
 }
 
 void Protocol::stop()
 {
     connection->stop();
-    receiving = false;
-    transmitting = false;
 }
 
-void Protocol::receive()
-{
-    if (receiving)
-    {
-        connection->receive();
-        if (connection->getPacketBufferLength() == IDSO1070A_PACKET_SIZE)
-        {
-            ResponsePacket packet(connection->getPacketBuffer());
-            packet.print();
-            parsePacket(&packet);
-            if (expectedResponseCount > 0)
-                expectedResponseCount--;
-
-            connection->clearPacketBuffer();
-        }
-    }
-}
-
-void Protocol::transmit()
-{
-    if (transmitting)
-    {
-        if (commandQueue.getSize() > 0 && expectedResponseCount == 0)
-        {
-            Command *cmd = commandQueue.getNext();
-            cmd->print();
-            lastCommand = cmd;
-            connection->transmit(cmd->getPayload(), 4);
-            expectedResponseCount = cmd->getResponseCount();
-            delete cmd;
-        }
-    }
-}
-
-IDSO1070A &Protocol::getIDSO1070A()
+IDSO1070A &Protocol::getDevice()
 {
     return device;
+}
+
+EEROMData &Protocol::getEEROMData()
+{
+    return eeromData;
 }
 
 void Protocol::sendCommands(CommandQueue cmd)
@@ -71,11 +37,6 @@ void Protocol::sendCommands(CommandQueue cmd)
 void Protocol::sendCommands(Command *cmd)
 {
     commandQueue.add(cmd);
-}
-
-void Protocol::sendSettings()
-{
-    sendCommands(cmdGen.initialize(device));
 }
 
 void Protocol::parsePacket(ResponsePacket *packet)
@@ -95,8 +56,9 @@ void Protocol::parsePacket(ResponsePacket *packet)
         parseStateResponse(packet);
         return;
     default:
+        requestSuccess = false;
         printf("Unknown response type: 0x%02x\n", (uint8_t)packet->getType());
-        // packet->print();
+        packet->print();
         return;
     }
 }
@@ -106,9 +68,11 @@ void Protocol::parseAAResponse(ResponsePacket *packet)
     switch (packet->getHeader()[4])
     {
     case 0x04:
+        requestSuccess = true;
         parseSampleData(packet);
         return;
     default:
+        requestSuccess = false;
         printf("Unknown AA response: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
         packet->print();
         return;
@@ -122,35 +86,44 @@ void Protocol::parseEEResponse(ResponsePacket *packet)
         switch (packet->getHeader()[5])
         {
         case 0x00:
+            requestSuccess = true;
             memcpy(eeromData.caliLevel, packet->getPayload(), 200);
             return;
         case 0x04:
+            requestSuccess = true;
             memcpy(eeromData.fpgaAlert, packet->getPayload(), 40);
             return;
         case 0x05:
+            requestSuccess = true;
             memcpy(eeromData.userName, packet->getPayload(), 12);
             memcpy(eeromData.productName, &packet->getPayload()[12], 20);
             return;
         case 0x07:
+            requestSuccess = true;
             memcpy(&eeromData.diffFixData[0][0], packet->getPayload(), 100);
             return;
         case 0x08:
+            requestSuccess = true;
             memcpy(&eeromData.diffFixData[0][100], packet->getPayload(), 100);
             return;
         case 0x09:
+            requestSuccess = true;
             memcpy(&eeromData.diffFixData[0][200], packet->getPayload(), 56);
             return;
         case 0x0a:
+            requestSuccess = true;
             memcpy(&eeromData.diffFixData[1][0], packet->getPayload(), 100);
             return;
         case 0x0b:
+            requestSuccess = true;
             memcpy(&eeromData.diffFixData[1][100], packet->getPayload(), 100);
             return;
         case 0x0c:
+            requestSuccess = true;
             memcpy(&eeromData.diffFixData[1][200], packet->getPayload(), 56);
             // readFPGAVersionAndEEROMHasDone();
 
-            //TEST
+            // TEST
             // sendCommands(cmdGen.initialize(device));
             // sendCommands(cmdGen.updateTimeBase(device));
             // sendCommands(cmdGen.channelStatus(device));
@@ -160,6 +133,7 @@ void Protocol::parseEEResponse(ResponsePacket *packet)
 
             return;
         default:
+            requestSuccess = false;
             printf("Unknown EEROM page: 0x%02x\n", (uint8_t)packet->getHeader()[5]);
             packet->print();
             return;
@@ -172,44 +146,56 @@ void Protocol::parseFPGAResponse(ResponsePacket *packet)
     switch (packet->getHeader()[4])
     {
     case 0x02:
+        requestSuccess = true;
         parseStartCapture(packet);
         return;
     case 0x03:
+        requestSuccess = true;
         parseRelay(packet);
         return;
     case 0x04:
+        requestSuccess = true;
         // Select Channel
         return;
     case 0x05:
+        requestSuccess = true;
         parseTriggerSourceAndSlope(packet);
         return;
     case 0x06:
+        requestSuccess = true;
         parseVoltsDiv125(packet);
         return;
     case 0x0b:
+        requestSuccess = true;
         parseCh1ZeroLevel(packet);
         return;
     case 0x0c:
+        requestSuccess = true;
         parseCh2ZeroLevel(packet);
         return;
     case 0x0d:
+        requestSuccess = true;
         parseTriggerLevel(packet);
         return;
     case 0x12:
+        requestSuccess = true;
         parseFreqDivLowBytes(packet);
         return;
     case 0x13:
+        requestSuccess = true;
         parseFreqDivHighBytes(packet);
         return;
     case 0x15:
+        requestSuccess = true;
         parseRamChannelSelection(packet);
         return;
     case 0x16:
         // RAM COUNT
         return;
     default:
+        requestSuccess = false;
         printf("Unknown FPGA response type: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
-        // packet->print();
+        packet->print();
         return;
     }
 }
@@ -219,13 +205,16 @@ void Protocol::parseStateResponse(ResponsePacket *packet)
     switch (packet->getHeader()[4])
     {
     case 0x03:
+        requestSuccess = true;
         device.batteryLevel = packet->getPayload()[0];
         break;
     case 0x04:
+        requestSuccess = true;
         memcpy(device.date, packet->getPayload(), 8);
         device.date[8] = 0;
         break;
     default:
+        requestSuccess = false;
         printf("Unknown state response type: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
         packet->print();
         return;
@@ -482,12 +471,90 @@ void Protocol::syncTimeBaseFromFreqDiv()
     // setTimeBase(timebaseFromFreqDiv);
 }
 
+void Protocol::receive()
+{
+    // connection->receive();
+    // if (connection->getPacketBufferLength() == IDSO1070A_PACKET_SIZE)
+    // {
+    //     ResponsePacket packet(connection->getPacketBuffer());
+    //     packet.print();
+    //     parsePacket(&packet);
+    //     if (expectedResponseCount > 0)
+    //         expectedResponseCount--;
+
+    //     // if (connection->getDoubleEEROMResponse() && packet.getType() == TYPE_EE)
+    //     //     expectedResponseCount++;
+
+    //     connection->clearPacketBuffer();
+    // }
+    connection->receive();
+    if (connection->getPacketBufferLength() == IDSO1070A_PACKET_SIZE)
+    {
+        ResponsePacket packet(connection->getPacketBuffer());
+        // packet.print();
+        parsePacket(&packet);
+        expectedResponseCount--;
+        connection->clearPacketBuffer();
+        if (expectedResponseCount == 0)
+            state = STATE_DONE;
+    }
+}
+
+void Protocol::transmit()
+{
+    // if (commandQueue.getSize() > 0 && expectedResponseCount == 0)
+    // {
+    //     Command *cmd = commandQueue.getNext();
+    //     cmd->print();
+    //     lastCommand = cmd;
+    //     connection->transmit(cmd->getPayload(), 4);
+    //     // expectedResponseCount++;
+    //     expectedResponseCount = cmd->getResponseCount();
+    //     delete cmd;
+    // }
+
+    Command *cmd = commandQueue.getNext();
+    // cmd->print();
+    lastCommand = cmd;
+    connection->transmit(cmd->getPayload(), 4);
+    expectedResponseCount = cmd->getResponseCount();
+    state = STATE_RESPONSE;
+}
+
 void Protocol::process()
 {
-    if (commandQueue.getSize() == 0 && expectedResponseCount == 0)
+    switch (state)
     {
-        device.print();
-        eeromData.print();
-        exit(0);
+    case STATE_IDLE:
+        if (commandQueue.getSize() > 0)
+        {
+            state = STATE_REQUEST;
+        }
+        break;
+    case STATE_REQUEST:
+        transmit();
+        break;
+    case STATE_RESPONSE:
+        receive();
+        break;
+    case STATE_DONE:
+        if (responseHandler->onResponse(lastCommand, requestSuccess))
+            state = STATE_IDLE;
+        break;
     }
+}
+
+CommandGenerator &Protocol::getCmdGen()
+{
+    return cmdGen;
+}
+
+void Protocol::resendLastCommand()
+{
+    commandQueue.addFront(lastCommand);
+}
+
+void Protocol::removeLastCommand()
+{
+    delete lastCommand;
 }
