@@ -28,7 +28,7 @@ uint8_t Command::setResponseCount(uint8_t responseCount)
     this->responseCount = responseCount;
 }
 
-void Command::setName(char *name)
+void Command::setName(const char *name)
 {
     strncpy(this->name, name, 256);
 }
@@ -48,6 +48,15 @@ void CommandQueue::add(Command *cmd)
     {
         totalResponseCount += cmd->getResponseCount();
         push_back(cmd);
+    }
+}
+
+void CommandQueue::addFront(Command *cmd)
+{
+    if (cmd != NULL)
+    {
+        totalResponseCount += cmd->getResponseCount();
+        push_front(cmd);
     }
 }
 

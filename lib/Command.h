@@ -23,7 +23,7 @@ public:
   uint8_t *getPayload();
   uint8_t getResponseCount();
   uint8_t setResponseCount(uint8_t responseCount);
-  void setName(char *name);
+  void setName(const char *name);
 
   void print();
 };
@@ -34,6 +34,7 @@ private:
   size_t totalResponseCount = 0;
 
 public:
+  void addFront(Command *cmd);
   void add(Command *cmd);
   void add(CommandQueue cmds);
 
