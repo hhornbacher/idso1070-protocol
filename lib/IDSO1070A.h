@@ -34,7 +34,7 @@ struct IDSO1070A
     struct Channel
     {
         char *name;
-        bool enabled;
+        bool enabled = true;
         VoltageDiv verticalDiv;
         InputCoupling coupling;
         int verticalPosition;
