@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdint>
 
+#include "hexdump.h"
 #include "enums.h"
 
 #define IDSO1070A_MAX_SAMPLE 248
@@ -39,6 +40,7 @@ struct IDSO1070A
         InputCoupling coupling;
         int verticalPosition;
         uint16_t pwmArray[9][2];
+        // ParseChVoltsDivStatus parseChVoltsDivStatus;
 
         void print();
         void setVerticalPosition(int i);
@@ -56,9 +58,15 @@ struct IDSO1070A
     uint32_t freqDiv;
 
     TimeBase timeBase;
-
     CaptureMode captureMode;
     ScopeMode scopeMode;
+
+    double ch1Voltage125;
+    double ch1VoltageRL1;
+    double ch1VoltageRL2;
+    double ch2Voltage125;
+    double ch2VoltageRL3;
+    double ch2VoltageRL4;
 
     bool isSampleRate200Mor250M();
     size_t getSamplesNumberOfOneFrame();

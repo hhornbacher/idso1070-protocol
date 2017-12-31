@@ -97,6 +97,12 @@ void IDSO1070A::print()
     printf("timeBase = %d\n", timeBase);
     printf("captureMode = %d\n", captureMode);
     printf("scopeMode = %d\n", scopeMode);
+    printf("ch1Voltage125 = %lf\n", ch1Voltage125);
+    printf("ch1VoltageRL1 = %lf\n", ch1VoltageRL1);
+    printf("ch1VoltageRL2 = %lf\n", ch1VoltageRL2);
+    printf("ch2Voltage125 = %lf\n", ch2Voltage125);
+    printf("ch2VoltageRL3 = %lf\n", ch2VoltageRL3);
+    printf("ch2VoltageRL4 = %lf\n", ch2VoltageRL4);
     printf("\n\n");
 }
 
@@ -107,6 +113,9 @@ void IDSO1070A::Channel::print()
     printf("verticalDiv = %d\n", verticalDiv);
     printf("coupling = %d\n", coupling);
     printf("verticalPosition = %d\n", coupling);
+    // printf("parseChVoltsDivStatus = %d\n", (int)parseChVoltsDivStatus);
+    printf("pwmArray = \n");
+    hexdump((uint8_t *)pwmArray, sizeof(pwmArray));
     printf("\n\n");
 }
 
@@ -132,6 +141,10 @@ void IDSO1070A::Trigger::print()
     printf("slope = %d\n", slope);
     printf("level = %d\n", level);
     printf("xPosition = %lf\n", xPosition);
+    printf("innerTriggerPWM = \n");
+    hexdump((uint8_t *)innerTriggerPWM, sizeof(innerTriggerPWM));
+    printf("outerTriggerPWM = \n");
+    hexdump((uint8_t *)outerTriggerPWM, sizeof(outerTriggerPWM));
     printf("\n\n");
 }
 
