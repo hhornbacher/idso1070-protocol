@@ -2,7 +2,7 @@
 
 TCPConnector::TCPConnector(char *host, int port)
 {
-
+    usbConnection = false;
     if ((socketHandle = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         printf("Cannot create socket!\n");

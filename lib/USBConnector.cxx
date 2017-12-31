@@ -2,6 +2,7 @@
 
 USBConnector::USBConnector(const char *device)
 {
+    usbConnection = true;
     strncpy(this->device, device, 256);
 }
 

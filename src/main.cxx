@@ -3,11 +3,11 @@
 #include <csignal>
 #include <unistd.h>
 
-#include "USBConnector.h"
-#include "TCPConnector.h"
 #include "Protocol.h"
 
 void sigHandler(int sig);
+
+#define CONNECTION usbConnection
 
 class Main : public ResponseHandler
 {
@@ -16,40 +16,40 @@ class Main : public ResponseHandler
     const char *device = "/dev/ttyACM0";
 
     int resendCounter = 0;
-    // const char *serverIP = "192.168.1.1";
-    // const uint16_t serverPort = 8870;
+    const char *serverIP = "192.168.1.1";
+    const uint16_t serverPort = 8870;
 
-    // TCPConnector connection((char *)serverIP, serverPort);
-    USBConnector connection;
+    TCPConnector wifiConnection;
+    USBConnector usbConnection;
     Protocol protocol;
 
   public:
-    Main() : connection((char *)device), protocol(&connection, this)
+    Main() : wifiConnection((char *)serverIP, serverPort), usbConnection((char *)device), protocol(&CONNECTION, this)
     {
         signal(SIGINT, sigHandler);
     }
 
-    bool onResponse(Command *cmd, bool success)
+    bool onResponse(Commands cmd, bool success)
     {
+        printf("Response!\n");
         if (success)
         {
             resendCounter = 0;
             printf("Success, next command.\n");
-            protocol.removeLastCommand();
         }
         else
         {
             if (resendCounter < 3)
             {
-                printf("Resending: ");
-                cmd->print();
+                printf("Resending: %d\n", (int)cmd);
+                //cmd->print();
                 protocol.resendLastCommand();
                 resendCounter++;
             }
             else
             {
-                printf("Problem while sending: ");
-                cmd->print();
+                printf("Problem while sending: %d\n", (int)cmd);
+                protocol.print();
                 printf("Exiting!\n\n");
                 exit(0);
             }
@@ -66,7 +66,8 @@ class Main : public ResponseHandler
     {
 
         protocol.start();
-        protocol.sendCommands(protocol.getCmdGen().readFPGAVersion());
+        protocol.sendCommand(CMD_READ_FPGAVERSION_AND_EEPROM);
+        protocol.sendCommand(CMD_INITIALIZE);
 
         while (runProgram)
         {

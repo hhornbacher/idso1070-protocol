@@ -1,10 +1,5 @@
 #include "IDSO1070A.h"
 
-uint16_t IDSO1070A::maxSample = 248;
-size_t IDSO1070A::samplesCountPerPacket = 500;
-size_t IDSO1070A::memoryDepth = 2000;
-uint16_t IDSO1070A::maxPWM = 4095;
-
 bool IDSO1070A::isSampleRate200Mor250M()
 {
     return timeBase <= HDIV_1uS;
@@ -12,7 +7,7 @@ bool IDSO1070A::isSampleRate200Mor250M()
 
 size_t IDSO1070A::getSamplesNumberOfOneFrame()
 {
-    return (memoryDepth == 2000 && timeBase == HDIV_5uS) ? 2500 : memoryDepth;
+    return (IDSO1070A_MEMORY_DEPTH == 2000 && timeBase == HDIV_5uS) ? 2500 : IDSO1070A_MEMORY_DEPTH;
 };
 uint8_t IDSO1070A::getEnabledChannelsCount()
 {
@@ -25,7 +20,7 @@ uint8_t IDSO1070A::getEnabledChannelsCount()
 uint8_t IDSO1070A::getPacketsNumber()
 {
     int enabledChannelsCount = getEnabledChannelsCount();
-    return enabledChannelsCount == 0 ? 0 : (enabledChannelsCount * getSamplesNumberOfOneFrame()) / samplesCountPerPacket;
+    return enabledChannelsCount == 0 ? 0 : (enabledChannelsCount * getSamplesNumberOfOneFrame()) / IDSO1070A_SAMPLES_COUNT_PER_PACKET;
 }
 
 TimeBase IDSO1070A::getTimebaseFromFreqDiv()
@@ -121,9 +116,9 @@ void IDSO1070A::Channel::setVerticalPosition(int i)
     {
         i = 8;
     }
-    else if (i > IDSO1070A::maxSample)
+    else if (i > IDSO1070A_MAX_SAMPLE)
     {
-        i = IDSO1070A::maxSample;
+        i = IDSO1070A_MAX_SAMPLE;
     }
     verticalPosition = i;
 }
@@ -158,15 +153,15 @@ uint16_t IDSO1070A::Trigger::getTopPWM()
     return -1;
 }
 
-void IDSO1070A::Trigger::setTriggerLevel(int i)
+void IDSO1070A::Trigger::setTriggerLevel(uint16_t i)
 {
     if (i < 8)
     {
         i = 8;
     }
-    else if (i > IDSO1070A::maxSample)
+    else if (i > IDSO1070A_MAX_SAMPLE)
     {
-        i = IDSO1070A::maxSample;
+        i = IDSO1070A_MAX_SAMPLE;
     }
     level = i;
 }

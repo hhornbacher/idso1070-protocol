@@ -21,7 +21,7 @@
 class ResponseHandler
 {
 public:
-  virtual bool onResponse(Command *cmd, bool success) = 0;
+  virtual bool onResponse(Commands cmd, bool success) = 0;
 };
 
 class Protocol
@@ -34,8 +34,11 @@ private:
   size_t expectedResponseCount = 0;
   bool requestSuccess = false;
   ResponseHandler *responseHandler;
-  Command *lastCommand = NULL;
+  Commands lastCommand;
   CommandQueue commandQueue;
+  Timeout commandTimeout;
+
+  Timeout readBatteryTimeout;
 
   enum States
   {
@@ -73,6 +76,10 @@ private:
   void receive();
   void transmit();
 
+  void changeState(States state);
+
+  Command *getCommand(Commands cmd);
+
 public:
   Protocol(Connector *connection, ResponseHandler *responseHandler);
   ~Protocol();
@@ -83,12 +90,11 @@ public:
   IDSO1070A &getDevice();
   EEROMData &getEEROMData();
 
-  void sendCommands(CommandQueue cmd);
-  void sendCommands(Command *cmd);
-  CommandGenerator &getCmdGen();
+  void sendCommand(Commands cmd);
 
   void resendLastCommand();
-  void removeLastCommand();
+
+  void print();
 };
 
 #endif // _PROTOCOL_H_

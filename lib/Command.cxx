@@ -19,14 +19,6 @@ uint8_t *Command::getPayload()
 {
     return payload;
 }
-uint8_t Command::getResponseCount()
-{
-    return responseCount;
-}
-uint8_t Command::setResponseCount(uint8_t responseCount)
-{
-    this->responseCount = responseCount;
-}
 
 void Command::setName(const char *name)
 {
@@ -36,45 +28,20 @@ void Command::setName(const char *name)
 void Command::print()
 {
     printf("[Command:%s]\n", name);
+    printf("{%02x, %02x, %02x, %02x}\n", payload[0], payload[1], payload[2], payload[3]);
     printf("commandID = %02x\n", payload[1]);
     printf("args = %02x %02x\n", payload[2], payload[3]);
-    printf("responseCount = %d\n", responseCount);
     printf("\n\n");
 }
 
-void CommandQueue::add(Command *cmd)
+void CommandQueue::add(Commands cmd)
 {
-    if (cmd != NULL)
-    {
-        totalResponseCount += cmd->getResponseCount();
-        push_back(cmd);
-    }
+    push_back(cmd);
 }
 
-void CommandQueue::addFront(Command *cmd)
+void CommandQueue::addFront(Commands cmd)
 {
-    if (cmd != NULL)
-    {
-        totalResponseCount += cmd->getResponseCount();
-        push_front(cmd);
-    }
-}
-
-void CommandQueue::add(CommandQueue cmds)
-{
-    for (CommandQueue::iterator i = cmds.begin(); i != cmds.end(); i++)
-    {
-        if ((*i) != NULL)
-        {
-            totalResponseCount += (*i)->getResponseCount();
-            push_back(*i);
-        }
-    }
-}
-
-size_t CommandQueue::getTotalResponseCount()
-{
-    return totalResponseCount;
+    push_front(cmd);
 }
 
 size_t CommandQueue::getSize()
@@ -82,9 +49,9 @@ size_t CommandQueue::getSize()
     return size();
 }
 
-Command *CommandQueue::getNext()
+Commands CommandQueue::getNext()
 {
-    Command *next = (*begin());
+    Commands next = (*begin());
     pop_front();
     return next;
 }

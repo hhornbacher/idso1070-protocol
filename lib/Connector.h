@@ -19,6 +19,7 @@ class Connector
 protected:
   uint8_t packetBuffer[PACKETBUFFER_LENGTH];
   size_t packetBufferLength = 0;
+  bool usbConnection;
 
 public:
   virtual void transmit(uint8_t *data, size_t length) = 0;
@@ -30,6 +31,8 @@ public:
   uint8_t *getPacketBuffer();
   size_t getPacketBufferLength();
   void clearPacketBuffer();
+
+  bool isUsbConnection();
 };
 
 #endif // _CONNECTOR_H_

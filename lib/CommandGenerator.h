@@ -10,27 +10,13 @@ class CommandGenerator
 {
 private:
   IDSO1070A *device;
-  Command *readEEROMPage(uint8_t address);
 
 public:
   CommandGenerator(IDSO1070A *device);
   float mapValue(int i, float f, float f2, float f3, float f4);
   float mapValue(float f, float f2, float f3, float f4, float f5);
 
-  CommandQueue readFPGAVersionAndEEROM();
-  CommandQueue updateTriggerSource();
-  CommandQueue updateTimeBase();
-  CommandQueue initialize();
-  CommandQueue voltageDiv();
-  CommandQueue pullSamples();
-  CommandQueue channelStatus();
-  CommandQueue channelStatusOnly();
-  CommandQueue levels();
-  CommandQueue trigger();
-  CommandQueue xTriggerPos();
-  CommandQueue channel1VoltageDiv();
-  CommandQueue channel2VoltageDiv();
-
+  Command *readEEROMPage(uint8_t address);
   Command *selectChannel();
   Command *selectRAMChannel();
   Command *readFPGAVersion();
@@ -54,6 +40,7 @@ public:
   Command *channel2Coupling();
   Command *preTrigger();
   Command *postTrigger();
+  Command *startSampling();
   Command *channel1PWM(uint16_t pwm);
   Command *channel2PWM(uint16_t pwm);
 };

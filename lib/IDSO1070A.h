@@ -6,13 +6,13 @@
 
 #include "enums.h"
 
+#define IDSO1070A_MAX_SAMPLE 248
+#define IDSO1070A_MAX_PWM 4095
+#define IDSO1070A_MEMORY_DEPTH 2000
+#define IDSO1070A_SAMPLES_COUNT_PER_PACKET 500
+
 struct IDSO1070A
 {
-
-    static size_t samplesCountPerPacket;
-    static size_t memoryDepth;
-    static uint16_t maxPWM;
-    static uint16_t maxSample;
 
     struct Trigger
     {
@@ -20,7 +20,7 @@ struct IDSO1070A
         TriggerMode mode = TRIGMODE_AUTO;
         TriggerChannel channel = TRIGCHAN_CH1;
         TriggerSlope slope = TRIGSLOPE_RISING;
-        int level = 0;
+        uint16_t level = 0;
         double xPosition = 0.5;
         uint16_t innerTriggerPWM[4];
         uint16_t outerTriggerPWM[2];
@@ -28,7 +28,7 @@ struct IDSO1070A
         uint16_t getBottomPWM();
         uint16_t getTopPWM();
         void print();
-        void setTriggerLevel(int i);
+        void setTriggerLevel(uint16_t i);
     };
 
     struct Channel

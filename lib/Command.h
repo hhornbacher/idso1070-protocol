@@ -14,33 +14,25 @@ class Command
 private:
   char name[256];
   uint8_t payload[4];
-  uint8_t responseCount = 1;
 
 public:
   Command(CommandCode cmd, uint8_t param1 = 0, uint8_t param2 = 0);
   Command(uint8_t *payload);
 
   uint8_t *getPayload();
-  uint8_t getResponseCount();
-  uint8_t setResponseCount(uint8_t responseCount);
   void setName(const char *name);
 
   void print();
 };
 
-class CommandQueue : private std::deque<Command *>
+class CommandQueue : private std::deque<Commands>
 {
-private:
-  size_t totalResponseCount = 0;
-
 public:
-  void addFront(Command *cmd);
-  void add(Command *cmd);
-  void add(CommandQueue cmds);
+  void addFront(Commands cmd);
+  void add(Commands cmd);
 
-  size_t getTotalResponseCount();
   size_t getSize();
-  Command *getNext();
+  Commands getNext();
 };
 // typedef std::deque<Command *> CommandQueue;
 
