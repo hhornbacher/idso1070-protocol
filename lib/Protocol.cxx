@@ -2,20 +2,23 @@
 
 Protocol::Protocol(Connector *connection, ResponseHandler *responseHandler) : cmdGen(&device), connection(connection),
                                                                               responseHandler(responseHandler), readBatteryTimeout(10000),
-                                                                              commandTimeout(300)
+                                                                              commandTimeout(200)
 {
     memset(&eeromData, 0, sizeof(EEROMData));
 
+    device.freqDiv = 0;
     device.trigger.setTriggerLevel(188);
     device.trigger.mode = TRIGMODE_AUTO;
     device.channel1.enabled = true;
     device.channel1.coupling = COUPLING_AC;
     device.channel1.verticalDiv = VDIV_1V;
     device.channel1.verticalPosition = 188;
+    // device.channel1.parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
     device.channel2.enabled = true;
     device.channel2.coupling = COUPLING_AC;
     device.channel2.verticalDiv = VDIV_1V;
     device.channel2.verticalPosition = 68;
+    // device.channel2.parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
     device.timeBase = HDIV_1mS;
     device.captureMode = CAPMODE_NORMAL;
     device.scopeMode = SCOMODE_ANALOG;
@@ -217,81 +220,7 @@ void Protocol::parseEEResponse(ResponsePacket *packet)
         {
         case 0x00:
             requestSuccess = true;
-            memcpy(eeromData.caliLevel, packet->getPayload(), 200);
-
-            //     int i;
-            // int[] iArr;
-            // int i2;
-            // int i3 = 7;
-            // byte[] bytes = replyPacket.getBytes();
-            // ByteBuffer.wrap(bytes, 7, 100).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(EeromData.nCaliLevel, 0, 50);
-            // int i4 = 0;
-            // while (i4 < 9) {
-            //     i = i3 + 1;
-            //     this.channel1.getPwmArray()[i4][0] = bytes[i3] & 255;
-            //     iArr = this.channel1.getPwmArray()[i4];
-            //     int i5 = i + 1;
-            //     iArr[0] = iArr[0] + ((bytes[i] & 255) << 8);
-            //     i = i5 + 1;
-            //     this.channel1.getPwmArray()[i4][1] = bytes[i5] & 255;
-            //     iArr = this.channel1.getPwmArray()[i4];
-            //     i2 = i + 1;
-            //     iArr[1] = ((bytes[i] & 255) << 8) + iArr[1];
-            //     i4++;
-            //     i3 = i2;
-            // }
-            // i4 = i3;
-            // for (i3 = 0; i3 < 9; i3++) {
-            //     i = i4 + 1;
-            //     this.channel2.getPwmArray()[i3][0] = bytes[i4] & 255;
-            //     int[] iArr2 = this.channel2.getPwmArray()[i3];
-            //     i5 = i + 1;
-            //     iArr2[0] = iArr2[0] + ((bytes[i] & 255) << 8);
-            //     i2 = i5 + 1;
-            //     this.channel2.getPwmArray()[i3][1] = bytes[i5] & 255;
-            //     int[] iArr3 = this.channel2.getPwmArray()[i3];
-            //     i4 = i2 + 1;
-            //     iArr3[1] = ((bytes[i2] & 255) << 8) + iArr3[1];
-            // }
-            // i2 = i4 + 1;
-            // this.trigger.getInnerTriggerPwm()[0] = bytes[i4] & 255;
-            // iArr = this.trigger.getInnerTriggerPwm();
-            // i = i2 + 1;
-            // iArr[0] = iArr[0] + ((bytes[i2] & 255) << 8);
-            // i4 = i + 1;
-            // this.trigger.getInnerTriggerPwm()[1] = bytes[i] & 255;
-            // iArr = this.trigger.getInnerTriggerPwm();
-            // i = i4 + 1;
-            // iArr[1] = ((bytes[i4] & 255) << 8) + iArr[1];
-            // C0002a.m17b("读取的CH1内触发上方：" + this.trigger.getInnerTriggerPwm()[1] + "，下方：" + this.trigger.getInnerTriggerPwm()[0], new Object[0]);
-            // i4 = i + 1;
-            // this.trigger.getOuterTriggerPwm()[0] = bytes[i] & 255;
-            // iArr = this.trigger.getOuterTriggerPwm();
-            // i = i4 + 1;
-            // iArr[0] = ((bytes[i4] & 255) << 8) + iArr[0];
-            // i4 = i + 1;
-            // this.trigger.getOuterTriggerPwm()[1] = bytes[i] & 255;
-            // iArr = this.trigger.getOuterTriggerPwm();
-            // i = i4 + 1;
-            // iArr[1] = ((bytes[i4] & 255) << 8) + iArr[1];
-            // C0002a.m17b("读取的外触发上方：" + this.trigger.getOuterTriggerPwm()[0] + "，下方：" + this.trigger.getOuterTriggerPwm()[0], new Object[0]);
-            // i4 = i + 1;
-            // this.trigger.getInnerTriggerPwm()[2] = bytes[i] & 255;
-            // iArr = this.trigger.getInnerTriggerPwm();
-            // i = i4 + 1;
-            // iArr[2] = ((bytes[i4] & 255) << 8) + iArr[2];
-            // i4 = i + 1;
-            // this.trigger.getInnerTriggerPwm()[3] = bytes[i] & 255;
-            // iArr = this.trigger.getInnerTriggerPwm();
-            // i = i4 + 1;
-            // iArr[3] = ((bytes[i4] & 255) << 8) + iArr[3];
-            // C0002a.m17b("读取的CH2内触发上方：" + this.trigger.getInnerTriggerPwm()[3] + "，下方：" + this.trigger.getInnerTriggerPwm()[2], new Object[0]);
-            // if (this.trigger.getInnerTriggerPwm()[2] < IDSO1070.samplesCountPerPacket || this.trigger.getInnerTriggerPwm()[2] > 4000) {
-            //     this.trigger.getInnerTriggerPwm()[2] = this.trigger.getInnerTriggerPwm()[0];
-            // }
-            // if (this.trigger.getInnerTriggerPwm()[3] < IDSO1070.samplesCountPerPacket || this.trigger.getInnerTriggerPwm()[3] > 4000) {
-            //     this.trigger.getInnerTriggerPwm()[3] = this.trigger.getInnerTriggerPwm()[1];
-            // }
+            parseEEROMPage00(packet);
             return;
         case 0x04:
             requestSuccess = true;
@@ -456,7 +385,7 @@ void Protocol::parseFreqDivLowBytes(ResponsePacket *packet)
         device.freqDiv = i;
         // resetRecvFreqStatusAfterDelay();
     }
-    else if (device.receiveFreqDivStatus != 1 && device.receiveFreqDivStatus == 2)
+    else if (device.receiveFreqDivStatus == 2)
     {
         device.receiveFreqDivStatus = 0;
         device.freqDiv = i + device.freqDiv;
@@ -512,54 +441,54 @@ void Protocol::parseRelay(ResponsePacket *packet)
     switch (packet->getHeader()[5])
     {
     case 0x80:
-        // ch1VoltageRL1 = 1.0;
+        device.ch1VoltageRL1 = 1.0;
         break;
     case 0xbf:
-        // ch2VoltageRL3 = 0.1;
+        device.ch2VoltageRL3 = 0.1;
         break;
     case 0xfb:
-        // ch2VoltageRL4 = 0.1;
+        device.ch2VoltageRL4 = 0.1;
         break;
     case 0xfd:
-        // ch1VoltageRL2 = 0.1;
+        device.ch1VoltageRL2 = 0.1;
         break;
     case 0x02:
-        // ch1VoltageRL2 = 1.0;
+        device.ch1VoltageRL2 = 1.0;
         break;
     case 0x04:
-        // ch2VoltageRL4 = 1.0;
+        device.ch2VoltageRL4 = 1.0;
         break;
     case 0x40:
-        // ch2VoltageRL3 = 1.0;
+        device.ch2VoltageRL3 = 1.0;
         break;
     case 0x7f:
-        // ch1VoltageRL1 = 0.1;
+        device.ch1VoltageRL1 = 0.1;
         break;
     default:
-        // parseCouplingReply(replyPacket);
+        parseCoupling(packet);
         break;
     }
-    switch (packet->getHeader()[5])
-    {
-    case 0x80:
-    case 0x7f:
-        // updateCh1VoltsDivStatusAfterReceivedRL1();
-        return;
-    case 0xbf:
-    case 0x40:
-        // updateCh2VoltsDivStatusAfterReceivedRL3();
-        return;
-    case 0xfb:
-    case 0x04:
-        // updateCh2VoltsDivStatusAfterReceivedRL4();
-        return;
-    case 0xfd:
-    case 0x02:
-        // updateCh1VoltsDivStatusAfterReceivedRL2();
-        return;
-    default:
-        return;
-    }
+    // switch (packet->getHeader()[5])
+    // {
+    // case 0x80:
+    // case 0x7f:
+    // updateCh1VoltsDivStatusAfterReceivedRL1();
+    //     return;
+    // case 0xbf:
+    // case 0x40:
+    // updateCh2VoltsDivStatusAfterReceivedRL3();
+    //     return;
+    // case 0xfb:
+    // case 0x04:
+    // updateCh2VoltsDivStatusAfterReceivedRL4();
+    //     return;
+    // case 0xfd:
+    // case 0x02:
+    // updateCh1VoltsDivStatusAfterReceivedRL2();
+    //     return;
+    // default:
+    //     return;
+    // }
 }
 
 void Protocol::parseCh1ZeroLevel(ResponsePacket *packet)
@@ -583,26 +512,26 @@ void Protocol::parseVoltsDiv125(ResponsePacket *packet)
     switch (packet->getHeader()[5] & 3)
     {
     case 0:
-        // ch1Voltage125 = 1.0;
+        device.ch1Voltage125 = 1.0;
         break;
     case 1:
-        // ch1Voltage125 = 2.0;
+        device.ch1Voltage125 = 2.0;
         break;
     case 2:
-        // ch1Voltage125 = 5.0;
+        device.ch1Voltage125 = 5.0;
         break;
     }
     // updateCh1VoltsDivStatusAfterReceived125();
     switch ((packet->getHeader()[5] >> 2) & 3)
     {
     case 0:
-        // ch2Voltage125 = 1.0;
+        device.ch2Voltage125 = 1.0;
         break;
     case 1:
-        // ch2Voltage125 = 2.0;
+        device.ch2Voltage125 = 2.0;
         break;
     case 2:
-        // ch2Voltage125 = 5.0;
+        device.ch2Voltage125 = 5.0;
         break;
     }
     // updateCh2VoltsDivStatusAfterReceived125();
@@ -611,9 +540,7 @@ void Protocol::parseVoltsDiv125(ResponsePacket *packet)
 void Protocol::parseTriggerLevel(ResponsePacket *packet)
 {
     uint16_t i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
-    // printf("i = %d, 0x%04x\n", i, i);
-    // i = (uint16_t)roundf(cmdGen.mapValue(i, (float)device.trigger.getBottomPWM(), (float)device.trigger.getTopPWM(), 8.0f, 248.0f));
-    // printf("i = %d, 0x%04x\n", i, i);
+    i = (uint16_t)roundf(cmdGen.mapValue(i, (float)device.trigger.getBottomPWM(), (float)device.trigger.getTopPWM(), 8.0f, 248.0f));
     device.trigger.setTriggerLevel(i);
 }
 
@@ -682,6 +609,113 @@ void Protocol::parseStartCapture(ResponsePacket *packet)
     }
 }
 
+void Protocol::parseCoupling(ResponsePacket *packet)
+{
+    switch (packet->getHeader()[5])
+    {
+    case 0xef:
+        device.channel1.coupling = COUPLING_DC;
+        break;
+    case 0xfe:
+        device.channel2.coupling = COUPLING_DC;
+        break;
+    case 0xff:
+        if (packet->getHeader()[6] == 0x01)
+        {
+            device.channel1.coupling = COUPLING_GND;
+        }
+        else if (packet->getHeader()[6] == 0x02)
+        {
+            device.channel2.coupling = COUPLING_GND;
+        }
+        break;
+    case 0x01:
+        device.channel1.coupling = COUPLING_AC;
+        break;
+    case 0x10:
+        device.channel2.coupling = COUPLING_AC;
+        break;
+    }
+}
+
+void Protocol::parseEEROMPage00(ResponsePacket *packet)
+{
+    memcpy(eeromData.caliLevel, packet->getPayload(), 200);
+    uint16_t *iArr;
+    int i = 0;
+    int i2 = 0;
+
+    int tmpA = 0;
+    int tmpB = 0;
+    while (tmpB < 9)
+    {
+        i = tmpA + 1;
+        device.channel1.pwmArray[tmpB][0] = packet->getPayload()[tmpA] & 255;
+        iArr = device.channel1.pwmArray[tmpB];
+        int tmp = i + 1;
+        iArr[0] = iArr[0] + ((packet->getPayload()[i] & 255) << 8);
+        i = tmp + 1;
+        device.channel1.pwmArray[tmpB][1] = packet->getPayload()[tmp] & 255;
+        iArr = device.channel1.pwmArray[tmpB];
+        i2 = i + 1;
+        iArr[1] = ((packet->getPayload()[i] & 255) << 8) + iArr[1];
+        tmpB++;
+        tmpA = i2;
+    }
+    tmpB = tmpA;
+    for (tmpA = 0; tmpA < 9; tmpA++)
+    {
+        i = tmpB + 1;
+        device.channel2.pwmArray[tmpA][0] = packet->getPayload()[tmpB] & 255;
+        uint16_t *iArr2 = device.channel2.pwmArray[tmpA];
+        int tmp = i + 1;
+        iArr2[0] = iArr2[0] + ((packet->getPayload()[i] & 255) << 8);
+        i2 = tmp + 1;
+        device.channel2.pwmArray[tmpA][1] = packet->getPayload()[tmp] & 255;
+        uint16_t *iArr3 = device.channel2.pwmArray[tmpA];
+        tmpB = i2 + 1;
+        iArr3[1] = ((packet->getPayload()[i2] & 255) << 8) + iArr3[1];
+    }
+    i2 = tmpB + 1;
+    device.trigger.innerTriggerPWM[0] = packet->getPayload()[tmpB] & 255;
+    iArr = device.trigger.innerTriggerPWM;
+    i = i2 + 1;
+    iArr[0] = iArr[0] + ((packet->getPayload()[i2] & 255) << 8);
+    tmpB = i + 1;
+    device.trigger.innerTriggerPWM[1] = packet->getPayload()[i] & 255;
+    iArr = device.trigger.innerTriggerPWM;
+    i = tmpB + 1;
+    iArr[1] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[1];
+    tmpB = i + 1;
+    device.trigger.innerTriggerPWM[0] = packet->getPayload()[i] & 255;
+    iArr = device.trigger.innerTriggerPWM;
+    i = tmpB + 1;
+    iArr[0] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[0];
+    tmpB = i + 1;
+    device.trigger.innerTriggerPWM[1] = packet->getPayload()[i] & 255;
+    iArr = device.trigger.innerTriggerPWM;
+    i = tmpB + 1;
+    iArr[1] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[1];
+    tmpB = i + 1;
+    device.trigger.innerTriggerPWM[2] = packet->getPayload()[i] & 255;
+    iArr = device.trigger.innerTriggerPWM;
+    i = tmpB + 1;
+    iArr[2] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[2];
+    tmpB = i + 1;
+    device.trigger.innerTriggerPWM[3] = packet->getPayload()[i] & 255;
+    iArr = device.trigger.innerTriggerPWM;
+    i = tmpB + 1;
+    iArr[3] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[3];
+    if (device.trigger.innerTriggerPWM[2] < IDSO1070A_SAMPLES_COUNT_PER_PACKET || device.trigger.innerTriggerPWM[2] > 4000)
+    {
+        device.trigger.innerTriggerPWM[2] = device.trigger.innerTriggerPWM[0];
+    }
+    if (device.trigger.innerTriggerPWM[3] < IDSO1070A_SAMPLES_COUNT_PER_PACKET || device.trigger.innerTriggerPWM[3] > 4000)
+    {
+        device.trigger.innerTriggerPWM[3] = device.trigger.innerTriggerPWM[1];
+    }
+}
+
 void Protocol::syncTimeBaseFromFreqDiv()
 {
     TimeBase timebaseFromFreqDiv = device.getTimebaseFromFreqDiv();
@@ -703,7 +737,6 @@ void Protocol::receive()
         parsePacket(&packet);
         expectedResponseCount--;
         connection->clearPacketBuffer();
-        // printf("expectedResponseCount = %d\n", expectedResponseCount);
         if (expectedResponseCount == 0)
             changeState(STATE_DONE);
     }
@@ -801,24 +834,6 @@ Command *Protocol::getCommand(Commands cmd)
 
 void Protocol::changeState(States state)
 {
-    switch (state)
-    {
-    case STATE_IDLE:
-        // printf("Changed state: STATE_IDLE\n");
-        break;
-    case STATE_REQUEST:
-        // printf("Changed state: STATE_REQUEST\n");
-        break;
-    case STATE_RESPONSE:
-        // printf("Changed state: STATE_RESPONSE\n");
-        break;
-    case STATE_DONE:
-        // printf("Changed state: STATE_DONE\n");
-        break;
-    default:
-        printf("Unknown state: %d\n", (int)state);
-        return;
-    }
     this->state = state;
 }
 
