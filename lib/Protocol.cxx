@@ -67,11 +67,14 @@ void Protocol::transmit()
 {
     if (commandTimeout.isTimedOut())
     {
+        // Transmit current comman
         connection->transmit(commandQueue.getCurrent().getPayload(), 4);
-        if (commandQueue.getCurrent().getPayload()[0] == 0xee && !connection->isUsbConnection())
+
+        // If command was readEEROM and it's a wifi connection, then we get two responses per command
+        if (commandQueue.getCurrent().getPayload()[0] == TYPE_EE && !connection->isUsbConnection())
             expectedResponseCount = 2;
         expectedResponseCount = 1;
-        // delete cmd;
+
         changeState(STATE_RESPONSE);
         commandTimeout.reset();
     }

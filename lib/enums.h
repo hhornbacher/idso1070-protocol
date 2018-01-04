@@ -77,6 +77,14 @@ enum Commands
     CMD_POST_TRIGGER
 };
 
+enum ResponseType
+{
+    TYPE_AA = 0xaa,
+    TYPE_EE = 0xee,
+    TYPE_FPGA = 0x55,
+    TYPE_STATE = 0x57
+};
+
 enum ParseChVoltsDivStatus
 {
     PARSE_CHVOLTSDIV_S0,

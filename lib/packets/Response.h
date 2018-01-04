@@ -13,14 +13,6 @@
 #define IDSO1070A_PACKET_HEADER_SIZE 7
 #define IDSO1070A_PACKET_PAYLOAD_SIZE 502
 
-enum ResponseType
-{
-  TYPE_AA = 0xaa,
-  TYPE_EE = 0xee,
-  TYPE_FPGA = 0x55,
-  TYPE_STATE = 0x57
-};
-
 class Response
 {
 private:
