@@ -65,7 +65,6 @@ public:
   size_t getSamplesNumberOfOneFrame();
   uint8_t getEnabledChannelsCount();
   uint8_t getPacketsNumber();
-  uint8_t getChannelsCount();
 
   void print();
 };
