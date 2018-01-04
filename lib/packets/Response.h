@@ -13,7 +13,7 @@
 #define IDSO1070A_PACKET_HEADER_SIZE 7
 #define IDSO1070A_PACKET_PAYLOAD_SIZE 502
 
-enum PacketType
+enum ResponseType
 {
   TYPE_AA = 0xaa,
   TYPE_EE = 0xee,
@@ -21,28 +21,26 @@ enum PacketType
   TYPE_STATE = 0x57
 };
 
-class ResponsePacket
+class Response
 {
 private:
-  struct __attribute__((packed)) Packet
+  struct __attribute__((packed)) RawPacket
   {
     uint8_t header[IDSO1070A_PACKET_HEADER_SIZE];
     uint8_t payload[IDSO1070A_PACKET_PAYLOAD_SIZE];
   } rawPacket;
 
 public:
-  ResponsePacket(uint8_t *data);
+  Response(uint8_t *data);
 
   uint8_t *getHeader();
   uint8_t *getPayload();
   uint8_t getCommandID();
-  PacketType getType();
+  ResponseType getType();
   size_t getPayloadLength();
 
   void print();
-  static const char *typeToString(PacketType type);
+  static const char *typeToString(ResponseType type);
 };
-
-typedef std::deque<ResponsePacket *> PacketQueue;
 
 #endif // _RESPONSE_PACKET_H_

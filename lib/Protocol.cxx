@@ -154,7 +154,7 @@ void Protocol::sendCommand(Commands cmd)
     }
 }
 
-void Protocol::parsePacket(ResponsePacket *packet)
+void Protocol::parsePacket(Response *packet)
 {
     switch (packet->getType())
     {
@@ -178,7 +178,7 @@ void Protocol::parsePacket(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseAAResponse(ResponsePacket *packet)
+void Protocol::parseAAResponse(Response *packet)
 {
     switch (packet->getHeader()[4])
     {
@@ -198,7 +198,7 @@ void Protocol::parseAAResponse(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseEEResponse(ResponsePacket *packet)
+void Protocol::parseEEResponse(Response *packet)
 {
     if (packet->getHeader()[4] == 0xaa)
     {
@@ -260,7 +260,7 @@ void Protocol::parseEEResponse(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseFPGAResponse(ResponsePacket *packet)
+void Protocol::parseFPGAResponse(Response *packet)
 {
     switch (packet->getHeader()[4])
     {
@@ -336,7 +336,7 @@ void Protocol::parseFPGAResponse(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseStateResponse(ResponsePacket *packet)
+void Protocol::parseStateResponse(Response *packet)
 {
     switch (packet->getHeader()[4])
     {
@@ -357,12 +357,12 @@ void Protocol::parseStateResponse(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseSampleData(ResponsePacket *packet)
+void Protocol::parseSampleData(Response *packet)
 {
     printf("parseSampleData\n");
 }
 
-void Protocol::parseFreqDivLowBytes(ResponsePacket *packet)
+void Protocol::parseFreqDivLowBytes(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 255) << 8) + (packet->getHeader()[5] & 255);
     if (device.getReceiveFreqDivStatus() == 0)
@@ -379,7 +379,7 @@ void Protocol::parseFreqDivLowBytes(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseFreqDivHighBytes(ResponsePacket *packet)
+void Protocol::parseFreqDivHighBytes(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 0xff) << 8) + (packet->getHeader()[5] & 0xff);
 
@@ -397,7 +397,7 @@ void Protocol::parseFreqDivHighBytes(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseRamChannelSelection(ResponsePacket *packet)
+void Protocol::parseRamChannelSelection(Response *packet)
 {
     switch (packet->getHeader()[5])
     {
@@ -422,7 +422,7 @@ void Protocol::parseRamChannelSelection(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseRelay(ResponsePacket *packet)
+void Protocol::parseRelay(Response *packet)
 {
     switch (packet->getHeader()[5])
     {
@@ -477,7 +477,7 @@ void Protocol::parseRelay(ResponsePacket *packet)
     // }
 }
 
-void Protocol::parseCh1ZeroLevel(ResponsePacket *packet)
+void Protocol::parseCh1ZeroLevel(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
     int ordinal = (int)device.getChannel1().getVerticalDiv();
@@ -485,7 +485,7 @@ void Protocol::parseCh1ZeroLevel(ResponsePacket *packet)
     device.getChannel1().setVerticalPosition(i);
 }
 
-void Protocol::parseCh2ZeroLevel(ResponsePacket *packet)
+void Protocol::parseCh2ZeroLevel(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
     int ordinal = (int)device.getChannel2().getVerticalDiv();
@@ -493,7 +493,7 @@ void Protocol::parseCh2ZeroLevel(ResponsePacket *packet)
     device.getChannel2().setVerticalPosition(i);
 }
 
-void Protocol::parseVoltsDiv125(ResponsePacket *packet)
+void Protocol::parseVoltsDiv125(Response *packet)
 {
     switch (packet->getHeader()[5] & 3)
     {
@@ -523,14 +523,14 @@ void Protocol::parseVoltsDiv125(ResponsePacket *packet)
     // updateCh2VoltsDivStatusAfterReceived125();
 }
 
-void Protocol::parseTriggerLevel(ResponsePacket *packet)
+void Protocol::parseTriggerLevel(Response *packet)
 {
     uint16_t i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
     i = (uint16_t)roundf(cmdGen.mapValue(i, (float)device.getTrigger().getBottomPWM(), (float)device.getTrigger().getTopPWM(), 8.0f, 248.0f));
     device.getTrigger().setTriggerLevel(i);
 }
 
-void Protocol::parseTriggerSourceAndSlope(ResponsePacket *packet)
+void Protocol::parseTriggerSourceAndSlope(Response *packet)
 {
     uint8_t i = packet->getHeader()[5] & 3;
 
@@ -564,7 +564,7 @@ void Protocol::parseTriggerSourceAndSlope(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseStartCapture(ResponsePacket *packet)
+void Protocol::parseStartCapture(Response *packet)
 {
     // this.littlePacketStatus = 0;
 
@@ -595,7 +595,7 @@ void Protocol::parseStartCapture(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseCoupling(ResponsePacket *packet)
+void Protocol::parseCoupling(Response *packet)
 {
     switch (packet->getHeader()[5])
     {
@@ -624,7 +624,7 @@ void Protocol::parseCoupling(ResponsePacket *packet)
     }
 }
 
-void Protocol::parseEEROMPage00(ResponsePacket *packet)
+void Protocol::parseEEROMPage00(Response *packet)
 {
     memcpy(eeromData.caliLevel, packet->getPayload(), 200);
     uint16_t *iArr;
@@ -719,7 +719,7 @@ void Protocol::receive()
     connection->receive();
     if (connection->getPacketBufferLength() == IDSO1070A_PACKET_SIZE)
     {
-        ResponsePacket packet(connection->getPacketBuffer());
+        Response packet(connection->getPacketBuffer());
         parsePacket(&packet);
         expectedResponseCount--;
         connection->clearPacketBuffer();

@@ -17,7 +17,7 @@
 #include "device/EEROMData.h"
 
 #include "enums.h"
-#include "packets/ResponsePacket.h"
+#include "packets/Response.h"
 #include "packets/Command.h"
 #include "packets/CommandQueue.h"
 #include "packets/CommandGenerator.h"
@@ -58,27 +58,27 @@ private:
   IDSO1070A device;
   EEROMData eeromData;
 
-  void resolveCommandResponse(ResponsePacket *packet);
-  void rejectCommandResponse(ResponsePacket *packet);
+  void resolveCommandResponse(Response *packet);
+  void rejectCommandResponse(Response *packet);
 
-  void parsePacket(ResponsePacket *packet);
-  void parseAAResponse(ResponsePacket *packet);
-  void parseEEResponse(ResponsePacket *packet);
-  void parseFPGAResponse(ResponsePacket *packet);
-  void parseStateResponse(ResponsePacket *packet);
-  void parseSampleData(ResponsePacket *packet);
-  void parseFreqDivLowBytes(ResponsePacket *packet);
-  void parseFreqDivHighBytes(ResponsePacket *packet);
-  void parseRamChannelSelection(ResponsePacket *packet);
-  void parseCh1ZeroLevel(ResponsePacket *packet);
-  void parseCh2ZeroLevel(ResponsePacket *packet);
-  void parseRelay(ResponsePacket *packet);
-  void parseVoltsDiv125(ResponsePacket *packet);
-  void parseTriggerLevel(ResponsePacket *packet);
-  void parseTriggerSourceAndSlope(ResponsePacket *packet);
-  void parseStartCapture(ResponsePacket *packet);
-  void parseEEROMPage00(ResponsePacket *packet);
-  void parseCoupling(ResponsePacket *packet);
+  void parsePacket(Response *packet);
+  void parseAAResponse(Response *packet);
+  void parseEEResponse(Response *packet);
+  void parseFPGAResponse(Response *packet);
+  void parseStateResponse(Response *packet);
+  void parseSampleData(Response *packet);
+  void parseFreqDivLowBytes(Response *packet);
+  void parseFreqDivHighBytes(Response *packet);
+  void parseRamChannelSelection(Response *packet);
+  void parseCh1ZeroLevel(Response *packet);
+  void parseCh2ZeroLevel(Response *packet);
+  void parseRelay(Response *packet);
+  void parseVoltsDiv125(Response *packet);
+  void parseTriggerLevel(Response *packet);
+  void parseTriggerSourceAndSlope(Response *packet);
+  void parseStartCapture(Response *packet);
+  void parseEEROMPage00(Response *packet);
+  void parseCoupling(Response *packet);
 
   void syncTimeBaseFromFreqDiv();
 

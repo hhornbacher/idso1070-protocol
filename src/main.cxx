@@ -9,7 +9,7 @@ void sigHandler(int sig);
 
 #define CONNECTION usbConnection
 
-class Main : public ResponseHandler
+class Main
 {
   private:
     bool runProgram = true;
@@ -24,7 +24,7 @@ class Main : public ResponseHandler
     Protocol protocol;
 
   public:
-    Main() : wifiConnection((char *)serverIP, serverPort), usbConnection((char *)device), protocol(&CONNECTION, this)
+    Main() : wifiConnection((char *)serverIP, serverPort), usbConnection((char *)device), protocol(&CONNECTION)
     {
         signal(SIGINT, sigHandler);
     }
@@ -67,7 +67,8 @@ class Main : public ResponseHandler
 
         protocol.start();
         protocol.sendCommand(CMD_READ_FPGAVERSION_AND_EEPROM);
-        protocol.sendCommand(CMD_INITIALIZE);
+        // protocol.sendCommand(CMD_INITIALIZE);
+        protocol.sendCommand(CMD_PULL_SAMPLES);
 
         while (runProgram)
         {
