@@ -14,6 +14,7 @@ USBConnector::~USBConnector()
 
 void USBConnector::start()
 {
+
     termios tty;
     handle = open(device, O_RDWR | O_NOCTTY | O_SYNC);
     memset(&tty, 0, sizeof tty);

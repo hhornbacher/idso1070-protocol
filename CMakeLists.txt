@@ -35,9 +35,6 @@ set (CMAKE_CXX_STANDARD 11)
 # add local cmake dir to module path
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
-# Find packages needed to build
-find_package(libusb-1.0 REQUIRED)
-
 add_subdirectory(lib)
 add_subdirectory(src)
 add_subdirectory(tests)

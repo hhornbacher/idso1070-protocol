@@ -18,6 +18,6 @@ add_subdirectory(packets)
 add_subdirectory(util)
 
 add_library(idso1070a Protocol.cxx)
-target_link_libraries (idso1070a device connection packets util ${LIBUSB_1_LIBRARIES})
+target_link_libraries (idso1070a device connection packets util)
 
 install (TARGETS idso1070a DESTINATION lib)

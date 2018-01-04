@@ -8,8 +8,9 @@ else()
 include_directories(${libidso1070a_SOURCE_DIR})
 endif()
 
+
 add_executable(idso1070a-protocol main.cxx)
 
-target_link_libraries (idso1070a-protocol idso1070a ${LIBUSB_1_LIBRARIES})
+target_link_libraries (idso1070a-protocol idso1070a)
 
 install (TARGETS idso1070a-protocol DESTINATION bin)
