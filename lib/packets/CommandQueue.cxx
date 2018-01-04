@@ -1,13 +1,8 @@
 #include "CommandQueue.h"
 
-void CommandQueue::add(Commands cmd)
+void CommandQueue::add(Command *cmd)
 {
     push_back(cmd);
-}
-
-void CommandQueue::addFront(Commands cmd)
-{
-    push_front(cmd);
 }
 
 size_t CommandQueue::getSize()
@@ -15,9 +10,13 @@ size_t CommandQueue::getSize()
     return size();
 }
 
-Commands CommandQueue::getNext()
+Command &CommandQueue::getCurrent()
 {
-    Commands next = (*begin());
+    return *(*begin());
+}
+
+void CommandQueue::destroyCurrent()
+{
+    delete (*begin());
     pop_front();
-    return next;
 }

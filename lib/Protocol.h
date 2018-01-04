@@ -14,39 +14,19 @@
 #include "connection/USBConnector.h"
 
 #include "device/IDSO1070A.h"
-#include "device/EEROMData.h"
 
 #include "enums.h"
 #include "packets/Response.h"
+#include "packets/ResponseParser.h"
 #include "packets/Command.h"
 #include "packets/CommandQueue.h"
 #include "packets/CommandGenerator.h"
 
-// typedef std::function<void(Commands cmd, bool success)> ResponseHandler;
-
-// class ResponseHandler
-// {
-// public:
-//   virtual bool onResponse(Commands cmd, bool success) = 0;
-// };
+#define COMMAND_MAX_RETRIES 3
 
 class Protocol
 {
 private:
-  Connector *connection;
-
-  CommandGenerator cmdGen;
-
-  size_t expectedResponseCount = 0;
-  bool requestSuccess = false;
-  // ResponseHandler *responseHandler;
-  Commands lastCommand;
-  CommandQueue commandQueue;
-  Timeout commandTimeout;
-  bool sampling = false;
-
-  Timeout readBatteryTimeout;
-
   enum States
   {
     STATE_IDLE,
@@ -56,31 +36,26 @@ private:
   } state = STATE_IDLE;
 
   IDSO1070A device;
-  EEROMData eeromData;
+
+  Connector *connection;
+
+  CommandGenerator cmdGen;
+
+  ResponseParser parser;
+
+  bool sampling = false;
+
+  int retries = 0;
+  size_t expectedResponseCount = 0;
+  CommandQueue commandQueue;
+  Timeout commandTimeout;
+
+  Response *lastResponse;
+
+  // Timeout readBatteryTimeout;
 
   void resolveCommandResponse(Response *packet);
   void rejectCommandResponse(Response *packet);
-
-  void parsePacket(Response *packet);
-  void parseAAResponse(Response *packet);
-  void parseEEResponse(Response *packet);
-  void parseFPGAResponse(Response *packet);
-  void parseStateResponse(Response *packet);
-  void parseSampleData(Response *packet);
-  void parseFreqDivLowBytes(Response *packet);
-  void parseFreqDivHighBytes(Response *packet);
-  void parseRamChannelSelection(Response *packet);
-  void parseCh1ZeroLevel(Response *packet);
-  void parseCh2ZeroLevel(Response *packet);
-  void parseRelay(Response *packet);
-  void parseVoltsDiv125(Response *packet);
-  void parseTriggerLevel(Response *packet);
-  void parseTriggerSourceAndSlope(Response *packet);
-  void parseStartCapture(Response *packet);
-  void parseEEROMPage00(Response *packet);
-  void parseCoupling(Response *packet);
-
-  void syncTimeBaseFromFreqDiv();
 
   void changeState(States state);
 
@@ -93,12 +68,11 @@ public:
   void start();
   void stop();
   void process();
+
   IDSO1070A &getDevice();
-  EEROMData &getEEROMData();
 
-  void sendCommand(Commands cmd);
-
-  void resendLastCommand();
+  // void sendCommand(Commands cmd);
+  void sendCommand(Command *cmd);
 
   void receive();
   void transmit();

@@ -1,17 +1,27 @@
 #include "IDSO1070A.h"
 
+IDSO1070A::IDSO1070A()
+{
+    memset(&eeromData, 0, sizeof(EEROMData));
+    channel1.setVerticalPosition(188);
+    channel2.setVerticalPosition(68);
+    // this.channel1.setAttenuationFactor(AttenuationFactor.X1);
+    // this.channel2.setAttenuationFactor(AttenuationFactor.X1);
+}
+
 void IDSO1070A::print()
 {
     printf("[IDSO1070A]\n");
-    channel1.print();
-    channel2.print();
-    trigger.print();
     printf("batteryLevel = %d\n", batteryLevel);
     printf("receiveFreqDivStatus = 0x%02x\n", receiveFreqDivStatus);
     printf("freqDiv = %d\n", freqDiv);
     printf("timeBase = %d\n", timeBase);
     printf("captureMode = %d\n", captureMode);
     printf("scopeMode = %d\n", scopeMode);
+    channel1.print();
+    channel2.print();
+    trigger.print();
+    eeromData.print();
     printf("\n\n");
 }
 
@@ -37,6 +47,11 @@ ScopeMode IDSO1070A::getScopeMode()
 }
 void IDSO1070A::setScopeMode(ScopeMode scopeMode)
 {
+}
+
+EEROMData &IDSO1070A::getEEROMData()
+{
+    return eeromData;
 }
 
 Channel &IDSO1070A::getChannel1()

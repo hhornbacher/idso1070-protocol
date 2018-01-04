@@ -160,8 +160,8 @@ TEST(ProtocolTest, parseEEROMPage05)
 
     connection.fakePacket(packetPayload);
     proto.receive();
-    EXPECT_EQ(strcmp((char *)proto.getEEROMData().productName, "IDSO1070A"), 0);
-    EXPECT_EQ(strcmp((char *)proto.getEEROMData().userName, "IDSO"), 0);
+    EXPECT_EQ(strcmp((char *)proto.getDevice().getEEROMData().productName, "IDSO1070A"), 0);
+    EXPECT_EQ(strcmp((char *)proto.getDevice().getEEROMData().userName, "IDSO"), 0);
 }
 
 } // namespace

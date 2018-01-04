@@ -7,6 +7,7 @@
 #include "../util/hexdump.h"
 #include "../enums.h"
 
+#include "EEROMData.h"
 #include "Channel.h"
 #include "Trigger.h"
 
@@ -22,6 +23,7 @@ private:
   CaptureMode captureMode = CAPMODE_NORMAL;
   ScopeMode scopeMode = SCOMODE_ANALOG;
 
+  EEROMData eeromData;
   Channel channel1;
   Channel channel2;
   Channel *selectedChannel = &channel1;
@@ -32,6 +34,7 @@ private:
   uint32_t freqDiv = 0;
 
 public:
+  IDSO1070A();
   TimeBase getTimeBase();
   void setTimeBase();
 
@@ -41,6 +44,7 @@ public:
   ScopeMode getScopeMode();
   void setScopeMode(ScopeMode scopeMode);
 
+  EEROMData &getEEROMData();
   Channel &getChannel1();
   Channel &getChannel2();
 

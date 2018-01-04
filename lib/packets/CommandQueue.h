@@ -7,16 +7,17 @@
 
 #include <deque>
 
-#include "../enums.h"
+#include "Command.h"
 
-class CommandQueue : private std::deque<Commands>
+class CommandQueue : private std::deque<Command *>
 {
 public:
-  void addFront(Commands cmd);
-  void add(Commands cmd);
+  void add(Command *cmd);
 
   size_t getSize();
-  Commands getNext();
+
+  Command &getCurrent();
+  void destroyCurrent();
 };
 
 #endif // _COMMAND_QUEUE_H_

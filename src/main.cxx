@@ -29,33 +29,33 @@ class Main
         signal(SIGINT, sigHandler);
     }
 
-    bool onResponse(Commands cmd, bool success)
-    {
-        printf("Response!\n");
-        if (success)
-        {
-            resendCounter = 0;
-            printf("Success, next command.\n");
-        }
-        else
-        {
-            if (resendCounter < 3)
-            {
-                printf("Resending: %d\n", (int)cmd);
-                //cmd->print();
-                protocol.resendLastCommand();
-                resendCounter++;
-            }
-            else
-            {
-                printf("Problem while sending: %d\n", (int)cmd);
-                protocol.print();
-                printf("Exiting!\n\n");
-                exit(0);
-            }
-        }
-        return true;
-    }
+    // bool onResponse(Commands cmd, bool success)
+    // {
+    //     printf("Response!\n");
+    //     if (success)
+    //     {
+    //         resendCounter = 0;
+    //         printf("Success, next command.\n");
+    //     }
+    //     else
+    //     {
+    //         if (resendCounter < 3)
+    //         {
+    //             printf("Resending: %d\n", (int)cmd);
+    //             //cmd->print();
+    //             protocol.resendLastCommand();
+    //             resendCounter++;
+    //         }
+    //         else
+    //         {
+    //             printf("Problem while sending: %d\n", (int)cmd);
+    //             protocol.print();
+    //             printf("Exiting!\n\n");
+    //             exit(0);
+    //         }
+    //     }
+    //     return true;
+    // }
 
     void stop()
     {
@@ -66,9 +66,9 @@ class Main
     {
 
         protocol.start();
-        protocol.sendCommand(CMD_READ_FPGAVERSION_AND_EEPROM);
+        // protocol.sendCommand(CMD_READ_FPGAVERSION_AND_EEPROM);
         // protocol.sendCommand(CMD_INITIALIZE);
-        protocol.sendCommand(CMD_PULL_SAMPLES);
+        // protocol.sendCommand(CMD_PULL_SAMPLES);
 
         while (runProgram)
         {

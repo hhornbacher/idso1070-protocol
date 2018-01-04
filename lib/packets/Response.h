@@ -1,5 +1,5 @@
-#ifndef _RESPONSE_PACKET_H_
-#define _RESPONSE_PACKET_H_
+#ifndef _RESPONSE_H_
+#define _RESPONSE_H_
 
 #include <cstdint>
 #include <cstdio>
@@ -43,4 +43,4 @@ public:
   static const char *typeToString(ResponseType type);
 };
 
-#endif // _RESPONSE_PACKET_H_
+#endif // _RESPONSE_H_

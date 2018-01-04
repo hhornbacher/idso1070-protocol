@@ -26,6 +26,8 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                  EXCLUDE_FROM_ALL)
 # END: Include GoogleTest framework
 
+# Set buil to debug
+set(CMAKE_BUILD_TYPE Debug)
 
 # Set C++ standard to C++11
 set (CMAKE_CXX_STANDARD 11)
