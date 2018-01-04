@@ -10,6 +10,6 @@ endif()
 
 add_executable(idso1070a-protocol main.cxx)
 
-target_link_libraries (idso1070a-protocol idso1070a)
+target_link_libraries (idso1070a-protocol idso1070a ${LIBUSB_1_LIBRARIES})
 
 install (TARGETS idso1070a-protocol DESTINATION bin)
