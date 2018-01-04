@@ -16,6 +16,8 @@
         "chrono": "cpp",
         "cmath": "cpp",
         "*.ipp": "cpp",
-        "condition_variable": "cpp"
+        "condition_variable": "cpp",
+        "array": "cpp",
+        "initializer_list": "cpp"
     }
 }
