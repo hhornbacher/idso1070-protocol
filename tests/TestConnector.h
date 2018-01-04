@@ -1,25 +1,25 @@
 #ifndef _TEST_CONNECTOR_H_
 #define _TEST_CONNECTOR_H_
 
-#include "Connector.h"
+#include "connection/Connector.h"
 #include "ResponsePacket.h"
 
 class TestConnector : public Connector
 {
-  private:
-    bool pending = false;
+private:
+  bool pending = false;
 
-  public:
-    TestConnector();
-    ~TestConnector();
+public:
+  TestConnector();
+  ~TestConnector();
 
-    void transmit(uint8_t *data, size_t length);
-    size_t receive();
+  void transmit(uint8_t *data, size_t length);
+  size_t receive();
 
-    void start();
-    void stop();
+  void start();
+  void stop();
 
-    void fakePacket(uint8_t *data);
+  void fakePacket(uint8_t *data);
 };
 
 #endif // _TEST_CONNECTOR_H_

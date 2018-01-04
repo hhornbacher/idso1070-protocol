@@ -11,6 +11,10 @@ TEST(ProtocolTest, parseRamChannelSelection)
     TestConnector connection;
     Protocol proto(&connection);
     proto.start();
+    proto.getDevice().getChannel1().disable();
+    proto.getDevice().getChannel2().disable();
+    EXPECT_EQ(proto.getDevice().getChannel1().isEnabled(), false);
+    EXPECT_EQ(proto.getDevice().getChannel2().isEnabled(), false);
     uint8_t packetPayload[IDSO1070A_PACKET_SIZE] = {
         0xff, 0x01, 0x02, 0x55, 0x15, 0x00, 0x00, 0x60,
         0x04, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01,
@@ -79,8 +83,8 @@ TEST(ProtocolTest, parseRamChannelSelection)
 
     connection.fakePacket(packetPayload);
     proto.receive();
-    EXPECT_EQ(proto.getDevice().channel1.enabled, true);
-    EXPECT_EQ(proto.getDevice().channel2.enabled, true);
+    EXPECT_EQ(proto.getDevice().getChannel1().isEnabled(), true);
+    EXPECT_EQ(proto.getDevice().getChannel2().isEnabled(), true);
 }
 
 TEST(ProtocolTest, parseEEROMPage05)
