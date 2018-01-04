@@ -16,7 +16,7 @@ add_subdirectory(device)
 add_subdirectory(connection)
 add_subdirectory(util)
 
-add_library(idso1070a Timeout.cxx Protocol.cxx Command.cxx CommandGenerator.cxx ResponsePacket.cxx)
+add_library(idso1070a Protocol.cxx Command.cxx CommandGenerator.cxx ResponsePacket.cxx)
 target_link_libraries (idso1070a device connection util)
 
 install (TARGETS idso1070a DESTINATION lib)
