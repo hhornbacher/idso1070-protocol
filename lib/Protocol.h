@@ -7,6 +7,8 @@
 #include <cmath>
 #include <unistd.h>
 
+#include <deque>
+
 #include "util/hexdump.h"
 #include "util/Timeout.h"
 
@@ -19,7 +21,6 @@
 #include "packets/Response.h"
 #include "packets/ResponseParser.h"
 #include "packets/Command.h"
-#include "packets/CommandQueue.h"
 #include "packets/CommandGenerator.h"
 
 #define COMMAND_MAX_RETRIES 3
@@ -46,7 +47,7 @@ private:
 
   int retries = 0;
   size_t expectedResponseCount = 0;
-  CommandQueue commandQueue;
+  std::deque<CommandGenerationFunction> commandQueue;
   Timeout commandTimeout;
 
   Response *lastResponse;
