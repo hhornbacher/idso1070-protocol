@@ -9,7 +9,7 @@ namespace
 TEST(ProtocolTest, parseRamChannelSelection)
 {
     TestConnector connection;
-    Protocol proto(&connection);
+    Protocol proto(connection);
     proto.start();
     proto.getDevice().getChannel1().disable();
     proto.getDevice().getChannel2().disable();
@@ -90,7 +90,7 @@ TEST(ProtocolTest, parseRamChannelSelection)
 TEST(ProtocolTest, parseEEROMPage05)
 {
     TestConnector connection;
-    Protocol proto(&connection);
+    Protocol proto(connection);
     proto.start();
     uint8_t packetPayload[IDSO1070A_PACKET_SIZE] = {
         0xff, 0x01, 0xfa, 0xee, 0xaa, 0x05, 0x00, 0x49,

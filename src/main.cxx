@@ -22,9 +22,10 @@ class Main
     TCPConnector wifiConnection;
     USBConnector usbConnection;
     Protocol protocol;
+    CommandGenerator cmdGen;
 
   public:
-    Main() : wifiConnection((char *)serverIP, serverPort), usbConnection((char *)device), protocol(&CONNECTION)
+    Main() : wifiConnection((char *)serverIP, serverPort), usbConnection((char *)device), protocol(CONNECTION), cmdGen(protocol.getDevice())
     {
         signal(SIGINT, sigHandler);
     }
@@ -34,10 +35,28 @@ class Main
         runProgram = false;
     }
 
+    bool onEEROM00Response(uint8_t *cmdPayload, uint8_t *responsePayload, bool success)
+    {
+        printf("Success: %d\n", success);
+        return true;
+    }
+
+    bool onFPGAResponse(uint8_t *cmdPayload, uint8_t *responsePayload, bool success)
+    {
+        printf("Success: %d\n", success);
+        Command *cmd = cmdGen.readEEROMPage(0);
+        cmd->setHandler(&Main::onEEROM00Response, this);
+        protocol.sendCommand(cmd);
+        return true;
+    }
+
     int run()
     {
 
         protocol.start();
+        Command *cmd = cmdGen.readFPGAVersion();
+        cmd->setHandler(&Main::onFPGAResponse, this);
+        protocol.sendCommand(cmd);
         // protocol.sendCommand(CMD_READ_FPGAVERSION_AND_EEPROM);
         // protocol.sendCommand(CMD_INITIALIZE);
         // protocol.sendCommand(CMD_PULL_SAMPLES);

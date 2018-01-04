@@ -9,10 +9,10 @@
 class CommandGenerator
 {
 private:
-  IDSO1070A *device;
+  IDSO1070A &device;
 
 public:
-  CommandGenerator(IDSO1070A *device);
+  CommandGenerator(IDSO1070A &device);
   float mapValue(int i, float f, float f2, float f3, float f4);
   float mapValue(float f, float f2, float f3, float f4, float f5);
 

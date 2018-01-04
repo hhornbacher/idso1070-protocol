@@ -7,6 +7,7 @@
 
 #include <deque>
 
+#include "../enums.h"
 #include "../util/hexdump.h"
 
 #define IDSO1070A_PACKET_SIZE 509

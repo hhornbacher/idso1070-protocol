@@ -31,15 +31,14 @@ private:
   {
     STATE_IDLE,
     STATE_REQUEST,
-    STATE_RESPONSE,
-    STATE_DONE
+    STATE_RESPONSE
   } state = STATE_IDLE;
 
   IDSO1070A device;
 
-  Connector *connection;
+  Connector &connection;
 
-  CommandGenerator cmdGen;
+  // CommandGenerator cmdGen;
 
   ResponseParser parser;
 
@@ -52,17 +51,10 @@ private:
 
   Response *lastResponse;
 
-  // Timeout readBatteryTimeout;
-
-  void resolveCommandResponse(Response *packet);
-  void rejectCommandResponse(Response *packet);
-
   void changeState(States state);
 
-  Command *getCommand(Commands cmd);
-
 public:
-  Protocol(Connector *connection);
+  Protocol(Connector &connection);
   ~Protocol();
 
   void start();
@@ -71,7 +63,6 @@ public:
 
   IDSO1070A &getDevice();
 
-  // void sendCommand(Commands cmd);
   void sendCommand(Command *cmd);
 
   void receive();

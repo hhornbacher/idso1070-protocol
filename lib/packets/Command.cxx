@@ -34,15 +34,15 @@ void Command::setName(const char *name)
     strncpy(this->name, name, 256);
 }
 
-void Command::setHandler(Handler &handler)
+void Command::setHandler(Handler handler)
 {
-    this->handler = &handler;
+    this->handler = handler;
 }
 
 bool Command::callHandler(uint8_t *responsePayload, bool success)
 {
     if (handler)
-        return (*handler)(payload, responsePayload, success);
+        return handler(payload, responsePayload, success);
     return true;
 }
 
