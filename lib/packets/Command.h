@@ -7,7 +7,7 @@
 
 #include <functional>
 
-#include "enums.h"
+#include "../enums.h"
 
 class Command
 {

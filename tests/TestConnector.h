@@ -2,7 +2,7 @@
 #define _TEST_CONNECTOR_H_
 
 #include "connection/Connector.h"
-#include "ResponsePacket.h"
+#include "packets/ResponsePacket.h"
 
 class TestConnector : public Connector
 {

@@ -7,7 +7,7 @@
 
 #include <deque>
 
-#include "util/hexdump.h"
+#include "../util/hexdump.h"
 
 #define IDSO1070A_PACKET_SIZE 509
 #define IDSO1070A_PACKET_HEADER_SIZE 7

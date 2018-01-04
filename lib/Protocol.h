@@ -17,10 +17,10 @@
 #include "device/EEROMData.h"
 
 #include "enums.h"
-#include "ResponsePacket.h"
-#include "Command.h"
-#include "CommandQueue.h"
-#include "CommandGenerator.h"
+#include "packets/ResponsePacket.h"
+#include "packets/Command.h"
+#include "packets/CommandQueue.h"
+#include "packets/CommandGenerator.h"
 
 // typedef std::function<void(Commands cmd, bool success)> ResponseHandler;
 

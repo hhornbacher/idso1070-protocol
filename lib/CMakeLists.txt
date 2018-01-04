@@ -14,9 +14,10 @@ include_directories("${PROJECT_BINARY_DIR}")
 
 add_subdirectory(device)
 add_subdirectory(connection)
+add_subdirectory(packets)
 add_subdirectory(util)
 
-add_library(idso1070a Protocol.cxx Command.cxx CommandQueue.cxx CommandGenerator.cxx ResponsePacket.cxx)
-target_link_libraries (idso1070a device connection util)
+add_library(idso1070a Protocol.cxx)
+target_link_libraries (idso1070a device connection packets util)
 
 install (TARGETS idso1070a DESTINATION lib)
