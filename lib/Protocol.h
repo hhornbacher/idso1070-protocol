@@ -8,21 +8,27 @@
 #include <unistd.h>
 
 #include "util/hexdump.h"
-#include "Timeout.h"
+#include "util/Timeout.h"
+
 #include "connection/TCPConnector.h"
 #include "connection/USBConnector.h"
-#include "enums.h"
+
 #include "device/IDSO1070A.h"
 #include "device/EEROMData.h"
+
+#include "enums.h"
 #include "ResponsePacket.h"
 #include "Command.h"
+#include "CommandQueue.h"
 #include "CommandGenerator.h"
 
-class ResponseHandler
-{
-public:
-  virtual bool onResponse(Commands cmd, bool success) = 0;
-};
+// typedef std::function<void(Commands cmd, bool success)> ResponseHandler;
+
+// class ResponseHandler
+// {
+// public:
+//   virtual bool onResponse(Commands cmd, bool success) = 0;
+// };
 
 class Protocol
 {
@@ -33,7 +39,7 @@ private:
 
   size_t expectedResponseCount = 0;
   bool requestSuccess = false;
-  ResponseHandler *responseHandler;
+  // ResponseHandler *responseHandler;
   Commands lastCommand;
   CommandQueue commandQueue;
   Timeout commandTimeout;
@@ -76,15 +82,12 @@ private:
 
   void syncTimeBaseFromFreqDiv();
 
-  void receive();
-  void transmit();
-
   void changeState(States state);
 
   Command *getCommand(Commands cmd);
 
 public:
-  Protocol(Connector *connection, ResponseHandler *responseHandler);
+  Protocol(Connector *connection);
   ~Protocol();
 
   void start();
@@ -96,6 +99,9 @@ public:
   void sendCommand(Commands cmd);
 
   void resendLastCommand();
+
+  void receive();
+  void transmit();
 
   void print();
 };

@@ -481,7 +481,7 @@ Command *CommandGenerator::selectChannel()
     {
         b = 0x01;
     }
-    else if (device->getChannelsCount() == 2 || (!device->isSampleRate200Mor250M() && device->getChannelsCount() == 1))
+    else if (device->getEnabledChannelsCount() == 2 || (!device->isSampleRate200Mor250M() && device->getEnabledChannelsCount() == 1))
     {
         b = 0x02;
     }

@@ -15,6 +15,15 @@ Command::Command(uint8_t *payload)
     memcpy(this->payload, payload, 4);
 }
 
+void Command::print()
+{
+    printf("[Command:%s]\n", name);
+    printf("{%02x, %02x, %02x, %02x}\n", payload[0], payload[1], payload[2], payload[3]);
+    printf("commandID = %02x\n", payload[1]);
+    printf("args = %02x %02x\n", payload[2], payload[3]);
+    printf("\n\n");
+}
+
 uint8_t *Command::getPayload()
 {
     return payload;
@@ -25,33 +34,24 @@ void Command::setName(const char *name)
     strncpy(this->name, name, 256);
 }
 
-void Command::print()
+void Command::setHandler(Handler &handler)
 {
-    printf("[Command:%s]\n", name);
-    printf("{%02x, %02x, %02x, %02x}\n", payload[0], payload[1], payload[2], payload[3]);
-    printf("commandID = %02x\n", payload[1]);
-    printf("args = %02x %02x\n", payload[2], payload[3]);
-    printf("\n\n");
+    this->handler = &handler;
 }
 
-void CommandQueue::add(Commands cmd)
+bool Command::callHandler(uint8_t *responsePayload, bool success)
 {
-    push_back(cmd);
+    if (handler)
+        return (*handler)(payload, responsePayload, success);
+    return true;
 }
 
-void CommandQueue::addFront(Commands cmd)
+bool Command::isInProgress()
 {
-    push_front(cmd);
+    return inProgress;
 }
 
-size_t CommandQueue::getSize()
+void Command::beginProgress()
 {
-    return size();
-}
-
-Commands CommandQueue::getNext()
-{
-    Commands next = (*begin());
-    pop_front();
-    return next;
+    inProgress = true;
 }

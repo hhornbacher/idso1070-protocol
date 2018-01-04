@@ -1,8 +1,7 @@
 #include "Protocol.h"
 
-Protocol::Protocol(Connector *connection, ResponseHandler *responseHandler) : cmdGen(&device), connection(connection),
-                                                                              responseHandler(responseHandler), readBatteryTimeout(10000),
-                                                                              commandTimeout(200)
+Protocol::Protocol(Connector *connection) : cmdGen(&device), connection(connection),
+                                            readBatteryTimeout(10000), commandTimeout(200)
 {
     memset(&eeromData, 0, sizeof(EEROMData));
     device.getChannel1().setVerticalPosition(188);
@@ -841,8 +840,8 @@ void Protocol::process()
         receive();
         break;
     case STATE_DONE:
-        if (responseHandler->onResponse(lastCommand, requestSuccess))
-            changeState(STATE_IDLE);
+        // if (responseHandler->onResponse(lastCommand, requestSuccess))
+        changeState(STATE_IDLE);
         break;
     }
     // if (readBatteryTimeout.isTimedOut())
