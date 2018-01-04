@@ -28,9 +28,15 @@ IDSO1070A &Protocol::getDevice()
     return device;
 }
 
-void Protocol::sendCommand(Command *cmd)
+void Protocol::sendCommand(CommandGenerationFunction cmdFn)
 {
-    commandQueue.add(cmd);
+    commandQueue.push_back(cmdFn);
+}
+
+void Protocol::sendCommands(std::deque<CommandGenerationFunction> cmdFns)
+{
+    for (auto cmdFn : cmdFns)
+        commandQueue.push_back(cmdFn);
 }
 
 void Protocol::receive()
@@ -44,15 +50,18 @@ void Protocol::receive()
         bool success = parser.parse(lastResponse);
 
         // Call handler of current command
-        commandQueue.getCurrent().callHandler(lastResponse->getPayload(), success);
         if (!success && retries < COMMAND_MAX_RETRIES)
             retries++;
         else
         {
-            // Remove current command
-            commandQueue.destroyCurrent();
+            currentCommand->callCommandHandler(lastResponse->getPayload(), success);
+            // Remove current command generator function
+            commandQueue.pop_front();
             retries = 0;
         }
+
+        // Remove current command
+        delete currentCommand;
 
         expectedResponseCount--;
         connection.clearPacketBuffer();
@@ -65,11 +74,14 @@ void Protocol::transmit()
 {
     if (commandTimeout.isTimedOut())
     {
+        CommandGenerationFunction generateCommand = *(commandQueue.begin());
+        currentCommand = generateCommand();
+
         // Transmit current command
-        connection.transmit(commandQueue.getCurrent().getPayload(), 4);
+        connection.transmit(currentCommand->getPayload(), 4);
 
         // If command was readEEROM and it's a wifi connection, then we get two responses per command
-        if (commandQueue.getCurrent().getPayload()[0] == TYPE_EE && !connection.isUsbConnection())
+        if (currentCommand->getPayload()[0] == TYPE_EE && !connection.isUsbConnection())
             expectedResponseCount = 2;
         expectedResponseCount = 1;
 
@@ -88,7 +100,7 @@ void Protocol::process()
     switch (state)
     {
     case STATE_IDLE:
-        if (commandQueue.getSize() > 0)
+        if (commandQueue.size() > 0)
         {
             changeState(STATE_REQUEST);
         }

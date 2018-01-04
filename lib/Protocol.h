@@ -50,7 +50,8 @@ private:
   std::deque<CommandGenerationFunction> commandQueue;
   Timeout commandTimeout;
 
-  Response *lastResponse;
+  Command *currentCommand = NULL;
+  Response *lastResponse = NULL;
 
   void changeState(States state);
 
@@ -64,7 +65,8 @@ public:
 
   IDSO1070A &getDevice();
 
-  void sendCommand(Command *cmd);
+  void sendCommand(CommandGenerationFunction cmdFn);
+  void sendCommands(std::deque<CommandGenerationFunction> cmdFns);
 
   void receive();
   void transmit();

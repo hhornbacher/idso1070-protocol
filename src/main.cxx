@@ -35,18 +35,16 @@ class Main
         runProgram = false;
     }
 
-    bool onEEROM00Response(uint8_t *cmdPayload, uint8_t *responsePayload, bool success)
+    bool onDone(uint8_t *cmdPayload, uint8_t *responsePayload, bool success)
     {
-        printf("Success: %d\n", success);
+        printf("Done!");
+        exit(0);
         return true;
     }
 
-    bool onFPGAResponse(uint8_t *cmdPayload, uint8_t *responsePayload, bool success)
+    bool onResponse(uint8_t *cmdPayload, uint8_t *responsePayload, bool success)
     {
         printf("Success: %d\n", success);
-        Command *cmd = cmdGen.readEEROMPage(0);
-        cmd->setHandler(&Main::onEEROM00Response, this);
-        protocol.sendCommand(cmd);
         return true;
     }
 
@@ -54,9 +52,51 @@ class Main
     {
 
         protocol.start();
-        Command *cmd = cmdGen.readFPGAVersion();
-        cmd->setHandler(&Main::onFPGAResponse, this);
-        protocol.sendCommand(cmd);
+        protocol.sendCommand(
+            cmdGen.readFPGAVersion(
+                Command::bindHandler(&Main::onResponse, this)));
+        protocol.sendCommand(
+            cmdGen.readEEROMPage(
+                Command::bindHandler(&Main::onResponse, this),
+                0x00));
+        protocol.sendCommand(
+            cmdGen.readEEROMPage(
+                Command::bindHandler(&Main::onResponse, this),
+                0x04));
+        protocol.sendCommand(
+            cmdGen.readEEROMPage(
+                Command::bindHandler(&Main::onResponse, this),
+                0x05));
+        protocol.sendCommand(
+            cmdGen.readEEROMPage(
+                Command::bindHandler(&Main::onResponse, this),
+                0x07));
+        protocol.sendCommand(
+            cmdGen.readEEROMPage(
+                Command::bindHandler(&Main::onResponse, this),
+                0x08));
+        protocol.sendCommand(
+            cmdGen.readEEROMPage(
+                Command::bindHandler(&Main::onResponse, this),
+                0x09));
+        protocol.sendCommand(
+            cmdGen.readEEROMPage(
+                Command::bindHandler(&Main::onResponse, this),
+                0x0a));
+        protocol.sendCommand(
+            cmdGen.readEEROMPage(
+                Command::bindHandler(&Main::onResponse, this),
+                0x0b));
+        protocol.sendCommand(
+            cmdGen.readEEROMPage(
+                Command::bindHandler(&Main::onResponse, this),
+                0x0c));
+        protocol.sendCommand(
+            cmdGen.readEEROMPage(
+                Command::bindHandler(&Main::onResponse, this),
+                0x0c));
+        protocol.sendCommands(cmdGen.init(Command::bindHandler(&Main::onDone, this)));
+
         // protocol.sendCommand(CMD_READ_FPGAVERSION_AND_EEPROM);
         // protocol.sendCommand(CMD_INITIALIZE);
         // protocol.sendCommand(CMD_PULL_SAMPLES);
