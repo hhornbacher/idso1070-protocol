@@ -7,13 +7,13 @@
 #include <cmath>
 #include <unistd.h>
 
-#include "hexdump.h"
+#include "util/hexdump.h"
 #include "Timeout.h"
-#include "TCPConnector.h"
-#include "USBConnector.h"
+#include "connection/TCPConnector.h"
+#include "connection/USBConnector.h"
 #include "enums.h"
-#include "IDSO1070A.h"
-#include "EEROMData.h"
+#include "device/IDSO1070A.h"
+#include "device/EEROMData.h"
 #include "ResponsePacket.h"
 #include "Command.h"
 #include "CommandGenerator.h"
@@ -37,6 +37,7 @@ private:
   Commands lastCommand;
   CommandQueue commandQueue;
   Timeout commandTimeout;
+  bool sampling = false;
 
   Timeout readBatteryTimeout;
 
@@ -70,6 +71,8 @@ private:
   void parseTriggerLevel(ResponsePacket *packet);
   void parseTriggerSourceAndSlope(ResponsePacket *packet);
   void parseStartCapture(ResponsePacket *packet);
+  void parseEEROMPage00(ResponsePacket *packet);
+  void parseCoupling(ResponsePacket *packet);
 
   void syncTimeBaseFromFreqDiv();
 

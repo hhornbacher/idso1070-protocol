@@ -3,7 +3,7 @@
 
 #include <cstdio>
 
-#include "IDSO1070A.h"
+#include "device/IDSO1070A.h"
 #include "Command.h"
 
 class CommandGenerator

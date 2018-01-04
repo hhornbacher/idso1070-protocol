@@ -43,7 +43,7 @@ Command *CommandGenerator::updateSampleRate()
 {
     uint8_t b = 0;
 
-    switch (device->timeBase)
+    switch (device->getTimeBase())
     {
     case HDIV_5nS:
     case HDIV_10nS:
@@ -84,9 +84,9 @@ Command *CommandGenerator::updateSampleRate()
         b = 0x00;
         break;
     }
-    if (!device->channel1.enabled || !device->channel2.enabled)
+    if (!device->getChannel1().isEnabled() || !device->getChannel2().isEnabled())
     {
-        switch (device->timeBase)
+        switch (device->getTimeBase())
         {
         case HDIV_5nS:
         case HDIV_10nS:
@@ -156,15 +156,15 @@ Command *CommandGenerator::getFreqDivHighBytes()
 Command *CommandGenerator::selectRAMChannel()
 {
     uint8_t b = 0x01;
-    if (device->channel1.enabled && !device->channel2.enabled)
+    if (device->getChannel1().isEnabled() && !device->getChannel2().isEnabled())
     {
         b = 0x08;
     }
-    else if (device->channel2.enabled && !device->channel1.enabled)
+    else if (device->getChannel2().isEnabled() && !device->getChannel1().isEnabled())
     {
         b = 0x09;
     }
-    else if (device->channel2.enabled && device->channel1.enabled)
+    else if (device->getChannel2().isEnabled() && device->getChannel1().isEnabled())
     {
         b = 0x00;
     }
@@ -176,7 +176,7 @@ Command *CommandGenerator::selectRAMChannel()
 Command *CommandGenerator::updateChannelVolts125()
 {
     uint8_t b = 0;
-    switch (device->channel1.verticalDiv)
+    switch (device->getChannel1().getVerticalDiv())
     {
     case VDIV_10mV:
     case VDIV_100mV:
@@ -197,7 +197,7 @@ Command *CommandGenerator::updateChannelVolts125()
         break;
     }
 
-    switch (device->channel2.verticalDiv)
+    switch (device->getChannel2().getVerticalDiv())
     {
     case VDIV_10mV:
     case VDIV_100mV:
@@ -227,7 +227,7 @@ Command *CommandGenerator::relay1()
 {
     uint8_t b = 0;
 
-    switch (device->channel1.verticalDiv)
+    switch (device->getChannel1().getVerticalDiv())
     {
     case VDIV_10mV:
     case VDIV_100mV:
@@ -252,7 +252,7 @@ Command *CommandGenerator::relay2()
 {
     uint8_t b = 0;
 
-    switch (device->channel1.verticalDiv)
+    switch (device->getChannel1().getVerticalDiv())
     {
     case VDIV_10mV:
     case VDIV_100mV:
@@ -278,7 +278,7 @@ Command *CommandGenerator::relay3()
 {
     uint8_t b = 0;
 
-    switch (device->channel1.verticalDiv)
+    switch (device->getChannel1().getVerticalDiv())
     {
     case VDIV_10mV:
     case VDIV_100mV:
@@ -304,7 +304,7 @@ Command *CommandGenerator::relay4()
 {
     uint8_t b = 0;
 
-    switch (device->channel1.verticalDiv)
+    switch (device->getChannel1().getVerticalDiv())
     {
     case VDIV_10mV:
     case VDIV_100mV:
@@ -329,12 +329,12 @@ Command *CommandGenerator::relay4()
 Command *CommandGenerator::channel1Coupling()
 {
     uint8_t b1 = 0, b2 = 0;
-    if (device->channel1.coupling == COUPLING_GND)
+    if (device->getChannel1().getCoupling() == COUPLING_GND)
     {
         b1 = 0xff;
         b2 = 0x01;
     }
-    else if (device->channel1.coupling == COUPLING_DC)
+    else if (device->getChannel1().getCoupling() == COUPLING_DC)
     {
         b1 = 0xef;
     }
@@ -350,12 +350,12 @@ Command *CommandGenerator::channel1Coupling()
 Command *CommandGenerator::channel2Coupling()
 {
     uint8_t b1 = 0, b2 = 0;
-    if (device->channel2.coupling == COUPLING_GND)
+    if (device->getChannel2().getCoupling() == COUPLING_GND)
     {
         b1 = 0xff;
         b2 = 0x02;
     }
-    else if (device->channel2.coupling == COUPLING_DC)
+    else if (device->getChannel2().getCoupling() == COUPLING_DC)
     {
         b1 = 0xfe;
     }
@@ -371,15 +371,15 @@ Command *CommandGenerator::channel2Coupling()
 Command *CommandGenerator::updateTriggerMode()
 {
     uint8_t b = 0;
-    if (device->captureMode == CAPMODE_ROLL)
+    if (device->getCaptureMode() == CAPMODE_ROLL)
         b = (1 << 0);
-    else if (device->captureMode != CAPMODE_NORMAL)
+    else if (device->getCaptureMode() != CAPMODE_NORMAL)
         b |= (1 << 3);
-    if (device->trigger.mode == TRIGMODE_AUTO)
+    if (device->getTrigger().getMode() == TRIGMODE_AUTO)
         b |= (1 << 1);
-    else if (device->trigger.mode == TRIGMODE_SINGLE)
+    else if (device->getTrigger().getMode() == TRIGMODE_SINGLE)
         b |= (1 << 2);
-    if (device->scopeMode == SCOMODE_DIGITAL)
+    if (device->getScopeMode() == SCOMODE_DIGITAL)
         b |= (1 << 4);
     Command *cmd = new Command(CMDCODE_TRIGGER_MODE, b);
     cmd->setName("updateTriggerMode");
@@ -389,17 +389,17 @@ Command *CommandGenerator::updateTriggerMode()
 Command *CommandGenerator::readRamCount()
 {
     uint16_t b = 0;
-    if (device->channel1.enabled && device->channel2.enabled)
+    if (device->getChannel1().isEnabled() && device->getChannel2().isEnabled())
     {
         b = (uint16_t)device->getSamplesNumberOfOneFrame();
     }
-    else if (device->channel1.enabled || device->channel2.enabled)
+    else if (device->getChannel1().isEnabled() || device->getChannel2().isEnabled())
     {
         if (!device->isSampleRate200Mor250M())
             b = (uint16_t)(device->getSamplesNumberOfOneFrame() / 2);
         else
         {
-            double x = ((double)device->getSamplesNumberOfOneFrame() * device->trigger.xPosition / 2) + ((double)device->getSamplesNumberOfOneFrame() * (1 - device->trigger.xPosition));
+            double x = ((double)device->getSamplesNumberOfOneFrame() * device->getTrigger().getXPosition() / 2) + ((double)device->getSamplesNumberOfOneFrame() * (1 - device->getTrigger().getXPosition()));
             b = (uint16_t)x;
         }
     }
@@ -410,24 +410,24 @@ Command *CommandGenerator::readRamCount()
 
 Command *CommandGenerator::channel1Level()
 {
-    int verticalDiv = (int)device->channel1.verticalDiv;
+    int verticalDiv = (int)device->getChannel1().getVerticalDiv();
     Command *cmd = channel1PWM(
         (uint16_t)mapValue(
-            device->channel1.verticalPosition,
+            device->getChannel1().getVerticalPosition(),
             8.0f, 248.0f,
-            (float)device->channel1.pwmArray[verticalDiv][0], (float)device->channel1.pwmArray[verticalDiv][1]));
+            (float)device->getChannel1().getPWM(verticalDiv, 0), (float)device->getChannel1().getPWM(verticalDiv, 1)));
     cmd->setName("channel1Level");
     return cmd;
 }
 
 Command *CommandGenerator::channel2Level()
 {
-    int verticalDiv = (int)device->channel2.verticalDiv;
+    int verticalDiv = (int)device->getChannel2().getVerticalDiv();
     Command *cmd = channel2PWM(
         (uint16_t)mapValue(
-            device->channel2.verticalPosition,
+            device->getChannel2().getVerticalPosition(),
             8.0f, 248.0f,
-            (float)device->channel2.pwmArray[verticalDiv][0], (float)device->channel2.pwmArray[verticalDiv][1]));
+            (float)device->getChannel2().getPWM(verticalDiv, 0), (float)device->getChannel2().getPWM(verticalDiv, 1)));
     cmd->setName("channel2Level");
     return cmd;
 }
@@ -435,14 +435,14 @@ Command *CommandGenerator::channel2Level()
 Command *CommandGenerator::updateTriggerSourceAndSlope()
 {
     uint8_t b =
-        device->trigger.channel == TRIGCHAN_CH1 ? 0x01 : device->trigger.channel == TRIGCHAN_CH2 ? 0x00 : device->trigger.channel == TRIGCHAN_EXT ? 0x02 : 0x03;
+        device->getTrigger().getChannel() == TRIGCHAN_CH1 ? 0x01 : device->getTrigger().getChannel() == TRIGCHAN_CH2 ? 0x00 : device->getTrigger().getChannel() == TRIGCHAN_EXT ? 0x02 : 0x03;
 
     b &= ~0x2c;
-    if (device->scopeMode == SCOMODE_ANALOG)
+    if (device->getScopeMode() == SCOMODE_ANALOG)
         b |= 0x10;
     else
         b &= ~0x10;
-    if (device->trigger.slope == TRIGSLOPE_RISING)
+    if (device->getTrigger().getSlope() == TRIGSLOPE_RISING)
         b |= 0x80;
     else
         b &= ~0x80;
@@ -454,7 +454,7 @@ Command *CommandGenerator::updateTriggerSourceAndSlope()
 
 Command *CommandGenerator::updateTriggerLevel()
 {
-    // uint16_t pwm = mapValue(device->trigger.level, 8.0f, 248.0f, (float)device->trigger.getBottomPWM(), (float)device->trigger.getTopPWM());
+    // uint16_t pwm = mapValue(device->getTrigger().level, 8.0f, 248.0f, (float)device->getTrigger().getBottomPWM(), (float)device->getTrigger().getTopPWM());
     uint16_t pwm = 2741;
     Command *cmd = updateTriggerPWM(pwm);
     cmd->setName("updateTriggerLevel");
@@ -473,15 +473,15 @@ Command *CommandGenerator::updateTriggerPWM(uint16_t pwm)
 Command *CommandGenerator::selectChannel()
 {
     uint8_t b = 0;
-    if (device->channel1.enabled && !device->channel2.enabled && device->isSampleRate200Mor250M())
+    if (device->getChannel1().isEnabled() && !device->getChannel2().isEnabled() && device->isSampleRate200Mor250M())
     {
         b = 0x00;
     }
-    else if (device->channel2.enabled && !device->channel1.enabled && device->isSampleRate200Mor250M())
+    else if (device->getChannel2().isEnabled() && !device->getChannel1().isEnabled() && device->isSampleRate200Mor250M())
     {
         b = 0x01;
     }
-    else if (device->getEnabledChannelsCount() == 2 || (!device->isSampleRate200Mor250M() && device->getEnabledChannelsCount() == 1))
+    else if (device->getChannelsCount() == 2 || (!device->isSampleRate200Mor250M() && device->getChannelsCount() == 1))
     {
         b = 0x02;
     }
@@ -496,7 +496,7 @@ Command *CommandGenerator::selectChannel()
 
 Command *CommandGenerator::preTrigger()
 {
-    uint16_t i = ((uint16_t)(((double)device->getSamplesNumberOfOneFrame()) * device->trigger.xPosition)) + 5;
+    uint16_t i = ((uint16_t)(((double)device->getSamplesNumberOfOneFrame()) * device->getTrigger().getXPosition())) + 5;
     Command *cmd = new Command(CMDCODE_PRE_TRIGGER_LENGTH,
                                (uint8_t)(i & 0xff),
                                (uint8_t)((i >> 8) & 0xff));
@@ -506,7 +506,7 @@ Command *CommandGenerator::preTrigger()
 
 Command *CommandGenerator::postTrigger()
 {
-    uint16_t i = ((uint16_t)(((double)device->getSamplesNumberOfOneFrame()) * (1 - device->trigger.xPosition)));
+    uint16_t i = ((uint16_t)(((double)device->getSamplesNumberOfOneFrame()) * (1 - device->getTrigger().getXPosition())));
     Command *cmd = new Command(CMDCODE_POST_TRIGGER_LENGTH,
                                (uint8_t)(i & 0xff),
                                (uint8_t)((i >> 8) & 0xff));

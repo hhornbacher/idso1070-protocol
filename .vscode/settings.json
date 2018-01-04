@@ -8,6 +8,14 @@
         "deque": "cpp",
         "queue": "cpp",
         "cstdint": "cpp",
-        "cstring": "cpp"
+        "cstring": "cpp",
+        "stdlib.h": "c",
+        "stdint.h": "c",
+        "csignal": "cpp",
+        "typeinfo": "cpp",
+        "chrono": "cpp",
+        "cmath": "cpp",
+        "*.ipp": "cpp",
+        "condition_variable": "cpp"
     }
 }

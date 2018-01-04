@@ -45,6 +45,8 @@ void ResponsePacket::print()
     printf("commandID = %02x\n", getCommandID());
     printf("packetType = %s\n", typeToString(getType()));
     printf("payloadLength = %ld\n", getPayloadLength());
+    printf("[Header]\n");
+    hexdump(getHeader(), IDSO1070A_PACKET_HEADER_SIZE);
     printf("[Payload]\n");
     hexdump(getPayload(), getPayloadLength());
     printf("\n\n");

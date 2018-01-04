@@ -3,7 +3,6 @@
 Timeout::Timeout(int ms) : timeout(ms)
 {
     nextTick = getTicks() + ms;
-    printf("Timeout next tick: %ld\n", nextTick);
 }
 
 long Timeout::getTicks()

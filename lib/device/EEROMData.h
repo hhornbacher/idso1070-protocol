@@ -3,7 +3,8 @@
 
 #include <cstdio>
 #include <cstdint>
-#include "hexdump.h"
+
+#include "../util/hexdump.h"
 
 struct EEROMData
 {
