@@ -1,7 +1,7 @@
 #include "Protocol.h"
 
 Protocol::Protocol(Connector &connection) : connection(connection),
-                                            commandTimeout(200), parser(device)
+                                            commandTimeout(200)
 {
     // device.getChannel1().parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
     // device.getChannel2().parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
@@ -47,14 +47,13 @@ void Protocol::receive()
         lastResponse = new Response(connection.getPacketBuffer());
 
         // Parse received packet
-        bool success = parser.parse(lastResponse);
+        bool success = currentCommand->callHandler(lastResponse, retries);
 
         // Call handler of current command
         if (!success && retries < COMMAND_MAX_RETRIES)
             retries++;
         else
         {
-            currentCommand->callHandler(lastResponse->getPayload(), success);
             // Remove current command generator function
             commandQueue.pop_front();
             retries = 0;

@@ -41,7 +41,7 @@ private:
 
   // CommandFactory cmdGen;
 
-  ResponseParser parser;
+  // ResponseParser parser;
 
   bool sampling = false;
 

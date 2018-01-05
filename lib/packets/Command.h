@@ -8,16 +8,17 @@
 #include <functional>
 
 #include "../enums.h"
-
-typedef std::function<bool(uint8_t *, uint8_t *, bool)> CommandResponseHandler;
+#include "Response.h"
 
 class Command
 {
 public:
+  typedef std::function<bool(Command *, Response *, int)> ResponseHandler;
+
 private:
   char name[256];
   uint8_t payload[4];
-  CommandResponseHandler handler;
+  ResponseHandler handler;
   bool inProgress = false;
 
 public:
@@ -25,13 +26,13 @@ public:
   Command(uint8_t *payload);
 
   template <class F, class S>
-  static CommandResponseHandler bindHandler(F &&f, S *self)
+  static ResponseHandler bindHandler(F &&f, S *self)
   {
     return std::bind(f, self, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
   }
 
-  void setCommandHandler(CommandResponseHandler handler);
-  bool callCommandHandler(uint8_t *responsePayload, bool success);
+  void setHandler(ResponseHandler handler);
+  bool callHandler(Response *response, int retries);
 
   uint8_t *getPayload();
   void setName(const char *name);

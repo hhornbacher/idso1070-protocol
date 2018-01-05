@@ -4,194 +4,203 @@ CommandFactory::CommandFactory(IDSO1070A &device) : device(device)
 {
 }
 
-std::deque<CommandGenerator> &CommandFactory::init(CommandResponseHandler handler, bool internal)
+void CommandFactory::setHandler(Command::Command::ResponseHandler handler)
 {
-    if (!internal)
-        buffer.clear();
-    for (auto cmd : channelStatusOnly(nullHandler))
-        buffer.push_back(cmd);
-    for (auto cmd : voltageDiv(nullHandler))
-        buffer.push_back(cmd);
-    for (auto cmd : updateTimeBase(nullHandler))
-        buffer.push_back(cmd);
-    for (auto cmd : trigger(nullHandler))
-        buffer.push_back(cmd);
-    buffer.push_back(channel1Level(nullHandler));
-    buffer.push_back(channel2Level(nullHandler));
-    buffer.push_back(channel1Coupling(nullHandler));
-    buffer.push_back(channel2Coupling(nullHandler));
-    for (auto cmd : pullSamples(handler))
-        buffer.push_back(cmd);
-    return buffer;
+    this->handler = handler;
 }
 
-std::deque<CommandGenerator> &CommandFactory::channelStatusOnly(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::init(bool internal)
 {
     if (!internal)
         buffer.clear();
-    buffer.push_back(selectChannel(nullHandler));
-    buffer.push_back(selectRAMChannel(nullHandler));
-    buffer.push_back(readRamCount(handler));
-    return buffer;
-}
-
-std::deque<CommandGenerator> &CommandFactory::channelStatus(CommandResponseHandler handler, bool internal)
-{
-    if (!internal)
-        buffer.clear();
-    for (auto cmd : channelStatusOnly(nullHandler))
+    for (auto cmd : channelStatusOnly())
         buffer.push_back(cmd);
-    for (auto cmd : updateTimeBase(handler))
+    for (auto cmd : voltageDiv())
+        buffer.push_back(cmd);
+    for (auto cmd : updateTimeBase())
+        buffer.push_back(cmd);
+    for (auto cmd : trigger())
+        buffer.push_back(cmd);
+    buffer.push_back(channel1Level());
+    buffer.push_back(channel2Level());
+    buffer.push_back(channel1Coupling());
+    buffer.push_back(channel2Coupling());
+    for (auto cmd : pullSamples())
         buffer.push_back(cmd);
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::channel1VoltageDiv(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::channelStatusOnly(bool internal)
 {
     if (!internal)
         buffer.clear();
-    buffer.push_back(updateChannelVolts125(nullHandler));
-    buffer.push_back(relay1(nullHandler));
-    buffer.push_back(relay2(handler));
+    buffer.push_back(selectChannel());
+    buffer.push_back(selectRAMChannel());
+    buffer.push_back(readRamCount());
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::channel2VoltageDiv(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::channelStatus(bool internal)
 {
     if (!internal)
         buffer.clear();
-    buffer.push_back(updateChannelVolts125(nullHandler));
-    buffer.push_back(relay3(nullHandler));
-    buffer.push_back(relay4(handler));
+    for (auto cmd : channelStatusOnly())
+        buffer.push_back(cmd);
+    for (auto cmd : updateTimeBase())
+        buffer.push_back(cmd);
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::levels(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::channel1VoltageDiv(bool internal)
 {
     if (!internal)
         buffer.clear();
-    buffer.push_back(channel1Level(nullHandler));
-    buffer.push_back(channel2Level(nullHandler));
-    buffer.push_back(updateTriggerLevel(handler));
+    buffer.push_back(updateChannelVolts125());
+    buffer.push_back(relay1());
+    buffer.push_back(relay2());
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::pullSamples(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::channel2VoltageDiv(bool internal)
 {
     if (!internal)
         buffer.clear();
-    buffer.push_back(updateTriggerMode(nullHandler));
-    buffer.push_back(startSampling(handler));
+    buffer.push_back(updateChannelVolts125());
+    buffer.push_back(relay3());
+    buffer.push_back(relay4());
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::readEEROMandFPGA(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::levels(bool internal)
+{
+    if (!internal)
+        buffer.clear();
+    buffer.push_back(channel1Level());
+    buffer.push_back(channel2Level());
+    buffer.push_back(updateTriggerLevel());
+    return buffer;
+}
+
+std::deque<CommandGenerator> &CommandFactory::pullSamples(bool internal)
+{
+    if (!internal)
+        buffer.clear();
+    buffer.push_back(updateTriggerMode());
+    buffer.push_back(startSampling());
+    return buffer;
+}
+
+std::deque<CommandGenerator> &CommandFactory::readEEROMandFPGA(bool internal)
 {
     buffer.clear();
-    buffer.push_back(readFPGAVersion(nullHandler));
-    buffer.push_back(readEEROMPage(nullHandler, 0x00));
-    buffer.push_back(readEEROMPage(nullHandler, 0x04));
-    buffer.push_back(readEEROMPage(nullHandler, 0x07));
-    buffer.push_back(readEEROMPage(nullHandler, 0x08));
-    buffer.push_back(readEEROMPage(nullHandler, 0x09));
-    buffer.push_back(readEEROMPage(nullHandler, 0x0a));
-    buffer.push_back(readEEROMPage(nullHandler, 0x0b));
-    buffer.push_back(readEEROMPage(handler, 0x0c));
+    buffer.push_back(readFPGAVersion());
+    buffer.push_back(readEEROMPage(0x00));
+    buffer.push_back(readEEROMPage(0x04));
+    buffer.push_back(readEEROMPage(0x07));
+    buffer.push_back(readEEROMPage(0x08));
+    buffer.push_back(readEEROMPage(0x09));
+    buffer.push_back(readEEROMPage(0x0a));
+    buffer.push_back(readEEROMPage(0x0b));
+    buffer.push_back(readEEROMPage(0x0c));
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::updateTimeBase(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::updateTimeBase(bool internal)
 {
     if (!internal)
         buffer.clear();
-    buffer.push_back(updateSampleRate(nullHandler));
-    buffer.push_back(getFreqDivLowBytes(nullHandler));
-    buffer.push_back(getFreqDivHighBytes(nullHandler));
-    for (auto cmd : updateXTriggerPos(nullHandler))
+    buffer.push_back(updateSampleRate());
+    buffer.push_back(getFreqDivLowBytes());
+    buffer.push_back(getFreqDivHighBytes());
+    for (auto cmd : updateXTriggerPos())
         buffer.push_back(cmd);
-    buffer.push_back(readRamCount(handler));
+    buffer.push_back(readRamCount());
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::trigger(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::trigger(bool internal)
 {
     if (!internal)
         buffer.clear();
-    buffer.push_back(updateTriggerSourceAndSlope(nullHandler));
-    buffer.push_back(updateTriggerMode(nullHandler));
-    buffer.push_back(updateTriggerLevel(handler));
+    buffer.push_back(updateTriggerSourceAndSlope());
+    buffer.push_back(updateTriggerMode());
+    buffer.push_back(updateTriggerLevel());
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::triggerSource(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::triggerSource(bool internal)
 {
     buffer.clear();
-    buffer.push_back(updateTriggerSourceAndSlope(nullHandler));
-    buffer.push_back(updateTriggerLevel(handler));
+    buffer.push_back(updateTriggerSourceAndSlope());
+    buffer.push_back(updateTriggerLevel());
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::voltageDiv(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::voltageDiv(bool internal)
 {
     if (!internal)
         buffer.clear();
-    buffer.push_back(updateChannelVolts125(nullHandler));
-    buffer.push_back(relay1(nullHandler));
-    buffer.push_back(relay2(nullHandler));
-    buffer.push_back(relay3(nullHandler));
-    buffer.push_back(relay4(nullHandler));
-    buffer.push_back(channel1Level(nullHandler));
-    buffer.push_back(channel2Level(handler));
+    buffer.push_back(updateChannelVolts125());
+    buffer.push_back(relay1());
+    buffer.push_back(relay2());
+    buffer.push_back(relay3());
+    buffer.push_back(relay4());
+    buffer.push_back(channel1Level());
+    buffer.push_back(channel2Level());
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::updateXTriggerPos(CommandResponseHandler handler, bool internal)
+std::deque<CommandGenerator> &CommandFactory::updateXTriggerPos(bool internal)
 {
     if (!internal)
         buffer.clear();
-    buffer.push_back(preTrigger(nullHandler));
-    buffer.push_back(postTrigger(handler));
+    buffer.push_back(preTrigger());
+    buffer.push_back(postTrigger());
     return buffer;
 }
 
-CommandGenerator CommandFactory::readEEROMPage(CommandResponseHandler handler, uint8_t address)
+CommandGenerator CommandFactory::readEEROMPage(uint8_t address)
 {
-    return [handler, address]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, address]() {
         uint8_t cmdBuffer[4] = {0xee, 0xaa, address, 0x00};
         Command *cmd = new Command(cmdBuffer);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         // cmd->setResponseCount(1);
         cmd->setName("readEEROMPage");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::readFPGAVersion(CommandResponseHandler handler)
+CommandGenerator CommandFactory::readFPGAVersion()
 {
-    return [handler]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef]() {
         uint8_t cmdBuffer[4] = {0xaa, 0x02, 0x00, 0x00};
         Command *cmd = new Command(cmdBuffer);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("readFPGAVersion");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::readBatteryLevel(CommandResponseHandler handler)
+CommandGenerator CommandFactory::readBatteryLevel()
 {
-    return [handler]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef]() {
         uint8_t cmdBuffer[4] = {0x57, 0x03, 0x00, 0x00};
         Command *cmd = new Command(cmdBuffer);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("readBatteryLevel");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::updateSampleRate(CommandResponseHandler handler)
+CommandGenerator CommandFactory::updateSampleRate()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b = 0;
 
         switch (devRef.getTimeBase())
@@ -283,41 +292,44 @@ CommandGenerator CommandFactory::updateSampleRate(CommandResponseHandler handler
         }
         b &= ~0x02;
         Command *cmd = new Command(CMDCODE_SAMPLE_RATE, b);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("updateSampleRate");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::getFreqDivLowBytes(CommandResponseHandler handler)
+CommandGenerator CommandFactory::getFreqDivLowBytes()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         // newTimeBase = idso1070.timeBase;
         uint16_t freqDiv = (uint16_t)(devRef.getTimebaseFromFreqDiv() & 0xffff);
         Command *cmd = new Command(CMDCODE_FREQ_DIV_LOW, (uint8_t)(freqDiv & 0xff), (uint8_t)((freqDiv >> 8) & 0xff));
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("getFreqDivLowBytes");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::getFreqDivHighBytes(CommandResponseHandler handler)
+CommandGenerator CommandFactory::getFreqDivHighBytes()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint16_t freqDiv = (uint16_t)((devRef.getTimebaseFromFreqDiv() >> 16) & 0xffff);
         Command *cmd = new Command(CMDCODE_FREQ_DIV_HIGH, (uint8_t)(freqDiv & 0xff), (uint8_t)((freqDiv >> 8) & 0xff));
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("getFreqDivHighBytes");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::selectRAMChannel(CommandResponseHandler handler)
+CommandGenerator CommandFactory::selectRAMChannel()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b = 0x01;
         if (devRef.getChannel1().isEnabled() && !devRef.getChannel2().isEnabled())
         {
@@ -332,16 +344,17 @@ CommandGenerator CommandFactory::selectRAMChannel(CommandResponseHandler handler
             b = 0x00;
         }
         Command *cmd = new Command(CMDCODE_RAM_CHANNEL_SELECTION, b);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("selectRAMChannel");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::updateChannelVolts125(CommandResponseHandler handler)
+CommandGenerator CommandFactory::updateChannelVolts125()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b = 0;
         switch (devRef.getChannel1().getVerticalDiv())
         {
@@ -386,16 +399,17 @@ CommandGenerator CommandFactory::updateChannelVolts125(CommandResponseHandler ha
         }
         b &= ~0x30;
         Command *cmd = new Command(CMDCODE_CHANNEL_VOLTS_DIV_125, b);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("updateChannelVolts125");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::relay1(CommandResponseHandler handler)
+CommandGenerator CommandFactory::relay1()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b = 0;
 
         switch (devRef.getChannel1().getVerticalDiv())
@@ -415,16 +429,17 @@ CommandGenerator CommandFactory::relay1(CommandResponseHandler handler)
             break;
         }
         Command *cmd = new Command(CMDCODE_SET_RELAY, b);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("relay1");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::relay2(CommandResponseHandler handler)
+CommandGenerator CommandFactory::relay2()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b = 0;
 
         switch (devRef.getChannel1().getVerticalDiv())
@@ -445,16 +460,17 @@ CommandGenerator CommandFactory::relay2(CommandResponseHandler handler)
         }
 
         Command *cmd = new Command(CMDCODE_SET_RELAY, b);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("relay2");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::relay3(CommandResponseHandler handler)
+CommandGenerator CommandFactory::relay3()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b = 0;
 
         switch (devRef.getChannel1().getVerticalDiv())
@@ -475,16 +491,17 @@ CommandGenerator CommandFactory::relay3(CommandResponseHandler handler)
         }
 
         Command *cmd = new Command(CMDCODE_SET_RELAY, b);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("relay3");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::relay4(CommandResponseHandler handler)
+CommandGenerator CommandFactory::relay4()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b = 0;
 
         switch (devRef.getChannel1().getVerticalDiv())
@@ -505,16 +522,17 @@ CommandGenerator CommandFactory::relay4(CommandResponseHandler handler)
         }
 
         Command *cmd = new Command(CMDCODE_SET_RELAY, b);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("relay4");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::channel1Coupling(CommandResponseHandler handler)
+CommandGenerator CommandFactory::channel1Coupling()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b1 = 0, b2 = 0;
         if (devRef.getChannel1().getCoupling() == COUPLING_GND)
         {
@@ -530,16 +548,17 @@ CommandGenerator CommandFactory::channel1Coupling(CommandResponseHandler handler
             b1 = 0x10;
         }
         Command *cmd = new Command(CMDCODE_SET_RELAY, b1, b2);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("channel1Coupling");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::channel2Coupling(CommandResponseHandler handler)
+CommandGenerator CommandFactory::channel2Coupling()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b1 = 0, b2 = 0;
         if (devRef.getChannel2().getCoupling() == COUPLING_GND)
         {
@@ -555,16 +574,17 @@ CommandGenerator CommandFactory::channel2Coupling(CommandResponseHandler handler
             b1 = 0x01;
         }
         Command *cmd = new Command(CMDCODE_SET_RELAY, b1, b2);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("channel2Coupling");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::updateTriggerMode(CommandResponseHandler handler)
+CommandGenerator CommandFactory::updateTriggerMode()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b = 0;
         if (devRef.getCaptureMode() == CAPMODE_ROLL)
             b = (1 << 0);
@@ -577,16 +597,17 @@ CommandGenerator CommandFactory::updateTriggerMode(CommandResponseHandler handle
         if (devRef.getScopeMode() == SCOMODE_DIGITAL)
             b |= (1 << 4);
         Command *cmd = new Command(CMDCODE_TRIGGER_MODE, b);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("updateTriggerMode");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::readRamCount(CommandResponseHandler handler)
+CommandGenerator CommandFactory::readRamCount()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint16_t b = 0;
         if (devRef.getChannel1().isEnabled() && devRef.getChannel2().isEnabled())
         {
@@ -603,36 +624,35 @@ CommandGenerator CommandFactory::readRamCount(CommandResponseHandler handler)
             }
         }
         Command *cmd = new Command(CMDCODE_READ_RAM_COUNT, (uint8_t)(b & 0xff), (uint8_t)((b >> 8) & 0xf + ((devRef.getPacketsNumber() - 1) << 4)));
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("readRamCount");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::channel1Level(CommandResponseHandler handler)
+CommandGenerator CommandFactory::channel1Level()
 {
     int verticalDiv = (int)device.getChannel1().getVerticalDiv();
-    return channel1PWM(handler,
-                       (uint16_t)mapValue(
-                           device.getChannel1().getVerticalPosition(),
-                           8.0f, 248.0f,
-                           (float)device.getChannel1().getPWM(verticalDiv, 0), (float)device.getChannel1().getPWM(verticalDiv, 1)));
+    return channel1PWM((uint16_t)mapValue(
+        device.getChannel1().getVerticalPosition(),
+        8.0f, 248.0f,
+        (float)device.getChannel1().getPWM(verticalDiv, 0), (float)device.getChannel1().getPWM(verticalDiv, 1)));
 }
 
-CommandGenerator CommandFactory::channel2Level(CommandResponseHandler handler)
+CommandGenerator CommandFactory::channel2Level()
 {
     int verticalDiv = (int)device.getChannel2().getVerticalDiv();
-    return channel2PWM(handler,
-                       (uint16_t)mapValue(
-                           device.getChannel2().getVerticalPosition(),
-                           8.0f, 248.0f,
-                           (float)device.getChannel2().getPWM(verticalDiv, 0), (float)device.getChannel2().getPWM(verticalDiv, 1)));
+    return channel2PWM((uint16_t)mapValue(
+        device.getChannel2().getVerticalPosition(),
+        8.0f, 248.0f,
+        (float)device.getChannel2().getPWM(verticalDiv, 0), (float)device.getChannel2().getPWM(verticalDiv, 1)));
 }
 
-CommandGenerator CommandFactory::updateTriggerSourceAndSlope(CommandResponseHandler handler)
+CommandGenerator CommandFactory::updateTriggerSourceAndSlope()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b =
             devRef.getTrigger().getChannel() == TRIGCHAN_CH1 ? 0x01 : devRef.getTrigger().getChannel() == TRIGCHAN_CH2 ? 0x00 : devRef.getTrigger().getChannel() == TRIGCHAN_EXT ? 0x02 : 0x03;
 
@@ -647,23 +667,24 @@ CommandGenerator CommandFactory::updateTriggerSourceAndSlope(CommandResponseHand
             b &= ~0x80;
 
         Command *cmd = new Command(CMDCODE_TRIGGER_SOURCE, b);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("updateTriggerSourceAndSlope");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::updateTriggerLevel(CommandResponseHandler handler)
+CommandGenerator CommandFactory::updateTriggerLevel()
 {
     // uint16_t pwm = mapValue(device.getTrigger().level, 8.0f, 248.0f, (float)device.getTrigger().getBottomPWM(), (float)device.getTrigger().getTopPWM());
     uint16_t pwm = 2741;
-    return updateTriggerPWM(handler, pwm);
+    return updateTriggerPWM(pwm);
 }
 
-CommandGenerator CommandFactory::selectChannel(CommandResponseHandler handler)
+CommandGenerator CommandFactory::selectChannel()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint8_t b = 0;
         if (devRef.getChannel1().isEnabled() && !devRef.getChannel2().isEnabled() && devRef.isSampleRate200Mor250M())
         {
@@ -682,88 +703,94 @@ CommandGenerator CommandFactory::selectChannel(CommandResponseHandler handler)
             b = 0x03;
         }
         Command *cmd = new Command(CMDCODE_CHANNEL_SELECTION, b);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("selectChannel");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::preTrigger(CommandResponseHandler handler)
+CommandGenerator CommandFactory::preTrigger()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint16_t i = ((uint16_t)(((double)devRef.getSamplesNumberOfOneFrame()) * devRef.getTrigger().getXPosition())) + 5;
         Command *cmd = new Command(CMDCODE_PRE_TRIGGER_LENGTH,
                                    (uint8_t)(i & 0xff),
                                    (uint8_t)((i >> 8) & 0xff));
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("preTrigger");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::postTrigger(CommandResponseHandler handler)
+CommandGenerator CommandFactory::postTrigger()
 {
     IDSO1070A &devRef = device;
-    return [handler, &devRef]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &devRef]() {
         uint16_t i = ((uint16_t)(((double)devRef.getSamplesNumberOfOneFrame()) * (1 - devRef.getTrigger().getXPosition())));
         Command *cmd = new Command(CMDCODE_POST_TRIGGER_LENGTH,
                                    (uint8_t)(i & 0xff),
                                    (uint8_t)((i >> 8) & 0xff));
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("postTrigger");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::startSampling(CommandResponseHandler handler)
+CommandGenerator CommandFactory::startSampling()
 {
-    return [handler]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef]() {
         uint8_t cmdPayload[4] = {0xaa, 0x04, 0x00, 0x00};
         Command *cmd = new Command(cmdPayload);
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("startSampling");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::updateTriggerPWM(CommandResponseHandler handler, uint16_t pwm)
+CommandGenerator CommandFactory::updateTriggerPWM(uint16_t pwm)
 {
-    return [handler, pwm]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, pwm]() {
         if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
             return (Command *)NULL;
         Command *cmd = new Command(CMDCODE_TRIGGER_PWM,
                                    (uint8_t)(pwm & 0xff),
                                    (uint8_t)((pwm >> 8) & 0x0f));
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("updateTriggerPWM");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::channel1PWM(CommandResponseHandler handler, uint16_t pwm)
+CommandGenerator CommandFactory::channel1PWM(uint16_t pwm)
 {
-    return [handler, pwm]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, pwm]() {
         if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
             return (Command *)NULL;
         Command *cmd = new Command(CMDCODE_CH1_PWM,
                                    (uint8_t)(pwm & 0xff),
                                    (uint8_t)((pwm >> 8) & 0x0f));
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("channel1PWM");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::channel2PWM(CommandResponseHandler handler, uint16_t pwm)
+CommandGenerator CommandFactory::channel2PWM(uint16_t pwm)
 {
-    return [handler, pwm]() {
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, pwm]() {
         if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
             return (Command *)NULL;
         Command *cmd = new Command(CMDCODE_CH2_PWM,
                                    (uint8_t)(pwm & 0xff),
                                    (uint8_t)((pwm >> 8) & 0x0f));
-        cmd->setHandler(handler);
+        cmd->setHandler(handlerRef);
         cmd->setName("channel2PWM");
         return cmd;
     };

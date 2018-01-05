@@ -17,52 +17,54 @@ class CommandFactory
 private:
   IDSO1070A &device;
   std::deque<CommandGenerator> buffer;
-  CommandResponseHandler nullHandler = [](uint8_t *, uint8_t *, bool success) { return success; };
+  Command::ResponseHandler handler;
 
 public:
   CommandFactory(IDSO1070A &device);
 
-  std::deque<CommandGenerator> &init(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &channelStatusOnly(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &channelStatus(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &channel1VoltageDiv(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &channel2VoltageDiv(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &levels(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &pullSamples(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &readEEROMandFPGA(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &updateTimeBase(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &trigger(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &triggerSource(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &voltageDiv(CommandResponseHandler handler, bool internal = false);
-  std::deque<CommandGenerator> &updateXTriggerPos(CommandResponseHandler handler, bool internal = false);
+  void setHandler(Command::ResponseHandler handler);
 
-  CommandGenerator selectChannel(CommandResponseHandler handler);
-  CommandGenerator selectRAMChannel(CommandResponseHandler handler);
-  CommandGenerator readFPGAVersion(CommandResponseHandler handler);
-  CommandGenerator readBatteryLevel(CommandResponseHandler handler);
-  CommandGenerator readRamCount(CommandResponseHandler handler);
-  CommandGenerator getFreqDivLowBytes(CommandResponseHandler handler);
-  CommandGenerator getFreqDivHighBytes(CommandResponseHandler handler);
-  CommandGenerator updateSampleRate(CommandResponseHandler handler);
-  CommandGenerator updateTriggerSourceAndSlope(CommandResponseHandler handler);
-  CommandGenerator updateTriggerLevel(CommandResponseHandler handler);
-  CommandGenerator updateChannelVolts125(CommandResponseHandler handler);
-  CommandGenerator updateTriggerMode(CommandResponseHandler handler);
-  CommandGenerator relay1(CommandResponseHandler handler);
-  CommandGenerator relay2(CommandResponseHandler handler);
-  CommandGenerator relay3(CommandResponseHandler handler);
-  CommandGenerator relay4(CommandResponseHandler handler);
-  CommandGenerator channel1Level(CommandResponseHandler handler);
-  CommandGenerator channel2Level(CommandResponseHandler handler);
-  CommandGenerator channel1Coupling(CommandResponseHandler handler);
-  CommandGenerator channel2Coupling(CommandResponseHandler handler);
-  CommandGenerator preTrigger(CommandResponseHandler handler);
-  CommandGenerator postTrigger(CommandResponseHandler handler);
-  CommandGenerator startSampling(CommandResponseHandler handler);
-  CommandGenerator readEEROMPage(CommandResponseHandler handler, uint8_t address);
-  CommandGenerator updateTriggerPWM(CommandResponseHandler handler, uint16_t pwm);
-  CommandGenerator channel1PWM(CommandResponseHandler handler, uint16_t pwm);
-  CommandGenerator channel2PWM(CommandResponseHandler handler, uint16_t pwm);
+  std::deque<CommandGenerator> &init(bool internal = false);
+  std::deque<CommandGenerator> &channelStatusOnly(bool internal = false);
+  std::deque<CommandGenerator> &channelStatus(bool internal = false);
+  std::deque<CommandGenerator> &channel1VoltageDiv(bool internal = false);
+  std::deque<CommandGenerator> &channel2VoltageDiv(bool internal = false);
+  std::deque<CommandGenerator> &levels(bool internal = false);
+  std::deque<CommandGenerator> &pullSamples(bool internal = false);
+  std::deque<CommandGenerator> &readEEROMandFPGA(bool internal = false);
+  std::deque<CommandGenerator> &updateTimeBase(bool internal = false);
+  std::deque<CommandGenerator> &trigger(bool internal = false);
+  std::deque<CommandGenerator> &triggerSource(bool internal = false);
+  std::deque<CommandGenerator> &voltageDiv(bool internal = false);
+  std::deque<CommandGenerator> &updateXTriggerPos(bool internal = false);
+
+  CommandGenerator selectChannel();
+  CommandGenerator selectRAMChannel();
+  CommandGenerator readFPGAVersion();
+  CommandGenerator readBatteryLevel();
+  CommandGenerator readRamCount();
+  CommandGenerator getFreqDivLowBytes();
+  CommandGenerator getFreqDivHighBytes();
+  CommandGenerator updateSampleRate();
+  CommandGenerator updateTriggerSourceAndSlope();
+  CommandGenerator updateTriggerLevel();
+  CommandGenerator updateChannelVolts125();
+  CommandGenerator updateTriggerMode();
+  CommandGenerator relay1();
+  CommandGenerator relay2();
+  CommandGenerator relay3();
+  CommandGenerator relay4();
+  CommandGenerator channel1Level();
+  CommandGenerator channel2Level();
+  CommandGenerator channel1Coupling();
+  CommandGenerator channel2Coupling();
+  CommandGenerator preTrigger();
+  CommandGenerator postTrigger();
+  CommandGenerator startSampling();
+  CommandGenerator readEEROMPage(uint8_t address);
+  CommandGenerator updateTriggerPWM(uint16_t pwm);
+  CommandGenerator channel1PWM(uint16_t pwm);
+  CommandGenerator channel2PWM(uint16_t pwm);
 };
 
 #endif // _COMMANDS_GENERATOR_H_
