@@ -21,7 +21,7 @@
 #include "packets/Response.h"
 #include "packets/ResponseParser.h"
 #include "packets/Command.h"
-#include "packets/CommandGenerator.h"
+#include "packets/CommandFactory.h"
 
 #define COMMAND_MAX_RETRIES 3
 
@@ -39,7 +39,7 @@ private:
 
   Connector &connection;
 
-  // CommandGenerator cmdGen;
+  // CommandFactory cmdGen;
 
   ResponseParser parser;
 
@@ -47,7 +47,7 @@ private:
 
   int retries = 0;
   size_t expectedResponseCount = 0;
-  std::deque<CommandGenerationFunction> commandQueue;
+  std::deque<CommandGenerator> commandQueue;
   Timeout commandTimeout;
 
   Command *currentCommand = NULL;
@@ -65,8 +65,8 @@ public:
 
   IDSO1070A &getDevice();
 
-  void sendCommand(CommandGenerationFunction cmdFn);
-  void sendCommands(std::deque<CommandGenerationFunction> cmdFns);
+  void sendCommand(CommandGenerator cmdFn);
+  void sendCommands(std::deque<CommandGenerator> cmdFns);
 
   void receive();
   void transmit();

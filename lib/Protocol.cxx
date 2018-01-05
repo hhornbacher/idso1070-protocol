@@ -28,12 +28,12 @@ IDSO1070A &Protocol::getDevice()
     return device;
 }
 
-void Protocol::sendCommand(CommandGenerationFunction cmdFn)
+void Protocol::sendCommand(CommandGenerator cmdFn)
 {
     commandQueue.push_back(cmdFn);
 }
 
-void Protocol::sendCommands(std::deque<CommandGenerationFunction> cmdFns)
+void Protocol::sendCommands(std::deque<CommandGenerator> cmdFns)
 {
     for (auto cmdFn : cmdFns)
         commandQueue.push_back(cmdFn);
@@ -54,7 +54,7 @@ void Protocol::receive()
             retries++;
         else
         {
-            currentCommand->callCommandHandler(lastResponse->getPayload(), success);
+            currentCommand->callHandler(lastResponse->getPayload(), success);
             // Remove current command generator function
             commandQueue.pop_front();
             retries = 0;
@@ -74,7 +74,7 @@ void Protocol::transmit()
 {
     if (commandTimeout.isTimedOut())
     {
-        CommandGenerationFunction generateCommand = *(commandQueue.begin());
+        CommandGenerator generateCommand = *(commandQueue.begin());
         currentCommand = generateCommand();
 
         // Transmit current command
