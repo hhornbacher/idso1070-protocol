@@ -7,7 +7,7 @@
 
 void sigHandler(int sig);
 
-#define CONNECTION usbConnection
+#define CONNECTION wifiConnection
 
 class Main
 {
@@ -39,13 +39,6 @@ class Main
         runProgram = false;
     }
 
-    bool onFinish(Command *cmd, Response *resp, int retries)
-    {
-        protocol.getDevice().print();
-
-        return true;
-    }
-
     bool onResponse(Command *cmd, Response *resp, int retries)
     {
         cmd->print();
@@ -57,60 +50,35 @@ class Main
     int run()
     {
         protocol.start();
-        protocol.getDevice().print();
         cmdGen.setHandler(Command::bindHandler(&Main::onResponse, this));
-        protocol.sendCommand(cmdGen.selectRAMChannel());
 
+        protocol.sendCommand(cmdGen.selectRAMChannel());
         protocol.sendCommand(cmdGen.readARMVersion());
         protocol.sendCommand(cmdGen.readFPGAVersion());
-
         protocol.sendCommands(cmdGen.readEEROMPages());
         protocol.sendCommand(cmdGen.updateSampleRate());
         protocol.sendCommand(cmdGen.getFreqDivLowBytes());
         protocol.sendCommand(cmdGen.getFreqDivHighBytes());
         protocol.sendCommand(cmdGen.selectChannel());
         protocol.sendCommand(cmdGen.updateTriggerSourceAndSlope());
-
         protocol.sendCommand(cmdGen.updateTriggerLevel());
-
         protocol.sendCommand(cmdGen.preTrigger());
         protocol.sendCommand(cmdGen.postTrigger());
         protocol.sendCommand(cmdGen.readRamCount());
-        // LOGIC ANALYZERS
         protocol.sendCommand(cmdGen.selectRAMChannel());
+        protocol.sendCommand(cmdGen.updateChannelVolts125());
         protocol.sendCommand(cmdGen.relay1());
         protocol.sendCommand(cmdGen.relay2());
-        protocol.sendCommand(cmdGen.updateChannelVolts125());
-        protocol.sendCommand(cmdGen.channel1Level());
-        protocol.sendCommand(cmdGen.updateChannelVolts125());
         protocol.sendCommand(cmdGen.relay3());
         protocol.sendCommand(cmdGen.relay4());
-        protocol.sendCommand(cmdGen.updateChannelVolts125());
+        protocol.sendCommand(cmdGen.channel1Level());
         protocol.sendCommand(cmdGen.channel2Level());
-        // SET RELAY ?
         protocol.sendCommand(cmdGen.updateChannelVolts125());
-        cmdGen.setHandler(Command::bindHandler(&Main::onFinish, this));
         protocol.sendCommand(cmdGen.updateTriggerMode());
-
-        cmdGen.setHandler(Command::bindHandler(&Main::onResponse, this));
+        protocol.sendCommand(cmdGen.updateTriggerLevel());
+        protocol.sendCommand(cmdGen.channel1Coupling());
+        protocol.sendCommand(cmdGen.channel2Coupling());
         protocol.sendCommand(cmdGen.startSampling());
-
-        //--------------------------------------------------
-
-        // protocol.sendCommand(cmdGen.updateChannelVolts125());
-        // protocol.sendCommand(cmdGen.relay1());
-        // protocol.sendCommand(cmdGen.relay2());
-        // protocol.sendCommand(cmdGen.relay3());
-        // protocol.sendCommand(cmdGen.relay4());
-        // protocol.sendCommand(cmdGen.channel1Level());
-        // protocol.sendCommand(cmdGen.channel2Level());
-        // protocol.sendCommand(cmdGen.readRamCount());
-        // protocol.sendCommand(cmdGen.updateTriggerMode());
-        // protocol.sendCommand(cmdGen.updateTriggerLevel());
-        // protocol.sendCommand(cmdGen.channel2Level());
-        // protocol.sendCommand(cmdGen.channel1Coupling());
-        // protocol.sendCommand(cmdGen.channel2Coupling());
-        // protocol.sendCommand(cmdGen.updateTriggerMode());
 
         while (runProgram)
         {
