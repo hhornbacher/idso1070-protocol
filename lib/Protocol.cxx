@@ -33,7 +33,7 @@ void Protocol::sendCommand(CommandGenerator cmdFn)
     commandQueue.push_back(cmdFn);
 }
 
-void Protocol::sendCommands(std::deque<CommandGenerator> cmdFns)
+void Protocol::sendCommands(CommandGeneratorVector cmdFns)
 {
     for (auto cmdFn : cmdFns)
         commandQueue.push_back(cmdFn);
@@ -44,28 +44,55 @@ void Protocol::receive()
     connection.receive();
     if (connection.getPacketBufferLength() == IDSO1070A_PACKET_SIZE)
     {
-        lastResponse = new Response(connection.getPacketBuffer());
 
-        // Parse received packet
-        bool success = currentCommand->callHandler(lastResponse, retries);
-
-        // Call handler of current command
-        if (!success && retries < COMMAND_MAX_RETRIES)
-            retries++;
+        if (ignoreNextResponse)
+        {
+            ignoreNextResponse = false;
+        }
         else
         {
-            // Remove current command generator function
-            commandQueue.pop_front();
-            retries = 0;
+
+            currentResponse = new Response(connection.getPacketBuffer());
+
+            // Check if we have a sample data packet
+            if (currentResponse->getType() == 0xaa &&
+                currentResponse->getCommandID() == 0x04)
+            {
+                printf("Got sample data!\n");
+                if (currentCommand &&
+                    currentCommand->getPayload()[0] == 0xaa &&
+                    currentCommand->getPayload()[1] == 0x04)
+                {
+                    commandQueue.pop_front();
+                    delete currentCommand;
+                }
+            }
+            else
+            {
+                // Parse received packet
+                bool success = currentCommand->getPayload()[0] == currentResponse->getType() &&
+                               currentCommand->getPayload()[1] == currentResponse->getCommandID() &&
+                               currentCommand->callHandler(currentResponse, retries);
+
+                // If command was readEEROM and it's a wifi connection, then we get two responses per command
+                if (currentCommand->getPayload()[0] == TYPE_EE && !connection.isUsbConnection())
+                    ignoreNextResponse = true;
+
+                // Call handler of current command
+                if (!success && retries < COMMAND_MAX_RETRIES)
+                    retries++;
+                else
+                {
+                    // Remove current command generator
+                    commandQueue.pop_front();
+                    retries = 0;
+                }
+
+                // Remove current command
+                delete currentCommand;
+            }
         }
-
-        // Remove current command
-        delete currentCommand;
-
-        expectedResponseCount--;
         connection.clearPacketBuffer();
-        if (expectedResponseCount == 0)
-            changeState(STATE_IDLE);
     }
 }
 
@@ -79,44 +106,14 @@ void Protocol::transmit()
         // Transmit current command
         connection.transmit(currentCommand->getPayload(), 4);
 
-        // If command was readEEROM and it's a wifi connection, then we get two responses per command
-        if (currentCommand->getPayload()[0] == TYPE_EE && !connection.isUsbConnection())
-            expectedResponseCount = 2;
-        expectedResponseCount = 1;
-
-        changeState(STATE_RESPONSE);
         commandTimeout.reset();
     }
 }
 
-void Protocol::changeState(States state)
-{
-    this->state = state;
-}
-
 void Protocol::process()
 {
-    switch (state)
-    {
-    case STATE_IDLE:
-        if (commandQueue.size() > 0)
-        {
-            changeState(STATE_REQUEST);
-        }
-        break;
-    case STATE_REQUEST:
-        transmit();
-        break;
-    case STATE_RESPONSE:
-        receive();
-        break;
-    }
-    // if (readBatteryTimeout.isTimedOut())
-    // {
-    //     printf("Send read battery!\n");
-    //     sendCommands(cmdGen.readBatteryLevel());
-    //     readBatteryTimeout.reset();
-    // }
+    transmit();
+    receive();
 }
 
 void Protocol::print()

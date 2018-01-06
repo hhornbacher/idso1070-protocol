@@ -11,12 +11,14 @@
 #include "Command.h"
 
 typedef std::function<Command *()> CommandGenerator;
+typedef std::deque<CommandGenerator> CommandGeneratorVector;
 
 class CommandFactory
 {
+public:
 private:
   IDSO1070A &device;
-  std::deque<CommandGenerator> buffer;
+  CommandGeneratorVector buffer;
   Command::ResponseHandler handler;
 
 public:
@@ -24,19 +26,19 @@ public:
 
   void setHandler(Command::ResponseHandler handler);
 
-  std::deque<CommandGenerator> &init(bool internal = false);
-  std::deque<CommandGenerator> &channelStatusOnly(bool internal = false);
-  std::deque<CommandGenerator> &channelStatus(bool internal = false);
-  std::deque<CommandGenerator> &channel1VoltageDiv(bool internal = false);
-  std::deque<CommandGenerator> &channel2VoltageDiv(bool internal = false);
-  std::deque<CommandGenerator> &levels(bool internal = false);
-  std::deque<CommandGenerator> &pullSamples(bool internal = false);
-  std::deque<CommandGenerator> &readEEROMandFPGA(bool internal = false);
-  std::deque<CommandGenerator> &updateTimeBase(bool internal = false);
-  std::deque<CommandGenerator> &trigger(bool internal = false);
-  std::deque<CommandGenerator> &triggerSource(bool internal = false);
-  std::deque<CommandGenerator> &voltageDiv(bool internal = false);
-  std::deque<CommandGenerator> &updateXTriggerPos(bool internal = false);
+  CommandGeneratorVector &init(bool internal = false);
+  CommandGeneratorVector &channelStatusOnly(bool internal = false);
+  CommandGeneratorVector &channelStatus(bool internal = false);
+  CommandGeneratorVector &channel1VoltageDiv(bool internal = false);
+  CommandGeneratorVector &channel2VoltageDiv(bool internal = false);
+  CommandGeneratorVector &levels(bool internal = false);
+  CommandGeneratorVector &pullSamples(bool internal = false);
+  CommandGeneratorVector &readEEROMandFPGA(bool internal = false);
+  CommandGeneratorVector &updateTimeBase(bool internal = false);
+  CommandGeneratorVector &trigger(bool internal = false);
+  CommandGeneratorVector &triggerSource(bool internal = false);
+  CommandGeneratorVector &voltageDiv(bool internal = false);
+  CommandGeneratorVector &updateXTriggerPos(bool internal = false);
 
   CommandGenerator selectChannel();
   CommandGenerator selectRAMChannel();

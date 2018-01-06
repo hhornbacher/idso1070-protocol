@@ -9,7 +9,7 @@ void CommandFactory::setHandler(Command::Command::ResponseHandler handler)
     this->handler = handler;
 }
 
-std::deque<CommandGenerator> &CommandFactory::init(bool internal)
+CommandGeneratorVector &CommandFactory::init(bool internal)
 {
     if (!internal)
         buffer.clear();
@@ -30,7 +30,7 @@ std::deque<CommandGenerator> &CommandFactory::init(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::channelStatusOnly(bool internal)
+CommandGeneratorVector &CommandFactory::channelStatusOnly(bool internal)
 {
     if (!internal)
         buffer.clear();
@@ -40,7 +40,7 @@ std::deque<CommandGenerator> &CommandFactory::channelStatusOnly(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::channelStatus(bool internal)
+CommandGeneratorVector &CommandFactory::channelStatus(bool internal)
 {
     if (!internal)
         buffer.clear();
@@ -51,7 +51,7 @@ std::deque<CommandGenerator> &CommandFactory::channelStatus(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::channel1VoltageDiv(bool internal)
+CommandGeneratorVector &CommandFactory::channel1VoltageDiv(bool internal)
 {
     if (!internal)
         buffer.clear();
@@ -61,7 +61,7 @@ std::deque<CommandGenerator> &CommandFactory::channel1VoltageDiv(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::channel2VoltageDiv(bool internal)
+CommandGeneratorVector &CommandFactory::channel2VoltageDiv(bool internal)
 {
     if (!internal)
         buffer.clear();
@@ -71,7 +71,7 @@ std::deque<CommandGenerator> &CommandFactory::channel2VoltageDiv(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::levels(bool internal)
+CommandGeneratorVector &CommandFactory::levels(bool internal)
 {
     if (!internal)
         buffer.clear();
@@ -81,7 +81,7 @@ std::deque<CommandGenerator> &CommandFactory::levels(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::pullSamples(bool internal)
+CommandGeneratorVector &CommandFactory::pullSamples(bool internal)
 {
     if (!internal)
         buffer.clear();
@@ -90,10 +90,10 @@ std::deque<CommandGenerator> &CommandFactory::pullSamples(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::readEEROMandFPGA(bool internal)
+CommandGeneratorVector &CommandFactory::readEEROMandFPGA(bool internal)
 {
     buffer.clear();
-    buffer.push_back(readFPGAVersion());
+    // buffer.push_back(readFPGAVersion());
     buffer.push_back(readEEROMPage(0x00));
     buffer.push_back(readEEROMPage(0x04));
     buffer.push_back(readEEROMPage(0x07));
@@ -105,7 +105,7 @@ std::deque<CommandGenerator> &CommandFactory::readEEROMandFPGA(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::updateTimeBase(bool internal)
+CommandGeneratorVector &CommandFactory::updateTimeBase(bool internal)
 {
     if (!internal)
         buffer.clear();
@@ -118,7 +118,7 @@ std::deque<CommandGenerator> &CommandFactory::updateTimeBase(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::trigger(bool internal)
+CommandGeneratorVector &CommandFactory::trigger(bool internal)
 {
     if (!internal)
         buffer.clear();
@@ -128,7 +128,7 @@ std::deque<CommandGenerator> &CommandFactory::trigger(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::triggerSource(bool internal)
+CommandGeneratorVector &CommandFactory::triggerSource(bool internal)
 {
     buffer.clear();
     buffer.push_back(updateTriggerSourceAndSlope());
@@ -136,7 +136,7 @@ std::deque<CommandGenerator> &CommandFactory::triggerSource(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::voltageDiv(bool internal)
+CommandGeneratorVector &CommandFactory::voltageDiv(bool internal)
 {
     if (!internal)
         buffer.clear();
@@ -150,7 +150,7 @@ std::deque<CommandGenerator> &CommandFactory::voltageDiv(bool internal)
     return buffer;
 }
 
-std::deque<CommandGenerator> &CommandFactory::updateXTriggerPos(bool internal)
+CommandGeneratorVector &CommandFactory::updateXTriggerPos(bool internal)
 {
     if (!internal)
         buffer.clear();

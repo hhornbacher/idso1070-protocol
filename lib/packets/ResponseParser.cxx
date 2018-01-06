@@ -17,31 +17,24 @@ bool ResponseParser::parse(Response *packet)
     case TYPE_STATE:
         return parseStateResponse(packet);
     default:
-        printf("Unknown response type: 0x%02x\n", (uint8_t)packet->getType());
-        packet->print();
         return false;
     }
 }
 
 bool ResponseParser::parseAAResponse(Response *packet)
 {
-    switch (packet->getHeader()[4])
+    switch (packet->getCommandID())
     {
     case 0x04:
         return parseSampleData(packet);
-    case 0x02:
-        printf("readFPGAVersion\n");
-        return true;
     default:
-        printf("Unknown AA response: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
-        packet->print();
         return false;
     }
 }
 
 bool ResponseParser::parseEEResponse(Response *packet)
 {
-    if (packet->getHeader()[4] == 0xaa)
+    if (packet->getCommandID() == 0xaa)
     {
         switch (packet->getHeader()[5])
         {
@@ -72,19 +65,8 @@ bool ResponseParser::parseEEResponse(Response *packet)
         case 0x0c:
             memcpy(&device.getEEROMData().diffFixData[1][200], packet->getPayload(), 56);
             // readFPGAVersionAndEEROMHasDone();
-
-            // TEST
-            // sendCommands(cmdGen.initialize(device));
-            // sendCommands(cmdGen.updateTimeBase(device));
-            // sendCommands(cmdGen.channelStatus(device));
-            // sendCommands(cmdGen.updateTriggerSource(device));
-            // sendCommands(cmdGen.readBatteryLevel(device));
-            // sendCommands(cmdGen.levels(device));
-
             return true;
         default:
-            printf("Unknown EEROM page: 0x%02x\n", (uint8_t)packet->getHeader()[5]);
-            packet->print();
             return false;
         }
     }
@@ -92,68 +74,45 @@ bool ResponseParser::parseEEResponse(Response *packet)
 
 bool ResponseParser::parseFPGAResponse(Response *packet)
 {
-    switch (packet->getHeader()[4])
+    switch (packet->getCommandID())
     {
     case 0x02:
         return parseStartCapture(packet);
     case 0x03:
         return parseRelay(packet);
-    case 0x04:
-        // Select Channel  response
-        return true;
     case 0x05:
         return parseTriggerSourceAndSlope(packet);
     case 0x06:
         return parseVoltsDiv125(packet);
-    case 0x07:
-        // pre trigger response
-        return true;
-    case 0x08:
-        // post trigger response
-        return true;
-    // case 0x0a:
-    //     // parseTriggerLevel response ??
-    //     requestSuccess = true;
-    //     return;
     case 0x0b:
         return parseCh1ZeroLevel(packet);
     case 0x0c:
         return parseCh2ZeroLevel(packet);
     case 0x0d:
         return parseTriggerLevel(packet);
-    case 0x11:
-        // sample rate response
-        return true;
     case 0x12:
         return parseFreqDivLowBytes(packet);
     case 0x13:
         return parseFreqDivHighBytes(packet);
     case 0x15:
         return parseRamChannelSelection(packet);
-    case 0x16:
-        // RAM COUNT response
-        return true;
     default:
-        printf("Unknown FPGA response type: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
-        packet->print();
         return false;
     }
 }
 
 bool ResponseParser::parseStateResponse(Response *packet)
 {
-    switch (packet->getHeader()[4])
+    switch (packet->getCommandID())
     {
     case 0x03:
         device.setBatteryLevel(packet->getPayload()[0]);
         return true;
-    case 0x04:
-        // memcpy(device.date, packet->getPayload(), 8);
-        // device.date[8] = 0;
-        return true;
+    // case 0x04:
+    //     // memcpy(device.date, packet->getPayload(), 8);
+    //     // device.date[8] = 0;
+    //     return true;
     default:
-        printf("Unknown state response type: 0x%02x\n", (uint8_t)packet->getHeader()[4]);
-        packet->print();
         return false;
     }
 }
@@ -281,18 +240,18 @@ bool ResponseParser::parseRelay(Response *packet)
 
 bool ResponseParser::parseCh1ZeroLevel(Response *packet)
 {
-    // int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
-    // int ordinal = (int)device.getChannel1().getVerticalDiv();
-    // i = (int)roundf(cmdGen.mapValue(i, (float)device.getChannel1().getPWM(ordinal, 0), (float)device.getChannel1().getPWM(ordinal, 1), 8.0f, 248.0f));
-    // device.getChannel1().setVerticalPosition(i);
+    int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
+    int ordinal = (int)device.getChannel1().getVerticalDiv();
+    i = (int)roundf(mapValue(i, (float)device.getChannel1().getPWM(ordinal, 0), (float)device.getChannel1().getPWM(ordinal, 1), 8.0f, 248.0f));
+    device.getChannel1().setVerticalPosition(i);
 }
 
 bool ResponseParser::parseCh2ZeroLevel(Response *packet)
 {
-    // int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
-    // int ordinal = (int)device.getChannel2().getVerticalDiv();
-    // i = (int)roundf(cmdGen.mapValue(i, (float)device.getChannel2().getPWM(ordinal, 0), (float)device.getChannel2().getPWM(ordinal, 1), 8.0f, 248.0f));
-    // device.getChannel2().setVerticalPosition(i);
+    int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
+    int ordinal = (int)device.getChannel2().getVerticalDiv();
+    i = (int)roundf(mapValue(i, (float)device.getChannel2().getPWM(ordinal, 0), (float)device.getChannel2().getPWM(ordinal, 1), 8.0f, 248.0f));
+    device.getChannel2().setVerticalPosition(i);
 }
 
 bool ResponseParser::parseVoltsDiv125(Response *packet)
@@ -327,9 +286,9 @@ bool ResponseParser::parseVoltsDiv125(Response *packet)
 
 bool ResponseParser::parseTriggerLevel(Response *packet)
 {
-    // uint16_t i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
-    // i = (uint16_t)roundf(cmdGen.mapValue(i, (float)device.getTrigger().getBottomPWM(), (float)device.getTrigger().getTopPWM(), 8.0f, 248.0f));
-    // device.getTrigger().setTriggerLevel(i);
+    uint16_t i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
+    i = (uint16_t)roundf(mapValue(i, (float)device.getTrigger().getBottomPWM(), (float)device.getTrigger().getTopPWM(), 8.0f, 248.0f));
+    device.getTrigger().setTriggerLevel(i);
 }
 
 bool ResponseParser::parseTriggerSourceAndSlope(Response *packet)
@@ -502,4 +461,5 @@ bool ResponseParser::parseEEROMPage00(Response *packet)
     {
         device.getTrigger().setInnerTriggerPWM(3, device.getTrigger().getInnerTriggerPWM(1));
     }
+    return true;
 }

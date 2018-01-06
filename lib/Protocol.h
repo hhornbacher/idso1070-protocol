@@ -4,10 +4,10 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-#include <cmath>
 #include <unistd.h>
 
 #include <deque>
+#include <functional>
 
 #include "util/hexdump.h"
 #include "util/Timeout.h"
@@ -27,33 +27,24 @@
 
 class Protocol
 {
-private:
-  enum States
-  {
-    STATE_IDLE,
-    STATE_REQUEST,
-    STATE_RESPONSE
-  } state = STATE_IDLE;
+public:
+  typedef std::function<void(Response &)> SampleDataHandler;
 
+private:
   IDSO1070A device;
 
   Connector &connection;
 
-  // CommandFactory cmdGen;
-
-  // ResponseParser parser;
-
   bool sampling = false;
+  SampleDataHandler sampleDataHandler;
 
-  int retries = 0;
-  size_t expectedResponseCount = 0;
   std::deque<CommandGenerator> commandQueue;
+  int retries = 0;
+  bool ignoreNextResponse = false;
   Timeout commandTimeout;
 
   Command *currentCommand = NULL;
-  Response *lastResponse = NULL;
-
-  void changeState(States state);
+  Response *currentResponse = NULL;
 
 public:
   Protocol(Connector &connection);
@@ -66,7 +57,7 @@ public:
   IDSO1070A &getDevice();
 
   void sendCommand(CommandGenerator cmdFn);
-  void sendCommands(std::deque<CommandGenerator> cmdFns);
+  void sendCommands(CommandGeneratorVector cmdFns);
 
   void receive();
   void transmit();

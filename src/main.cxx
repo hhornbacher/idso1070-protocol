@@ -21,11 +21,15 @@ class Main
 
     TCPConnector wifiConnection;
     USBConnector usbConnection;
-    Protocol protocol;
-    CommandGenerator cmdGen;
+    CommandFactory cmdGen;
+    ResponseParser parser;
 
   public:
-    Main() : wifiConnection((char *)serverIP, serverPort), usbConnection((char *)device), protocol(CONNECTION), cmdGen(protocol.getDevice())
+    Protocol protocol;
+    Main() : wifiConnection((char *)serverIP, serverPort),
+             usbConnection((char *)device),
+             protocol(CONNECTION), cmdGen(protocol.getDevice()),
+             parser(protocol.getDevice())
     {
         signal(SIGINT, sigHandler);
     }
@@ -35,71 +39,60 @@ class Main
         runProgram = false;
     }
 
-    bool onDone(uint8_t *cmdPayload, uint8_t *responsePayload, bool success)
+    bool onResponse(Command *cmd, Response *resp, int retries)
     {
-        printf("Done!");
-        exit(0);
-        return true;
-    }
-
-    bool onResponse(uint8_t *cmdPayload, uint8_t *responsePayload, bool success)
-    {
-        printf("Success: %d\n", success);
+        printf("Try #%d\n", retries + 1);
+        cmd->print();
+        resp->print();
+        bool parsable = parser.parse(resp);
         return true;
     }
 
     int run()
     {
-
         protocol.start();
-        protocol.sendCommand(
-            cmdGen.readFPGAVersion(
-                Command::bindHandler(&Main::onResponse, this)));
-        protocol.sendCommand(
-            cmdGen.readEEROMPage(
-                Command::bindHandler(&Main::onResponse, this),
-                0x00));
-        protocol.sendCommand(
-            cmdGen.readEEROMPage(
-                Command::bindHandler(&Main::onResponse, this),
-                0x04));
-        protocol.sendCommand(
-            cmdGen.readEEROMPage(
-                Command::bindHandler(&Main::onResponse, this),
-                0x05));
-        protocol.sendCommand(
-            cmdGen.readEEROMPage(
-                Command::bindHandler(&Main::onResponse, this),
-                0x07));
-        protocol.sendCommand(
-            cmdGen.readEEROMPage(
-                Command::bindHandler(&Main::onResponse, this),
-                0x08));
-        protocol.sendCommand(
-            cmdGen.readEEROMPage(
-                Command::bindHandler(&Main::onResponse, this),
-                0x09));
-        protocol.sendCommand(
-            cmdGen.readEEROMPage(
-                Command::bindHandler(&Main::onResponse, this),
-                0x0a));
-        protocol.sendCommand(
-            cmdGen.readEEROMPage(
-                Command::bindHandler(&Main::onResponse, this),
-                0x0b));
-        protocol.sendCommand(
-            cmdGen.readEEROMPage(
-                Command::bindHandler(&Main::onResponse, this),
-                0x0c));
-        protocol.sendCommand(
-            cmdGen.readEEROMPage(
-                Command::bindHandler(&Main::onResponse, this),
-                0x0c));
-        protocol.sendCommands(cmdGen.init(Command::bindHandler(&Main::onDone, this)));
+        cmdGen.setHandler(Command::bindHandler(&Main::onResponse, this));
+        protocol.sendCommand(cmdGen.selectRAMChannel());
+        protocol.sendCommands(cmdGen.readEEROMandFPGA());
+        protocol.sendCommand(cmdGen.updateSampleRate());
+        protocol.sendCommand(cmdGen.getFreqDivLowBytes());
+        protocol.sendCommand(cmdGen.getFreqDivHighBytes());
+        protocol.sendCommand(cmdGen.selectChannel());
+        protocol.sendCommand(cmdGen.updateTriggerSourceAndSlope());
+        protocol.sendCommand(cmdGen.updateTriggerLevel());
+        protocol.sendCommand(cmdGen.preTrigger());
+        protocol.sendCommand(cmdGen.postTrigger());
+        protocol.sendCommand(cmdGen.readRamCount());
+        // LOGIC ANALYZERS
+        protocol.sendCommand(cmdGen.selectRAMChannel());
+        protocol.sendCommand(cmdGen.relay1());
+        protocol.sendCommand(cmdGen.relay2());
+        protocol.sendCommand(cmdGen.updateChannelVolts125());
+        protocol.sendCommand(cmdGen.channel1Level());
+        protocol.sendCommand(cmdGen.updateChannelVolts125());
+        protocol.sendCommand(cmdGen.relay3());
+        protocol.sendCommand(cmdGen.relay4());
+        protocol.sendCommand(cmdGen.updateChannelVolts125());
+        protocol.sendCommand(cmdGen.channel2Level());
+        // SET RELAY ?
+        protocol.sendCommand(cmdGen.updateChannelVolts125());
+        protocol.sendCommand(cmdGen.updateTriggerMode());
 
-        // protocol.sendCommand(CMD_READ_FPGAVERSION_AND_EEPROM);
-        // protocol.sendCommand(CMD_INITIALIZE);
-        // protocol.sendCommand(CMD_PULL_SAMPLES);
+        // protocol.sendCommand(cmdGen.updateChannelVolts125());
+        // protocol.sendCommand(cmdGen.relay1());
+        // protocol.sendCommand(cmdGen.relay2());
+        // protocol.sendCommand(cmdGen.relay3());
+        // protocol.sendCommand(cmdGen.relay4());
+        // protocol.sendCommand(cmdGen.channel1Level());
+        // protocol.sendCommand(cmdGen.channel2Level());
+        // protocol.sendCommand(cmdGen.readRamCount());
+        // protocol.sendCommand(cmdGen.updateTriggerMode());
+        // protocol.sendCommand(cmdGen.updateTriggerLevel());
+        // protocol.sendCommand(cmdGen.channel2Level());
+        // protocol.sendCommand(cmdGen.channel1Coupling());
+        // protocol.sendCommand(cmdGen.channel2Coupling());
+        // protocol.sendCommand(cmdGen.updateTriggerMode());
+        protocol.sendCommand(cmdGen.startSampling());
 
         while (runProgram)
         {
@@ -118,6 +111,7 @@ void sigHandler(int sig)
 {
     if (sig == SIGINT)
     {
+        program.protocol.getDevice().print();
         program.stop();
         exit(0);
     }
