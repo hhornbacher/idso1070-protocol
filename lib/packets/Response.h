@@ -9,6 +9,7 @@
 
 #include "../enums.h"
 #include "../util/hexdump.h"
+#include "../device/IDSO1070A.h"
 
 class Response
 {
