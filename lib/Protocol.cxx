@@ -41,8 +41,8 @@ void Protocol::sendCommands(CommandGeneratorVector cmdFns)
 
 void Protocol::receive()
 {
-    connection.receive();
-    if (connection.getPacketBufferLength() == IDSO1070A_PACKET_SIZE)
+    size_t len = connection.receive();
+    if (len == IDSO1070A_PACKET_SIZE)
     {
 
         if (ignoreNextResponse)
@@ -51,7 +51,6 @@ void Protocol::receive()
         }
         else
         {
-
             currentResponse = new Response(connection.getPacketBuffer());
 
             // Check if we have a sample data packet
@@ -98,7 +97,7 @@ void Protocol::receive()
 
 void Protocol::transmit()
 {
-    if (commandTimeout.isTimedOut())
+    if (commandTimeout.isTimedOut() && commandQueue.size() > 0)
     {
         CommandGenerator generateCommand = *(commandQueue.begin());
         currentCommand = generateCommand();

@@ -29,11 +29,11 @@ public:
   uint8_t *getHeader();
   uint8_t *getPayload();
   uint8_t getCommandID();
+  uint8_t getCounter();
   ResponseType getType();
   size_t getPayloadLength();
 
   void print();
-  static const char *typeToString(ResponseType type);
 };
 
 #endif // _RESPONSE_H_

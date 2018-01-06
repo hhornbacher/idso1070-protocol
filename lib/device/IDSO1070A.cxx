@@ -2,6 +2,8 @@
 
 IDSO1070A::IDSO1070A()
 {
+    armFirmwareVersion[0] = 0;
+    fpgaFirmwareVersion[0] = 0;
     memset(&eeromData, 0, sizeof(EEROMData));
     channel1.setVerticalPosition(188);
     channel2.setVerticalPosition(68);
@@ -12,6 +14,8 @@ IDSO1070A::IDSO1070A()
 void IDSO1070A::print()
 {
     printf("[IDSO1070A]\n");
+    printf("armFirmwareVersion = %s\n", armFirmwareVersion);
+    printf("fpgaFirmwareVersion = %s\n", fpgaFirmwareVersion);
     printf("batteryLevel = %d\n", batteryLevel);
     printf("receiveFreqDivStatus = 0x%02x\n", receiveFreqDivStatus);
     printf("freqDiv = %d\n", freqDiv);
@@ -29,8 +33,9 @@ TimeBase IDSO1070A::getTimeBase()
 {
     return timeBase;
 }
-void IDSO1070A::setTimeBase()
+void IDSO1070A::setTimeBase(TimeBase timeBase)
 {
+    this->timeBase = timeBase;
 }
 
 CaptureMode IDSO1070A::getCaptureMode()
@@ -39,6 +44,7 @@ CaptureMode IDSO1070A::getCaptureMode()
 }
 void IDSO1070A::setCaptureMode(CaptureMode captureMode)
 {
+    this->captureMode = captureMode;
 }
 
 ScopeMode IDSO1070A::getScopeMode()
@@ -47,6 +53,7 @@ ScopeMode IDSO1070A::getScopeMode()
 }
 void IDSO1070A::setScopeMode(ScopeMode scopeMode)
 {
+    this->scopeMode = scopeMode;
 }
 
 EEROMData &IDSO1070A::getEEROMData()
@@ -70,6 +77,7 @@ Channel &IDSO1070A::getSelectedChannel()
 
 void IDSO1070A::setSelectedChannel(Channel &channel)
 {
+    this->selectedChannel = &channel;
 }
 
 Trigger &IDSO1070A::getTrigger()
@@ -79,6 +87,7 @@ Trigger &IDSO1070A::getTrigger()
 
 void IDSO1070A::setBatteryLevel(uint8_t batteryLevel)
 {
+    this->batteryLevel = batteryLevel;
 }
 uint8_t IDSO1070A::getBatteryLevel()
 {
@@ -87,6 +96,7 @@ uint8_t IDSO1070A::getBatteryLevel()
 
 void IDSO1070A::setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus)
 {
+    this->receiveFreqDivStatus = receiveFreqDivStatus;
 }
 uint8_t IDSO1070A::getReceiveFreqDivStatus()
 {
@@ -95,10 +105,21 @@ uint8_t IDSO1070A::getReceiveFreqDivStatus()
 
 void IDSO1070A::setFreqDiv(uint32_t freqDiv)
 {
+    this->freqDiv = freqDiv;
 }
 uint32_t IDSO1070A::getFreqDiv()
 {
     return freqDiv;
+}
+
+void IDSO1070A::setARMFirmwareVersion(char *version)
+{
+    strncpy(armFirmwareVersion, version, 9);
+}
+
+void IDSO1070A::setFPGAFirmwareVersion(char *version)
+{
+    strncpy(fpgaFirmwareVersion, version, 9);
 }
 
 bool IDSO1070A::isSampleRate200Mor250M()

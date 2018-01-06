@@ -90,10 +90,9 @@ CommandGeneratorVector &CommandFactory::pullSamples(bool internal)
     return buffer;
 }
 
-CommandGeneratorVector &CommandFactory::readEEROMandFPGA(bool internal)
+CommandGeneratorVector &CommandFactory::readEEROMPages(bool internal)
 {
     buffer.clear();
-    // buffer.push_back(readFPGAVersion());
     buffer.push_back(readEEROMPage(0x00));
     buffer.push_back(readEEROMPage(0x04));
     buffer.push_back(readEEROMPage(0x07));
@@ -168,6 +167,18 @@ CommandGenerator CommandFactory::readEEROMPage(uint8_t address)
         cmd->setHandler(handlerRef);
         // cmd->setResponseCount(1);
         cmd->setName("readEEROMPage");
+        return cmd;
+    };
+}
+
+CommandGenerator CommandFactory::readARMVersion()
+{
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef]() {
+        uint8_t cmdBuffer[4] = {0x57, 0x04, 0x00, 0x00};
+        Command *cmd = new Command(cmdBuffer);
+        cmd->setHandler(handlerRef);
+        cmd->setName("readARMVersion");
         return cmd;
     };
 }

@@ -34,6 +34,11 @@ uint8_t Response::getCommandID()
     return rawPacket.header[4];
 }
 
+uint8_t Response::getCounter()
+{
+    return rawPacket.header[2];
+}
+
 ResponseType Response::getType()
 {
     return (ResponseType)rawPacket.header[3];
@@ -42,29 +47,13 @@ ResponseType Response::getType()
 void Response::print()
 {
     printf("[Response]\n");
+    printf("counter = %d\n", getCounter());
     printf("commandID = %02x\n", getCommandID());
-    printf("packetType = %s\n", typeToString(getType()));
+    printf("packetType = %d\n", getType());
     printf("payloadLength = %ld\n", getPayloadLength());
     printf("[Header]\n");
     hexdump(getHeader(), IDSO1070A_PACKET_HEADER_SIZE);
     printf("[Payload]\n");
     hexdump(getPayload(), getPayloadLength());
     printf("\n\n");
-}
-
-const char *Response::typeToString(ResponseType type)
-{
-    switch (type)
-    {
-    case TYPE_AA:
-        return "TYPE_AA";
-    case TYPE_EE:
-        return "TYPE_EE";
-    case TYPE_FPGA:
-        return "TYPE_FPGA";
-    case TYPE_STATE:
-        return "TYPE_STATE";
-    default:
-        return "UNKOWN";
-    }
 }

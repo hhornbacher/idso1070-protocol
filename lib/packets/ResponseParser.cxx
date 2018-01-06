@@ -25,6 +25,16 @@ bool ResponseParser::parseAAResponse(Response *packet)
 {
     switch (packet->getCommandID())
     {
+    case 0x02:
+        // Parse FPGA version
+        char version[9];
+        for (int i = 0; i < 8; i++)
+        {
+            version[i] = 0x30 + packet->getPayload()[6 + i];
+        }
+        version[8] = 0;
+        device.setFPGAFirmwareVersion(version);
+        return true;
     case 0x04:
         return parseSampleData(packet);
     default:
@@ -108,10 +118,12 @@ bool ResponseParser::parseStateResponse(Response *packet)
     case 0x03:
         device.setBatteryLevel(packet->getPayload()[0]);
         return true;
-    // case 0x04:
-    //     // memcpy(device.date, packet->getPayload(), 8);
-    //     // device.date[8] = 0;
-    //     return true;
+    case 0x04:
+        char version[9];
+        memcpy(version, packet->getPayload(), 8);
+        version[8] = 0;
+        device.setARMFirmwareVersion(version);
+        return true;
     default:
         return false;
     }

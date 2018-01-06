@@ -33,7 +33,7 @@ public:
   CommandGeneratorVector &channel2VoltageDiv(bool internal = false);
   CommandGeneratorVector &levels(bool internal = false);
   CommandGeneratorVector &pullSamples(bool internal = false);
-  CommandGeneratorVector &readEEROMandFPGA(bool internal = false);
+  CommandGeneratorVector &readEEROMPages(bool internal = false);
   CommandGeneratorVector &updateTimeBase(bool internal = false);
   CommandGeneratorVector &trigger(bool internal = false);
   CommandGeneratorVector &triggerSource(bool internal = false);
@@ -42,6 +42,7 @@ public:
 
   CommandGenerator selectChannel();
   CommandGenerator selectRAMChannel();
+  CommandGenerator readARMVersion();
   CommandGenerator readFPGAVersion();
   CommandGenerator readBatteryLevel();
   CommandGenerator readRamCount();

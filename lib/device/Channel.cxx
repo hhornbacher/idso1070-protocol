@@ -7,6 +7,9 @@ void Channel::print()
     printf("verticalDiv = %d\n", verticalDiv);
     printf("coupling = %d\n", coupling);
     printf("verticalPosition = %d\n", coupling);
+    printf("voltage125 = %lf\n", voltage125);
+    printf("voltageRL1 = %lf\n", voltageRL1);
+    printf("voltageRL2 = %lf\n", voltageRL2);
     printf("pwmArray = \n");
     hexdump((uint8_t *)pwmArray, sizeof(pwmArray));
     printf("\n\n");

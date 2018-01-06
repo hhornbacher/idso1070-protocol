@@ -33,10 +33,13 @@ private:
   uint8_t receiveFreqDivStatus = 0;
   uint32_t freqDiv = 0;
 
+  char armFirmwareVersion[9];
+  char fpgaFirmwareVersion[9];
+
 public:
   IDSO1070A();
   TimeBase getTimeBase();
-  void setTimeBase();
+  void setTimeBase(TimeBase timeBase);
 
   CaptureMode getCaptureMode();
   void setCaptureMode(CaptureMode captureMode);
@@ -61,6 +64,9 @@ public:
 
   void setFreqDiv(uint32_t freqDiv);
   uint32_t getFreqDiv();
+
+  void setARMFirmwareVersion(char *version);
+  void setFPGAFirmwareVersion(char *version);
 
   bool isSampleRate200Mor250M();
 
