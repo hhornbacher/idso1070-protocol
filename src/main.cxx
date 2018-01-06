@@ -39,6 +39,12 @@ class Main
         runProgram = false;
     }
 
+    void onSample(Response *resp)
+    {
+        printf("Got sample!\n");
+        hexdump(resp->getPayload(), resp->getPayloadLength());
+    }
+
     bool onResponse(Command *cmd, Response *resp, int retries)
     {
         cmd->print();
@@ -51,6 +57,7 @@ class Main
     {
         protocol.start();
         cmdGen.setHandler(Command::bindHandler(&Main::onResponse, this));
+        protocol.setSampleDataHandler(Protocol::bindSampleDataHandler(&Main::onSample, this));
 
         protocol.sendCommand(cmdGen.selectRAMChannel());
         protocol.sendCommand(cmdGen.readARMVersion());

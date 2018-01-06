@@ -39,6 +39,11 @@ void Protocol::sendCommands(CommandGeneratorVector cmdFns)
         commandQueue.push_back(cmdFn);
 }
 
+void Protocol::setSampleDataHandler(SampleDataHandler handler)
+{
+    sampleDataHandler = handler;
+}
+
 void Protocol::receive()
 {
     connection.receive();
@@ -58,43 +63,45 @@ void Protocol::receive()
 
             if (currentCommand)
             {
-                // Parse received packet
-                bool success = currentCommand->getPayload()[0] == currentResponse->getType() &&
-                               currentCommand->getPayload()[1] == currentResponse->getCommandID() &&
-                               currentCommand->callHandler(currentResponse, retries);
-
-                // If it's a wifi connection, then we get two responses per command
-                if (success && !connection.isUsbConnection())
-                    ignoreNextResponse = true;
-
-                // Call handler of current command
-                if (!success && retries < MaxCommandRetries)
+                // Check for sample data packet
+                if (currentResponse->getCommandID() == 0x04 && currentResponse->getType() == 0xaa)
                 {
-                    printf("Fail:\n");
-                    currentCommand->print();
-                    currentResponse->print();
-                    retries++;
+                    sampling = true;
+                    if (sampleDataHandler)
+                        sampleDataHandler(currentResponse);
                 }
                 else
                 {
-                    if (currentResponse->getCommandID() == 0x04 && currentResponse->getType() == 0xaa)
-                        sampling = true;
-                    // Remove current command generator
-                    commandQueue.pop_front();
-                    retries = 0;
+                    // Parse received packet
+                    bool success = currentCommand->getPayload()[0] == currentResponse->getType() &&
+                                   currentCommand->getPayload()[1] == currentResponse->getCommandID() &&
+                                   currentCommand->callHandler(currentResponse, retries);
+
+                    // If it's a wifi connection, then we get two responses per command
+                    if (success && !connection.isUsbConnection())
+                        ignoreNextResponse = true;
+
+                    // Call handler of current command
+                    if (!success && retries < MaxCommandRetries)
+                    {
+                        retries++;
+                    }
+                    else
+                    {
+                        // Remove current command generator
+                        commandQueue.pop_front();
+                        retries = 0;
+                    }
                 }
 
                 // Remove current command
-                if (currentCommand)
-                {
-                    delete currentCommand;
-                    currentCommand = NULL;
-                }
+                delete currentCommand;
+                currentCommand = NULL;
             }
             else if (sampling)
             {
-                printf("Got sample!");
-                currentResponse->print();
+                if (sampleDataHandler)
+                    sampleDataHandler(currentResponse);
             }
             delete currentResponse;
             currentResponse = NULL;

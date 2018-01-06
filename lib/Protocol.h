@@ -28,7 +28,7 @@ class Protocol
 public:
   static const int MaxCommandRetries = 3;
 
-  typedef std::function<void(Response &)> SampleDataHandler;
+  typedef std::function<void(Response *)> SampleDataHandler;
 
 private:
   IDSO1070A device;
@@ -50,6 +50,12 @@ public:
   Protocol(Connector &connection);
   ~Protocol();
 
+  template <class F, class S>
+  static SampleDataHandler bindSampleDataHandler(F &&f, S *self)
+  {
+    return std::bind(f, self, std::placeholders::_1);
+  }
+
   void start();
   void stop();
   void process();
@@ -58,6 +64,8 @@ public:
 
   void sendCommand(CommandGenerator cmdFn);
   void sendCommands(CommandGeneratorVector cmdFns);
+
+  void setSampleDataHandler(SampleDataHandler handler);
 
   void receive();
   void transmit();
