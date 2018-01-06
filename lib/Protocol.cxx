@@ -41,57 +41,64 @@ void Protocol::sendCommands(CommandGeneratorVector cmdFns)
 
 void Protocol::receive()
 {
-    size_t len = connection.receive();
-    if (len == IDSO1070A_PACKET_SIZE)
+    connection.receive();
+    while (connection.getResponseBufferSize() > 0)
     {
 
         if (ignoreNextResponse)
         {
+            currentResponse = connection.getLatestResponse();
+            delete currentResponse;
+            currentResponse = NULL;
             ignoreNextResponse = false;
         }
         else
         {
-            currentResponse = new Response(connection.getPacketBuffer());
+            currentResponse = connection.getLatestResponse();
 
-            // Check if we have a sample data packet
-            if (currentResponse->getType() == 0xaa &&
-                currentResponse->getCommandID() == 0x04)
-            {
-                printf("Got sample data!\n");
-                if (currentCommand &&
-                    currentCommand->getPayload()[0] == 0xaa &&
-                    currentCommand->getPayload()[1] == 0x04)
-                {
-                    commandQueue.pop_front();
-                    delete currentCommand;
-                }
-            }
-            else
+            if (currentCommand)
             {
                 // Parse received packet
                 bool success = currentCommand->getPayload()[0] == currentResponse->getType() &&
                                currentCommand->getPayload()[1] == currentResponse->getCommandID() &&
                                currentCommand->callHandler(currentResponse, retries);
 
-                // If command was readEEROM and it's a wifi connection, then we get two responses per command
-                if (currentCommand->getPayload()[0] == TYPE_EE && !connection.isUsbConnection())
+                // If it's a wifi connection, then we get two responses per command
+                if (success && !connection.isUsbConnection())
                     ignoreNextResponse = true;
 
                 // Call handler of current command
                 if (!success && retries < COMMAND_MAX_RETRIES)
+                {
+                    printf("Fail:\n");
+                    currentCommand->print();
+                    currentResponse->print();
                     retries++;
+                }
                 else
                 {
+                    if (currentResponse->getCommandID() == 0x04 && currentResponse->getType() == 0xaa)
+                        sampling = true;
                     // Remove current command generator
                     commandQueue.pop_front();
                     retries = 0;
                 }
 
                 // Remove current command
-                delete currentCommand;
+                if (currentCommand)
+                {
+                    delete currentCommand;
+                    currentCommand = NULL;
+                }
             }
+            else if (sampling)
+            {
+                printf("Got sample!");
+                currentResponse->print();
+            }
+            delete currentResponse;
+            currentResponse = NULL;
         }
-        connection.clearPacketBuffer();
     }
 }
 

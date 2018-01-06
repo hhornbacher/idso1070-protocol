@@ -16,7 +16,7 @@ size_t TestConnector::receive()
     if (pending)
     {
         pending = false;
-        return IDSO1070A_PACKET_SIZE;
+        return Response::PacketSize;
     }
     return 0;
 }
@@ -31,7 +31,7 @@ void TestConnector::stop()
 
 void TestConnector::fakePacket(uint8_t *data)
 {
-    memcpy(packetBuffer, data, IDSO1070A_PACKET_SIZE);
-    packetBufferLength = IDSO1070A_PACKET_SIZE;
+    memcpy(rawBuffer, data, Response::PacketSize);
+    rawBufferLength = Response::PacketSize;
     pending = true;
 }

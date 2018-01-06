@@ -1,8 +1,12 @@
 #include "Response.h"
 
+// size_t PacketSize = 509;
+// size_t HeaderSize = 7;
+// size_t PayloadSize = PacketSize - HeaderSize;
+
 Response::Response(uint8_t *data)
 {
-    memcpy(&rawPacket, data, IDSO1070A_PACKET_SIZE);
+    memcpy(&rawPacket, data, PacketSize);
 }
 
 uint8_t *Response::getHeader()
@@ -15,12 +19,11 @@ uint8_t *Response::getPayload()
 }
 size_t Response::getPayloadLength()
 {
-    size_t pos = IDSO1070A_PACKET_PAYLOAD_SIZE - 2;
-    uint8_t filter = 0;
-    if (rawPacket.payload[IDSO1070A_PACKET_PAYLOAD_SIZE - 2] == 0x5a)
-    {
-        filter = 0x5a;
-    }
+    size_t pos = PayloadSize - 2;
+    uint8_t filter = 0x5a;
+
+    if (getType() == 0x57)
+        filter = 0x00;
     while (rawPacket.payload[pos] == filter)
     {
         pos--;
@@ -52,7 +55,7 @@ void Response::print()
     printf("packetType = %d\n", getType());
     printf("payloadLength = %ld\n", getPayloadLength());
     printf("[Header]\n");
-    hexdump(getHeader(), IDSO1070A_PACKET_HEADER_SIZE);
+    hexdump(getHeader(), HeaderSize);
     printf("[Payload]\n");
     hexdump(getPayload(), getPayloadLength());
     printf("\n\n");

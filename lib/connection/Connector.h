@@ -5,21 +5,23 @@
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <errno.h>
 
-#define PACKETBUFFER_LENGTH 1024 * 4
+#include <queue>
+
+#include "../packets/Response.h"
+
+#define RAW_BUFFER_LENGTH 1024 * 32
 
 class Connector
 {
 protected:
-  uint8_t packetBuffer[PACKETBUFFER_LENGTH];
-  size_t packetBufferLength = 0;
+  uint8_t rawBuffer[RAW_BUFFER_LENGTH];
+  size_t rawBufferLength = 0;
   bool usbConnection;
+
+  std::queue<Response *> responseBuffer;
+
+  void grabPacket();
 
 public:
   virtual void transmit(uint8_t *data, size_t length) = 0;
@@ -28,9 +30,9 @@ public:
   virtual void start() = 0;
   virtual void stop() = 0;
 
-  uint8_t *getPacketBuffer();
-  size_t getPacketBufferLength();
-  void clearPacketBuffer();
+  Response *getLatestResponse();
+  size_t getResponseBufferSize();
+  // void clearPacketBuffer();
 
   bool isUsbConnection();
 };

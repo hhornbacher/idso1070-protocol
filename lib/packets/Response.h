@@ -10,17 +10,18 @@
 #include "../enums.h"
 #include "../util/hexdump.h"
 
-#define IDSO1070A_PACKET_SIZE 509
-#define IDSO1070A_PACKET_HEADER_SIZE 7
-#define IDSO1070A_PACKET_PAYLOAD_SIZE 502
-
 class Response
 {
+public:
+  static const size_t PacketSize = 509;
+  static const size_t HeaderSize = 7;
+  static const size_t PayloadSize = PacketSize - HeaderSize;
+
 private:
   struct __attribute__((packed)) RawPacket
   {
-    uint8_t header[IDSO1070A_PACKET_HEADER_SIZE];
-    uint8_t payload[IDSO1070A_PACKET_PAYLOAD_SIZE];
+    uint8_t header[HeaderSize];
+    uint8_t payload[PayloadSize];
   } rawPacket;
 
 public:

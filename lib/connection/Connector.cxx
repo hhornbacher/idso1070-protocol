@@ -1,21 +1,36 @@
 #include "Connector.h"
 
-uint8_t *Connector::getPacketBuffer()
+#include "../util/hexdump.h"
+
+Response *Connector::getLatestResponse()
 {
-    return packetBuffer;
+  Response *response = responseBuffer.front();
+  responseBuffer.pop();
+  return response;
 }
 
-void Connector::clearPacketBuffer()
+size_t Connector::getResponseBufferSize()
 {
-    packetBufferLength = 0;
+  return responseBuffer.size();
 }
 
-size_t Connector::getPacketBufferLength()
+void Connector::grabPacket()
 {
-    return packetBufferLength;
+  if (rawBufferLength > Response::PacketSize)
+  {
+    Response *response = new Response(rawBuffer);
+    // printf("old buffer length: %ld\n", rawBufferLength);
+    // hexdump(rawBuffer, rawBufferLength);
+    rawBufferLength -= Response::PacketSize;
+    // printf("new buffer length: %ld\n", rawBufferLength);
+    // hexdump(rawBuffer, rawBufferLength);
+    memcpy(rawBuffer, &rawBuffer[Response::PacketSize], rawBufferLength);
+    // hexdump(rawBuffer, rawBufferLength);
+    responseBuffer.push(response);
+  }
 }
 
 bool Connector::isUsbConnection()
 {
-    return usbConnection;
+  return usbConnection;
 }

@@ -1,6 +1,8 @@
 #ifndef _USB_CONNECTOR_H_
 #define _USB_CONNECTOR_H_
 
+#include <fcntl.h>
+#include <errno.h>
 #include <termios.h>
 
 #include "Connector.h"
