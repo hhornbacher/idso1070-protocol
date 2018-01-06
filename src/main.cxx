@@ -39,10 +39,9 @@ class Main
         runProgram = false;
     }
 
-    void onSample(Response *resp)
+    void onSample(Sample *sample)
     {
-        printf("Got sample!\n");
-        hexdump(resp->getPayload(), resp->getPayloadLength());
+        sample->print();
     }
 
     bool onResponse(Command *cmd, Response *resp, int retries)
