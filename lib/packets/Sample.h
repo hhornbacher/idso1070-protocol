@@ -1,5 +1,5 @@
-#ifndef _RESPONSE_H_
-#define _RESPONSE_H_
+#ifndef _SAMPLE_H_
+#define _SAMPLE_H_
 
 #include <cstdio>
 
@@ -8,16 +8,13 @@
 
 #include "Packet.h"
 
-class Response : public Packet
+class Sample : public Packet
 {
 private:
   uint8_t rawPacket[PacketSize];
 
 public:
-  Response(uint8_t *data);
-
-  uint8_t getCommandID();
-  ResponseType getType();
+  Sample(uint8_t *data);
 
   uint8_t *getPayload();
   size_t getPayloadLength();
@@ -25,4 +22,4 @@ public:
   void print();
 };
 
-#endif // _RESPONSE_H_
+#endif // _SAMPLE_H_

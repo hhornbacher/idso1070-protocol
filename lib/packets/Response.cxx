@@ -1,34 +1,26 @@
 #include "Response.h"
 
-// size_t PacketSize = 509;
-// size_t HeaderSize = 7;
-// size_t PayloadSize = PacketSize - HeaderSize;
-
-Response::Response(uint8_t *data)
+Response::Response(uint8_t *data) : Packet(data)
 {
     memcpy(&rawPacket, data, PacketSize);
 }
 
-uint8_t *Response::getHeader()
-{
-    return rawPacket.header;
-}
 uint8_t *Response::getPayload()
 {
-    if (getType() == 0xaa && getCommandID() == 0x04)
-        return &rawPacket.payload[1];
-    return rawPacket.payload;
+    // if (getType() == 0xaa && getCommandID() == 0x04)
+    //     return &rawPacket[HeaderSize];
+    return &rawPacket[HeaderSize];
 }
 size_t Response::getPayloadLength()
 {
-    if (getType() == 0xaa && getCommandID() == 0x04)
-        return IDSO1070A::SamplesCountPerPacket;
+    // if (getType() == 0xaa && getCommandID() == 0x04)
+    //     return IDSO1070A::SamplesCountPerPacket;
     size_t pos = PayloadSize - 2;
     uint8_t filter = 0x5a;
 
     if (getType() == 0x57)
         filter = 0x00;
-    while (rawPacket.payload[pos] == filter)
+    while (getPayload()[pos] == filter)
     {
         pos--;
     }
@@ -38,17 +30,12 @@ size_t Response::getPayloadLength()
 
 uint8_t Response::getCommandID()
 {
-    return rawPacket.header[4];
-}
-
-uint8_t Response::getCounter()
-{
-    return rawPacket.header[2];
+    return rawPacket[4];
 }
 
 ResponseType Response::getType()
 {
-    return (ResponseType)rawPacket.header[3];
+    return (ResponseType)rawPacket[3];
 }
 
 void Response::print()
