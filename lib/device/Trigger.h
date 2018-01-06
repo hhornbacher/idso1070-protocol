@@ -6,6 +6,7 @@
 
 #include "../util/hexdump.h"
 #include "../enums.h"
+#include "Channel.h"
 
 class Trigger
 {
@@ -16,15 +17,16 @@ private:
   TriggerSlope slope = TRIGSLOPE_RISING;
   uint16_t level = 0;
   double xPosition = 0.5;
-  uint16_t innerTriggerPWM[4];
-  uint16_t outerTriggerPWM[2];
+  uint16_t innerPWM[4];
+  uint16_t outerPWM[2];
 
 public:
   uint16_t getBottomPWM();
   uint16_t getTopPWM();
   void print();
 
-  void setTriggerLevel(uint16_t i);
+  void setLevel(uint16_t i);
+  uint16_t getLevel();
 
   void setChannel(TriggerChannel channel);
   TriggerChannel getChannel();
@@ -38,13 +40,13 @@ public:
   double getXPosition();
   void setXPosition(double xPosition);
 
-  void setInnerTriggerPWM(uint8_t index, uint16_t pwm);
-  uint16_t getInnerTriggerPWM(uint8_t index);
-  uint16_t *getInnerTriggerPWM();
+  void setInnerPWM(uint8_t index, uint16_t pwm);
+  uint16_t getInnerPWM(uint8_t index);
+  uint16_t *getInnerPWM();
 
-  void setOuterTriggerPWM(uint8_t index, uint16_t pwm);
-  uint16_t getOuterTriggerPWM(uint8_t index);
-  uint16_t *getOuterTriggerPWM();
+  void setOuterPWM(uint8_t index, uint16_t pwm);
+  uint16_t getOuterPWM(uint8_t index);
+  uint16_t *getOuterPWM();
 };
 
 #endif // _TRIGGER_H_

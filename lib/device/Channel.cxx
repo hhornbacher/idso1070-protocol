@@ -52,6 +52,10 @@ int Channel::getVerticalPosition()
 }
 void Channel::setVerticalPosition(int verticalPosition)
 {
+    if (verticalPosition < 8)
+        verticalPosition = 8;
+    else if (verticalPosition > MaxSample)
+        verticalPosition = MaxSample;
     this->verticalPosition = verticalPosition;
 }
 

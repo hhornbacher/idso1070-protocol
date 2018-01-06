@@ -10,42 +10,46 @@ void Trigger::print()
     printf("slope = %d\n", slope);
     printf("level = %d\n", level);
     printf("xPosition = %lf\n", xPosition);
-    printf("innerTriggerPWM = \n");
-    hexdump((uint8_t *)innerTriggerPWM, sizeof(innerTriggerPWM));
-    printf("outerTriggerPWM = \n");
-    hexdump((uint8_t *)outerTriggerPWM, sizeof(outerTriggerPWM));
+    printf("innerPWM = \n");
+    hexdump((uint8_t *)innerPWM, sizeof(innerPWM));
+    printf("outerPWM = \n");
+    hexdump((uint8_t *)outerPWM, sizeof(outerPWM));
     printf("\n\n");
 }
 
 uint16_t Trigger::getBottomPWM()
 {
     if (channel == TRIGCHAN_CH1)
-        return innerTriggerPWM[0];
+        return innerPWM[0];
     else if (channel == TRIGCHAN_CH2)
-        return innerTriggerPWM[2];
+        return innerPWM[2];
     return -1;
 }
 
 uint16_t Trigger::getTopPWM()
 {
     if (channel == TRIGCHAN_CH1)
-        return innerTriggerPWM[1];
+        return innerPWM[1];
     else if (channel == TRIGCHAN_CH2)
-        return innerTriggerPWM[3];
+        return innerPWM[3];
     return -1;
 }
 
-void Trigger::setTriggerLevel(uint16_t i)
+void Trigger::setLevel(uint16_t i)
 {
     if (i < 8)
     {
         i = 8;
     }
-    else if (i > IDSO1070A_MAX_SAMPLE)
+    else if (i > Channel::MaxSample)
     {
-        i = IDSO1070A_MAX_SAMPLE;
+        i = Channel::MaxSample;
     }
     level = i;
+}
+uint16_t Trigger::getLevel()
+{
+    return level;
 }
 
 void Trigger::setChannel(TriggerChannel channel)
@@ -84,28 +88,28 @@ void Trigger::setXPosition(double xPosition)
     this->xPosition = xPosition;
 }
 
-void Trigger::setInnerTriggerPWM(uint8_t index, uint16_t pwm)
+void Trigger::setInnerPWM(uint8_t index, uint16_t pwm)
 {
-    this->innerTriggerPWM[index] = pwm;
+    this->innerPWM[index] = pwm;
 }
-uint16_t Trigger::getInnerTriggerPWM(uint8_t index)
+uint16_t Trigger::getInnerPWM(uint8_t index)
 {
-    return innerTriggerPWM[index];
+    return innerPWM[index];
 }
-uint16_t *Trigger::getInnerTriggerPWM()
+uint16_t *Trigger::getInnerPWM()
 {
-    return innerTriggerPWM;
+    return innerPWM;
 }
 
-void Trigger::setOuterTriggerPWM(uint8_t index, uint16_t pwm)
+void Trigger::setOuterPWM(uint8_t index, uint16_t pwm)
 {
-    this->outerTriggerPWM[index] = pwm;
+    this->outerPWM[index] = pwm;
 }
-uint16_t Trigger::getOuterTriggerPWM(uint8_t index)
+uint16_t Trigger::getOuterPWM(uint8_t index)
 {
-    return outerTriggerPWM[index];
+    return outerPWM[index];
 }
-uint16_t *Trigger::getOuterTriggerPWM()
+uint16_t *Trigger::getOuterPWM()
 {
-    return outerTriggerPWM;
+    return outerPWM;
 }

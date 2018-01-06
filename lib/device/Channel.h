@@ -9,6 +9,9 @@
 
 class Channel
 {
+public:
+  static const int MaxSample = 248;
+
 private:
   bool enabled = true;
   VoltageDiv verticalDiv = VDIV_1V;
