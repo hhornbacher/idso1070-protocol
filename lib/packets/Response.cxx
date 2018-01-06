@@ -15,6 +15,8 @@ uint8_t *Response::getHeader()
 }
 uint8_t *Response::getPayload()
 {
+    if (getType() == 0xaa && getCommandID() == 0x04)
+        return &rawPacket.payload[1];
     return rawPacket.payload;
 }
 size_t Response::getPayloadLength()
