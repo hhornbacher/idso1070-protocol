@@ -65,9 +65,6 @@ public:
   CommandGenerator postTrigger();
   CommandGenerator startSampling();
   CommandGenerator readEEROMPage(uint8_t address);
-  CommandGenerator updateTriggerPWM(uint16_t pwm);
-  CommandGenerator channel1PWM(uint16_t pwm);
-  CommandGenerator channel2PWM(uint16_t pwm);
 };
 
 #endif // _COMMANDS_GENERATOR_H_

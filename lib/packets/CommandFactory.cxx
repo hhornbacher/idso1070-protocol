@@ -165,7 +165,6 @@ CommandGenerator CommandFactory::readEEROMPage(uint8_t address)
         uint8_t cmdBuffer[4] = {0xee, 0xaa, address, 0x00};
         Command *cmd = new Command(cmdBuffer);
         cmd->setHandler(handlerRef);
-        // cmd->setResponseCount(1);
         cmd->setName("readEEROMPage");
         return cmd;
     };
@@ -643,20 +642,45 @@ CommandGenerator CommandFactory::readRamCount()
 
 CommandGenerator CommandFactory::channel1Level()
 {
-    int verticalDiv = (int)device.getChannel1().getVerticalDiv();
-    return channel1PWM((uint16_t)mapValue(
-        device.getChannel1().getVerticalPosition(),
-        8.0f, 248.0f,
-        (float)device.getChannel1().getPWM(verticalDiv, 0), (float)device.getChannel1().getPWM(verticalDiv, 1)));
+    Channel &channel1Ref = device.getChannel1();
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &channel1Ref]() {
+        int verticalDiv = (int)channel1Ref.getVerticalDiv();
+        uint16_t pwm = (uint16_t)mapValue(
+            channel1Ref.getVerticalPosition(),
+            8.0f, 248.0f,
+            (float)channel1Ref.getPWM(verticalDiv, 0), (float)channel1Ref.getPWM(verticalDiv, 1));
+        if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
+            return (Command *)NULL;
+        Command *cmd = new Command(CMDCODE_CH1_PWM,
+                                   (uint8_t)(pwm & 0xff),
+                                   (uint8_t)((pwm >> 8) & 0x0f));
+        cmd->setHandler(handlerRef);
+        cmd->setName("channel1PWM");
+        return cmd;
+    };
 }
 
 CommandGenerator CommandFactory::channel2Level()
 {
-    int verticalDiv = (int)device.getChannel2().getVerticalDiv();
-    return channel2PWM((uint16_t)mapValue(
-        device.getChannel2().getVerticalPosition(),
-        8.0f, 248.0f,
-        (float)device.getChannel2().getPWM(verticalDiv, 0), (float)device.getChannel2().getPWM(verticalDiv, 1)));
+    Channel &channel2Ref = device.getChannel2();
+    Command::ResponseHandler handlerRef = handler;
+    return [handlerRef, &channel2Ref]() {
+        int verticalDiv = (int)channel2Ref.getVerticalDiv();
+        uint16_t pwm = (uint16_t)mapValue(
+            channel2Ref.getVerticalPosition(),
+            8.0f, 248.0f,
+            (float)channel2Ref.getPWM(verticalDiv, 0), (float)channel2Ref.getPWM(verticalDiv, 1));
+
+        if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
+            return (Command *)NULL;
+        Command *cmd = new Command(CMDCODE_CH2_PWM,
+                                   (uint8_t)(pwm & 0xff),
+                                   (uint8_t)((pwm >> 8) & 0x0f));
+        cmd->setHandler(handlerRef);
+        cmd->setName("channel2PWM");
+        return cmd;
+    };
 }
 
 CommandGenerator CommandFactory::updateTriggerSourceAndSlope()
@@ -686,9 +710,27 @@ CommandGenerator CommandFactory::updateTriggerSourceAndSlope()
 
 CommandGenerator CommandFactory::updateTriggerLevel()
 {
-    // uint16_t pwm = mapValue(device.getTrigger().level, 8.0f, 248.0f, (float)device.getTrigger().getBottomPWM(), (float)device.getTrigger().getTopPWM());
-    uint16_t pwm = 2741;
-    return updateTriggerPWM(pwm);
+
+    Command::ResponseHandler handlerRef = handler;
+    Trigger &triggerRef = device.getTrigger();
+    return [handlerRef, &triggerRef]() {
+
+        printf("Current trigger level: %d\n", triggerRef.getLevel());
+        printf("Top PWM: %d\n", triggerRef.getTopPWM());
+        printf("Bottom PWM: %d\n", triggerRef.getBottomPWM());
+        uint16_t pwm = mapValue(triggerRef.getLevel(), 8.0f, 248.0f, (float)triggerRef.getBottomPWM(), (float)triggerRef.getTopPWM());
+        // uint16_t pwm = 0x0ab5;
+        printf("Calculated PWM: %u\n", pwm);
+
+        if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
+            return (Command *)NULL;
+        Command *cmd = new Command(CMDCODE_TRIGGER_PWM,
+                                   (uint8_t)(pwm & 0xff),
+                                   (uint8_t)((pwm >> 8) & 0x0f));
+        cmd->setHandler(handlerRef);
+        cmd->setName("updateTriggerPWM");
+        return cmd;
+    };
 }
 
 CommandGenerator CommandFactory::selectChannel()
@@ -758,51 +800,6 @@ CommandGenerator CommandFactory::startSampling()
         Command *cmd = new Command(cmdPayload);
         cmd->setHandler(handlerRef);
         cmd->setName("startSampling");
-        return cmd;
-    };
-}
-
-CommandGenerator CommandFactory::updateTriggerPWM(uint16_t pwm)
-{
-    Command::ResponseHandler handlerRef = handler;
-    return [handlerRef, pwm]() {
-        if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
-            return (Command *)NULL;
-        Command *cmd = new Command(CMDCODE_TRIGGER_PWM,
-                                   (uint8_t)(pwm & 0xff),
-                                   (uint8_t)((pwm >> 8) & 0x0f));
-        cmd->setHandler(handlerRef);
-        cmd->setName("updateTriggerPWM");
-        return cmd;
-    };
-}
-
-CommandGenerator CommandFactory::channel1PWM(uint16_t pwm)
-{
-    Command::ResponseHandler handlerRef = handler;
-    return [handlerRef, pwm]() {
-        if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
-            return (Command *)NULL;
-        Command *cmd = new Command(CMDCODE_CH1_PWM,
-                                   (uint8_t)(pwm & 0xff),
-                                   (uint8_t)((pwm >> 8) & 0x0f));
-        cmd->setHandler(handlerRef);
-        cmd->setName("channel1PWM");
-        return cmd;
-    };
-}
-
-CommandGenerator CommandFactory::channel2PWM(uint16_t pwm)
-{
-    Command::ResponseHandler handlerRef = handler;
-    return [handlerRef, pwm]() {
-        if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
-            return (Command *)NULL;
-        Command *cmd = new Command(CMDCODE_CH2_PWM,
-                                   (uint8_t)(pwm & 0xff),
-                                   (uint8_t)((pwm >> 8) & 0x0f));
-        cmd->setHandler(handlerRef);
-        cmd->setName("channel2PWM");
         return cmd;
     };
 }
