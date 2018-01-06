@@ -30,6 +30,9 @@ private:
   Trigger trigger;
 
   uint8_t batteryLevel = 0;
+
+  int littlePacketStatus = 0;
+
   uint8_t receiveFreqDivStatus = 0;
   uint32_t freqDiv = 0;
 
@@ -58,6 +61,9 @@ public:
 
   void setBatteryLevel(uint8_t batteryLevel);
   uint8_t getBatteryLevel();
+
+  void setLittlePacketStatus(int littlePacketStatus);
+  int getLittlePacketStatus();
 
   void setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus);
   uint8_t getReceiveFreqDivStatus();

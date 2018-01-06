@@ -94,6 +94,15 @@ uint8_t IDSO1070A::getBatteryLevel()
     return batteryLevel;
 }
 
+void IDSO1070A::setLittlePacketStatus(int littlePacketStatus)
+{
+    this->littlePacketStatus = littlePacketStatus;
+}
+int IDSO1070A::getLittlePacketStatus()
+{
+    return littlePacketStatus;
+}
+
 void IDSO1070A::setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus)
 {
     this->receiveFreqDivStatus = receiveFreqDivStatus;
