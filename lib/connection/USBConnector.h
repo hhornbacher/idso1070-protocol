@@ -7,10 +7,11 @@
 
 #include "Connector.h"
 
-#define USB_SERIAL_SPEED B4000000
-
 class USBConnector : public Connector
 {
+public:
+  static const int USBSerialSpeed = B4000000;
+
 private:
   const uint16_t idVendor = 0x0483;
   const uint16_t idProduct = 0x5740;

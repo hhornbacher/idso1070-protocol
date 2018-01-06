@@ -23,8 +23,8 @@ void USBConnector::start()
         printf("error %d from tcgetattr", errno);
     }
 
-    cfsetospeed(&tty, USB_SERIAL_SPEED);
-    cfsetispeed(&tty, USB_SERIAL_SPEED);
+    cfsetospeed(&tty, USBSerialSpeed);
+    cfsetispeed(&tty, USBSerialSpeed);
 
     tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8; // 8-bit chars
     // disable IGNBRK for mismatched speed tests; otherwise receive break
@@ -66,9 +66,9 @@ void USBConnector::transmit(uint8_t *data, size_t length)
 
 size_t USBConnector::receive()
 {
-    if (rawBufferLength < RAW_BUFFER_LENGTH)
+    if (rawBufferLength < RawBufferLength)
     {
-        int result = read(handle, &rawBuffer[rawBufferLength], RAW_BUFFER_LENGTH - rawBufferLength);
+        int result = read(handle, &rawBuffer[rawBufferLength], RawBufferLength - rawBufferLength);
         if (result > 0)
             rawBufferLength += result;
     }

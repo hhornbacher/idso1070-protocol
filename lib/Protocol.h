@@ -23,11 +23,11 @@
 #include "packets/Command.h"
 #include "packets/CommandFactory.h"
 
-#define COMMAND_MAX_RETRIES 3
-
 class Protocol
 {
 public:
+  static const int MaxCommandRetries = 3;
+
   typedef std::function<void(Response &)> SampleDataHandler;
 
 private:

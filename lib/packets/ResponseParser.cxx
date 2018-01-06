@@ -300,7 +300,7 @@ bool ResponseParser::parseTriggerLevel(Response *packet)
 {
     uint16_t i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
     i = (uint16_t)roundf(mapValue(i, (float)device.getTrigger().getBottomPWM(), (float)device.getTrigger().getTopPWM(), 8.0f, 248.0f));
-    device.getTrigger().setTriggerLevel(i);
+    device.getTrigger().setLevel(i);
 }
 
 bool ResponseParser::parseTriggerSourceAndSlope(Response *packet)
@@ -436,42 +436,42 @@ bool ResponseParser::parseEEROMPage00(Response *packet)
         iArr3[1] = ((packet->getPayload()[i2] & 255) << 8) + iArr3[1];
     }
     i2 = tmpB + 1;
-    device.getTrigger().setInnerTriggerPWM(0, packet->getPayload()[tmpB] & 255);
-    iArr = device.getTrigger().getInnerTriggerPWM();
+    device.getTrigger().setInnerPWM(0, packet->getPayload()[tmpB] & 255);
+    iArr = device.getTrigger().getInnerPWM();
     i = i2 + 1;
     iArr[0] = iArr[0] + ((packet->getPayload()[i2] & 255) << 8);
     tmpB = i + 1;
-    device.getTrigger().setInnerTriggerPWM(1, packet->getPayload()[i] & 255);
-    iArr = device.getTrigger().getInnerTriggerPWM();
+    device.getTrigger().setInnerPWM(1, packet->getPayload()[i] & 255);
+    iArr = device.getTrigger().getInnerPWM();
     i = tmpB + 1;
     iArr[1] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[1];
     tmpB = i + 1;
-    device.getTrigger().setInnerTriggerPWM(0, packet->getPayload()[i] & 255);
-    iArr = device.getTrigger().getInnerTriggerPWM();
+    device.getTrigger().setInnerPWM(0, packet->getPayload()[i] & 255);
+    iArr = device.getTrigger().getInnerPWM();
     i = tmpB + 1;
     iArr[0] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[0];
     tmpB = i + 1;
-    device.getTrigger().setInnerTriggerPWM(1, packet->getPayload()[i] & 255);
-    iArr = device.getTrigger().getInnerTriggerPWM();
+    device.getTrigger().setInnerPWM(1, packet->getPayload()[i] & 255);
+    iArr = device.getTrigger().getInnerPWM();
     i = tmpB + 1;
     iArr[1] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[1];
     tmpB = i + 1;
-    device.getTrigger().setInnerTriggerPWM(2, packet->getPayload()[i] & 255);
-    iArr = device.getTrigger().getInnerTriggerPWM();
+    device.getTrigger().setInnerPWM(2, packet->getPayload()[i] & 255);
+    iArr = device.getTrigger().getInnerPWM();
     i = tmpB + 1;
     iArr[2] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[2];
     tmpB = i + 1;
-    device.getTrigger().setInnerTriggerPWM(3, packet->getPayload()[i] & 255);
-    iArr = device.getTrigger().getInnerTriggerPWM();
+    device.getTrigger().setInnerPWM(3, packet->getPayload()[i] & 255);
+    iArr = device.getTrigger().getInnerPWM();
     i = tmpB + 1;
     iArr[3] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[3];
-    if (device.getTrigger().getInnerTriggerPWM(2) < IDSO1070A_SAMPLES_COUNT_PER_PACKET || device.getTrigger().getInnerTriggerPWM(2) > 4000)
+    if (device.getTrigger().getInnerPWM(2) < IDSO1070A::SamplesCountPerPacket || device.getTrigger().getInnerPWM(2) > 4000)
     {
-        device.getTrigger().setInnerTriggerPWM(2, device.getTrigger().getInnerTriggerPWM(0));
+        device.getTrigger().setInnerPWM(2, device.getTrigger().getInnerPWM(0));
     }
-    if (device.getTrigger().getInnerTriggerPWM(3) < IDSO1070A_SAMPLES_COUNT_PER_PACKET || device.getTrigger().getInnerTriggerPWM(3) > 4000)
+    if (device.getTrigger().getInnerPWM(3) < IDSO1070A::SamplesCountPerPacket || device.getTrigger().getInnerPWM(3) > 4000)
     {
-        device.getTrigger().setInnerTriggerPWM(3, device.getTrigger().getInnerTriggerPWM(1));
+        device.getTrigger().setInnerPWM(3, device.getTrigger().getInnerPWM(1));
     }
     return true;
 }

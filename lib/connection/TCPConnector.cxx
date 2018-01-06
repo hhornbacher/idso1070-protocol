@@ -47,9 +47,9 @@ void TCPConnector::transmit(uint8_t *data, size_t length)
 
 size_t TCPConnector::receive()
 {
-    if (rawBufferLength < RAW_BUFFER_LENGTH)
+    if (rawBufferLength < RawBufferLength)
     {
-        int result = recv(socketHandle, &rawBuffer[rawBufferLength], RAW_BUFFER_LENGTH - rawBufferLength, 0);
+        int result = recv(socketHandle, &rawBuffer[rawBufferLength], RawBufferLength - rawBufferLength, 0);
         if (result > 0)
             rawBufferLength += result;
     }

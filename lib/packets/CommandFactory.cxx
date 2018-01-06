@@ -650,7 +650,7 @@ CommandGenerator CommandFactory::channel1Level()
             channel1Ref.getVerticalPosition(),
             8.0f, 248.0f,
             (float)channel1Ref.getPWM(verticalDiv, 0), (float)channel1Ref.getPWM(verticalDiv, 1));
-        if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
+        if (pwm < 0 || pwm > IDSO1070A::MaxPWM)
             return (Command *)NULL;
         Command *cmd = new Command(CMDCODE_CH1_PWM,
                                    (uint8_t)(pwm & 0xff),
@@ -672,7 +672,7 @@ CommandGenerator CommandFactory::channel2Level()
             8.0f, 248.0f,
             (float)channel2Ref.getPWM(verticalDiv, 0), (float)channel2Ref.getPWM(verticalDiv, 1));
 
-        if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
+        if (pwm < 0 || pwm > IDSO1070A::MaxPWM)
             return (Command *)NULL;
         Command *cmd = new Command(CMDCODE_CH2_PWM,
                                    (uint8_t)(pwm & 0xff),
@@ -722,7 +722,7 @@ CommandGenerator CommandFactory::updateTriggerLevel()
         // uint16_t pwm = 0x0ab5;
         printf("Calculated PWM: %u\n", pwm);
 
-        if (pwm < 0 || pwm > IDSO1070A_MAX_PWM)
+        if (pwm < 0 || pwm > IDSO1070A::MaxPWM)
             return (Command *)NULL;
         Command *cmd = new Command(CMDCODE_TRIGGER_PWM,
                                    (uint8_t)(pwm & 0xff),

@@ -8,6 +8,7 @@
 
 #include "../util/mapValue.h"
 #include "../device/IDSO1070A.h"
+
 #include "Command.h"
 
 typedef std::function<Command *()> CommandGenerator;

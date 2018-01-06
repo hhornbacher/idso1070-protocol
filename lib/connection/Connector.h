@@ -10,12 +10,13 @@
 
 #include "../packets/Response.h"
 
-#define RAW_BUFFER_LENGTH 1024 * 32
-
 class Connector
 {
+public:
+  static const int RawBufferLength = 1024 * 32;
+
 protected:
-  uint8_t rawBuffer[RAW_BUFFER_LENGTH];
+  uint8_t rawBuffer[RawBufferLength];
   size_t rawBufferLength = 0;
   bool usbConnection;
 

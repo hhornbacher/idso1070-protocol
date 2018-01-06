@@ -11,13 +11,13 @@
 #include "Channel.h"
 #include "Trigger.h"
 
-#define IDSO1070A_MAX_SAMPLE 248
-#define IDSO1070A_MAX_PWM 4095
-#define IDSO1070A_MEMORY_DEPTH 2000
-#define IDSO1070A_SAMPLES_COUNT_PER_PACKET 500
-
 class IDSO1070A
 {
+public:
+  static const int MaxPWM = 4095;
+  static const int MemoryDepth = 2000;
+  static const int SamplesCountPerPacket = 500;
+
 private:
   TimeBase timeBase = HDIV_1mS;
   CaptureMode captureMode = CAPMODE_NORMAL;

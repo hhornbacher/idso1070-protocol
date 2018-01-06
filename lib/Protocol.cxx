@@ -68,7 +68,7 @@ void Protocol::receive()
                     ignoreNextResponse = true;
 
                 // Call handler of current command
-                if (!success && retries < COMMAND_MAX_RETRIES)
+                if (!success && retries < MaxCommandRetries)
                 {
                     printf("Fail:\n");
                     currentCommand->print();
