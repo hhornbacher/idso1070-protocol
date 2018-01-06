@@ -39,9 +39,15 @@ class Main
         runProgram = false;
     }
 
+    bool onFinish(Command *cmd, Response *resp, int retries)
+    {
+        protocol.getDevice().print();
+
+        return true;
+    }
+
     bool onResponse(Command *cmd, Response *resp, int retries)
     {
-        printf("Try #%d\n", retries + 1);
         cmd->print();
         resp->print();
         bool parsable = parser.parse(resp);
@@ -51,15 +57,22 @@ class Main
     int run()
     {
         protocol.start();
+        protocol.getDevice().print();
         cmdGen.setHandler(Command::bindHandler(&Main::onResponse, this));
         protocol.sendCommand(cmdGen.selectRAMChannel());
-        protocol.sendCommands(cmdGen.readEEROMandFPGA());
+
+        protocol.sendCommand(cmdGen.readARMVersion());
+        protocol.sendCommand(cmdGen.readFPGAVersion());
+
+        protocol.sendCommands(cmdGen.readEEROMPages());
         protocol.sendCommand(cmdGen.updateSampleRate());
         protocol.sendCommand(cmdGen.getFreqDivLowBytes());
         protocol.sendCommand(cmdGen.getFreqDivHighBytes());
         protocol.sendCommand(cmdGen.selectChannel());
         protocol.sendCommand(cmdGen.updateTriggerSourceAndSlope());
+
         protocol.sendCommand(cmdGen.updateTriggerLevel());
+
         protocol.sendCommand(cmdGen.preTrigger());
         protocol.sendCommand(cmdGen.postTrigger());
         protocol.sendCommand(cmdGen.readRamCount());
@@ -76,7 +89,13 @@ class Main
         protocol.sendCommand(cmdGen.channel2Level());
         // SET RELAY ?
         protocol.sendCommand(cmdGen.updateChannelVolts125());
+        cmdGen.setHandler(Command::bindHandler(&Main::onFinish, this));
         protocol.sendCommand(cmdGen.updateTriggerMode());
+
+        cmdGen.setHandler(Command::bindHandler(&Main::onResponse, this));
+        protocol.sendCommand(cmdGen.startSampling());
+
+        //--------------------------------------------------
 
         // protocol.sendCommand(cmdGen.updateChannelVolts125());
         // protocol.sendCommand(cmdGen.relay1());
@@ -92,7 +111,6 @@ class Main
         // protocol.sendCommand(cmdGen.channel1Coupling());
         // protocol.sendCommand(cmdGen.channel2Coupling());
         // protocol.sendCommand(cmdGen.updateTriggerMode());
-        protocol.sendCommand(cmdGen.startSampling());
 
         while (runProgram)
         {
