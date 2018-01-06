@@ -331,7 +331,7 @@ bool ResponseParser::parseTriggerSourceAndSlope(Response *packet)
 
 bool ResponseParser::parseStartCapture(Response *packet)
 {
-    // littlePacketStatus = 0;
+    device.setLittlePacketStatus(0);
 
     uint8_t b = packet->getHeader()[5];
     if (b & (1 << 0))
