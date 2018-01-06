@@ -425,13 +425,13 @@ bool ResponseParser::parseEEROMPage00(Response *packet)
     for (tmpA = 0; tmpA < 9; tmpA++)
     {
         i = tmpB + 1;
-        device.getChannel1().setPWM(packet->getPayload()[tmpB] & 255, tmpA, 0);
-        uint16_t *iArr2 = device.getChannel1().getPWM(tmpA);
+        device.getChannel2().setPWM(packet->getPayload()[tmpB] & 255, tmpA, 0);
+        uint16_t *iArr2 = device.getChannel2().getPWM(tmpA);
         int tmp = i + 1;
         iArr2[0] = iArr2[0] + ((packet->getPayload()[i] & 255) << 8);
         i2 = tmp + 1;
-        device.getChannel1().setPWM(packet->getPayload()[tmp] & 255, tmpA, 1);
-        uint16_t *iArr3 = device.getChannel1().getPWM(tmpA);
+        device.getChannel2().setPWM(packet->getPayload()[tmp] & 255, tmpA, 1);
+        uint16_t *iArr3 = device.getChannel2().getPWM(tmpA);
         tmpB = i2 + 1;
         iArr3[1] = ((packet->getPayload()[i2] & 255) << 8) + iArr3[1];
     }
