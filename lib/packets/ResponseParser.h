@@ -17,7 +17,6 @@ private:
   bool parseEEResponse(Response *packet);
   bool parseFPGAResponse(Response *packet);
   bool parseStateResponse(Response *packet);
-  bool parseSampleData(Response *packet);
   bool parseFreqDivLowBytes(Response *packet);
   bool parseFreqDivHighBytes(Response *packet);
   bool parseRamChannelSelection(Response *packet);

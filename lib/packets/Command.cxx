@@ -34,18 +34,6 @@ void Command::setName(const char *name)
     strncpy(this->name, name, 256);
 }
 
-void Command::setHandler(ResponseHandler handler)
-{
-    this->handler = handler;
-}
-
-bool Command::callHandler(Response *response, int retries)
-{
-    if (handler)
-        return handler(this, response, retries);
-    return true;
-}
-
 bool Command::isInProgress()
 {
     return inProgress;

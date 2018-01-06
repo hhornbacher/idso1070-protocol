@@ -20,26 +20,23 @@ public:
 private:
   IDSO1070A &device;
   CommandGeneratorVector buffer;
-  Command::ResponseHandler handler;
 
 public:
   CommandFactory(IDSO1070A &device);
 
-  void setHandler(Command::ResponseHandler handler);
-
-  CommandGeneratorVector &init(bool internal = false);
-  CommandGeneratorVector &channelStatusOnly(bool internal = false);
-  CommandGeneratorVector &channelStatus(bool internal = false);
-  CommandGeneratorVector &channel1VoltageDiv(bool internal = false);
-  CommandGeneratorVector &channel2VoltageDiv(bool internal = false);
-  CommandGeneratorVector &levels(bool internal = false);
-  CommandGeneratorVector &pullSamples(bool internal = false);
   CommandGeneratorVector &readEEROMPages(bool internal = false);
-  CommandGeneratorVector &updateTimeBase(bool internal = false);
-  CommandGeneratorVector &trigger(bool internal = false);
-  CommandGeneratorVector &triggerSource(bool internal = false);
-  CommandGeneratorVector &voltageDiv(bool internal = false);
-  CommandGeneratorVector &updateXTriggerPos(bool internal = false);
+  // CommandGeneratorVector &init(bool internal = false);
+  // CommandGeneratorVector &channelStatusOnly(bool internal = false);
+  // CommandGeneratorVector &channelStatus(bool internal = false);
+  // CommandGeneratorVector &channel1VoltageDiv(bool internal = false);
+  // CommandGeneratorVector &channel2VoltageDiv(bool internal = false);
+  // CommandGeneratorVector &levels(bool internal = false);
+  // CommandGeneratorVector &pullSamples(bool internal = false);
+  // CommandGeneratorVector &updateTimeBase(bool internal = false);
+  // CommandGeneratorVector &trigger(bool internal = false);
+  // CommandGeneratorVector &triggerSource(bool internal = false);
+  // CommandGeneratorVector &voltageDiv(bool internal = false);
+  // CommandGeneratorVector &updateXTriggerPos(bool internal = false);
 
   CommandGenerator selectChannel();
   CommandGenerator selectRAMChannel();

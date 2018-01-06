@@ -21,14 +21,14 @@ class Main
 
     TCPConnector wifiConnection;
     USBConnector usbConnection;
-    CommandFactory cmdGen;
+    CommandFactory cmdFactory;
     ResponseParser parser;
 
   public:
     Protocol protocol;
     Main() : wifiConnection((char *)serverIP, serverPort),
              usbConnection((char *)device),
-             protocol(CONNECTION), cmdGen(protocol.getDevice()),
+             protocol(CONNECTION), cmdFactory(protocol.getDevice()),
              parser(protocol.getDevice())
     {
         signal(SIGINT, sigHandler);
@@ -56,36 +56,10 @@ class Main
     int run()
     {
         protocol.start();
-        cmdGen.setHandler(Command::bindHandler(&Main::onResponse, this));
-        protocol.setSampleDataHandler(Protocol::bindSampleDataHandler(&Main::onSample, this));
-
-        protocol.sendCommand(cmdGen.selectRAMChannel());
-        protocol.sendCommand(cmdGen.readARMVersion());
-        protocol.sendCommand(cmdGen.readFPGAVersion());
-        protocol.sendCommands(cmdGen.readEEROMPages());
-        protocol.sendCommand(cmdGen.updateSampleRate());
-        protocol.sendCommand(cmdGen.getFreqDivLowBytes());
-        protocol.sendCommand(cmdGen.getFreqDivHighBytes());
-        protocol.sendCommand(cmdGen.selectChannel());
-        protocol.sendCommand(cmdGen.updateTriggerSourceAndSlope());
-        protocol.sendCommand(cmdGen.updateTriggerLevel());
-        protocol.sendCommand(cmdGen.preTrigger());
-        protocol.sendCommand(cmdGen.postTrigger());
-        protocol.sendCommand(cmdGen.readRamCount());
-        protocol.sendCommand(cmdGen.selectRAMChannel());
-        protocol.sendCommand(cmdGen.updateChannelVolts125());
-        protocol.sendCommand(cmdGen.relay1());
-        protocol.sendCommand(cmdGen.relay2());
-        protocol.sendCommand(cmdGen.relay3());
-        protocol.sendCommand(cmdGen.relay4());
-        protocol.sendCommand(cmdGen.channel1Level());
-        protocol.sendCommand(cmdGen.channel2Level());
-        protocol.sendCommand(cmdGen.updateChannelVolts125());
-        protocol.sendCommand(cmdGen.updateTriggerMode());
-        protocol.sendCommand(cmdGen.updateTriggerLevel());
-        protocol.sendCommand(cmdGen.channel1Coupling());
-        protocol.sendCommand(cmdGen.channel2Coupling());
-        protocol.sendCommand(cmdGen.startSampling());
+        protocol.setSamplePacketHandler(Protocol::bindSamplePacketHandler(&Main::onSample, this));
+        protocol.setResponsePacketHandler(Protocol::bindResponsePacketHandler(&Main::onResponse, this));
+        protocol.init();
+        protocol.sendCommand(cmdFactory.startSampling());
 
         while (runProgram)
         {

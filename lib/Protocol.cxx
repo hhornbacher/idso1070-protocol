@@ -1,7 +1,8 @@
 #include "Protocol.h"
 
 Protocol::Protocol(Connector &connection) : connection(connection),
-                                            commandTimeout(200)
+                                            commandTimeout(200),
+                                            cmdFactory(device)
 {
     // device.getChannel1().parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
     // device.getChannel2().parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
@@ -39,9 +40,44 @@ void Protocol::sendCommands(CommandGeneratorVector cmdFns)
         commandQueue.push_back(cmdFn);
 }
 
-void Protocol::setSampleDataHandler(SampleDataHandler handler)
+void Protocol::init()
 {
-    sampleDataHandler = handler;
+    sendCommand(cmdFactory.selectRAMChannel());
+    sendCommand(cmdFactory.readARMVersion());
+    sendCommand(cmdFactory.readFPGAVersion());
+    sendCommands(cmdFactory.readEEROMPages());
+    sendCommand(cmdFactory.updateSampleRate());
+    sendCommand(cmdFactory.getFreqDivLowBytes());
+    sendCommand(cmdFactory.getFreqDivHighBytes());
+    sendCommand(cmdFactory.selectChannel());
+    sendCommand(cmdFactory.updateTriggerSourceAndSlope());
+    sendCommand(cmdFactory.updateTriggerLevel());
+    sendCommand(cmdFactory.preTrigger());
+    sendCommand(cmdFactory.postTrigger());
+    sendCommand(cmdFactory.readRamCount());
+    sendCommand(cmdFactory.selectRAMChannel());
+    sendCommand(cmdFactory.updateChannelVolts125());
+    sendCommand(cmdFactory.relay1());
+    sendCommand(cmdFactory.relay2());
+    sendCommand(cmdFactory.relay3());
+    sendCommand(cmdFactory.relay4());
+    sendCommand(cmdFactory.channel1Level());
+    sendCommand(cmdFactory.channel2Level());
+    sendCommand(cmdFactory.updateChannelVolts125());
+    sendCommand(cmdFactory.updateTriggerMode());
+    sendCommand(cmdFactory.updateTriggerLevel());
+    sendCommand(cmdFactory.channel1Coupling());
+    sendCommand(cmdFactory.channel2Coupling());
+}
+
+void Protocol::setSamplePacketHandler(SamplePacketHandler handler)
+{
+    samplePacketHandler = handler;
+}
+
+void Protocol::setResponsePacketHandler(ResponsePacketHandler handler)
+{
+    responsePacketHandler = handler;
 }
 
 void Protocol::receive()
@@ -67,15 +103,15 @@ void Protocol::receive()
                 if (currentResponse->getCommandID() == 0x04 && currentResponse->getType() == 0xaa)
                 {
                     sampling = true;
-                    if (sampleDataHandler)
-                        sampleDataHandler(currentResponse);
+                    if (samplePacketHandler)
+                        samplePacketHandler(currentResponse);
                 }
                 else
                 {
                     // Parse received packet
                     bool success = currentCommand->getPayload()[0] == currentResponse->getType() &&
                                    currentCommand->getPayload()[1] == currentResponse->getCommandID() &&
-                                   currentCommand->callHandler(currentResponse, retries);
+                                   responsePacketHandler && responsePacketHandler(currentCommand, currentResponse, retries);
 
                     // If it's a wifi connection, then we get two responses per command
                     if (success && !connection.isUsbConnection())
@@ -83,9 +119,7 @@ void Protocol::receive()
 
                     // Call handler of current command
                     if (!success && retries < MaxCommandRetries)
-                    {
                         retries++;
-                    }
                     else
                     {
                         // Remove current command generator
@@ -100,8 +134,8 @@ void Protocol::receive()
             }
             else if (sampling)
             {
-                if (sampleDataHandler)
-                    sampleDataHandler(currentResponse);
+                if (samplePacketHandler)
+                    samplePacketHandler(currentResponse);
             }
             delete currentResponse;
             currentResponse = NULL;

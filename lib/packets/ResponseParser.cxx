@@ -35,8 +35,6 @@ bool ResponseParser::parseAAResponse(Response *packet)
         version[8] = 0;
         device.setFPGAFirmwareVersion(version);
         return true;
-    case 0x04:
-        return parseSampleData(packet);
     default:
         return false;
     }
@@ -127,12 +125,6 @@ bool ResponseParser::parseStateResponse(Response *packet)
     default:
         return false;
     }
-}
-
-bool ResponseParser::parseSampleData(Response *packet)
-{
-    printf("parseSampleData\n");
-    return true;
 }
 
 bool ResponseParser::parseFreqDivLowBytes(Response *packet)
@@ -339,7 +331,7 @@ bool ResponseParser::parseTriggerSourceAndSlope(Response *packet)
 
 bool ResponseParser::parseStartCapture(Response *packet)
 {
-    // this.littlePacketStatus = 0;
+    // littlePacketStatus = 0;
 
     uint8_t b = packet->getHeader()[5];
     if (b & (1 << 0))
