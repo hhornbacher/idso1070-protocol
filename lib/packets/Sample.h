@@ -7,6 +7,7 @@
 #include "../device/IDSO1070A.h"
 
 #include "Packet.h"
+#include "Response.h"
 
 class Sample : public Packet
 {
@@ -15,6 +16,7 @@ private:
 
 public:
   Sample(uint8_t *data);
+  Sample(Response *response);
 
   uint8_t *getPayload();
   size_t getPayloadLength();

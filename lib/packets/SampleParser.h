@@ -9,12 +9,12 @@
 
 class SampleParser
 {
-  private:
-    int littlePacketStatus = 0;
+private:
+  IDSO1070A &device;
 
-  public:
-    SampleParser(IDSO1070A &device);
-    bool parse(Response *packet);
+public:
+  SampleParser(IDSO1070A &device);
+  bool parse(Response *packet);
 };
 
 #endif // _SAMPLE_PARSER_H_

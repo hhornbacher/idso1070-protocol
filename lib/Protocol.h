@@ -18,6 +18,8 @@
 #include "device/IDSO1070A.h"
 
 #include "enums.h"
+#include "packets/Sample.h"
+#include "packets/SampleParser.h"
 #include "packets/Response.h"
 #include "packets/ResponseParser.h"
 #include "packets/Command.h"
@@ -28,8 +30,7 @@ class Protocol
 public:
   static const int MaxCommandRetries = 3;
 
-  typedef std::function<void(Response *)> SamplePacketHandler;
-  typedef std::function<bool(Command *, Response *, int)> ResponsePacketHandler;
+  typedef std::function<void(Sample *)> SamplePacketHandler;
 
 private:
   IDSO1070A device;
@@ -43,12 +44,12 @@ private:
   int retries = 0;
   bool ignoreNextResponse = false;
   Timeout commandTimeout;
-  ResponsePacketHandler responsePacketHandler;
 
   Command *currentCommand = NULL;
   Response *currentResponse = NULL;
 
   CommandFactory cmdFactory;
+  ResponseParser parser;
 
 public:
   Protocol(Connector &connection);
@@ -58,12 +59,6 @@ public:
   static SamplePacketHandler bindSamplePacketHandler(F &&f, S *self)
   {
     return std::bind(f, self, std::placeholders::_1);
-  }
-
-  template <class F, class S>
-  static ResponsePacketHandler bindResponsePacketHandler(F &&f, S *self)
-  {
-    return std::bind(f, self, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
   }
 
   void start();
@@ -78,7 +73,6 @@ public:
   void init();
 
   void setSamplePacketHandler(SamplePacketHandler handler);
-  void setResponsePacketHandler(ResponsePacketHandler handler);
 
   void receive();
   void transmit();

@@ -2,7 +2,8 @@
 
 Protocol::Protocol(Connector &connection) : connection(connection),
                                             commandTimeout(200),
-                                            cmdFactory(device)
+                                            cmdFactory(device),
+                                            parser(device)
 {
     // device.getChannel1().parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
     // device.getChannel2().parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
@@ -75,11 +76,6 @@ void Protocol::setSamplePacketHandler(SamplePacketHandler handler)
     samplePacketHandler = handler;
 }
 
-void Protocol::setResponsePacketHandler(ResponsePacketHandler handler)
-{
-    responsePacketHandler = handler;
-}
-
 void Protocol::receive()
 {
     connection.receive();
@@ -102,16 +98,20 @@ void Protocol::receive()
                 // Check for sample data packet
                 if (currentResponse->getCommandID() == 0x04 && currentResponse->getType() == 0xaa)
                 {
-                    sampling = true;
                     if (samplePacketHandler)
-                        samplePacketHandler(currentResponse);
+                    {
+                        sampling = true;
+                        Sample *sample = new Sample(currentResponse);
+                        samplePacketHandler(sample);
+                        delete sample;
+                    }
                 }
                 else
                 {
                     // Parse received packet
                     bool success = currentCommand->getPayload()[0] == currentResponse->getType() &&
                                    currentCommand->getPayload()[1] == currentResponse->getCommandID() &&
-                                   responsePacketHandler && responsePacketHandler(currentCommand, currentResponse, retries);
+                                   parser.parse(currentResponse);
 
                     // If it's a wifi connection, then we get two responses per command
                     if (success && !connection.isUsbConnection())
@@ -135,7 +135,11 @@ void Protocol::receive()
             else if (sampling)
             {
                 if (samplePacketHandler)
-                    samplePacketHandler(currentResponse);
+                {
+                    Sample *sample = new Sample(currentResponse->getHeader());
+                    samplePacketHandler(sample);
+                    delete sample;
+                }
             }
             delete currentResponse;
             currentResponse = NULL;

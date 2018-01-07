@@ -22,14 +22,12 @@ class Main
     TCPConnector wifiConnection;
     USBConnector usbConnection;
     CommandFactory cmdFactory;
-    ResponseParser parser;
 
   public:
     Protocol protocol;
     Main() : wifiConnection((char *)serverIP, serverPort),
              usbConnection((char *)device),
-             protocol(CONNECTION), cmdFactory(protocol.getDevice()),
-             parser(protocol.getDevice())
+             protocol(CONNECTION), cmdFactory(protocol.getDevice())
     {
         signal(SIGINT, sigHandler);
     }
@@ -42,14 +40,6 @@ class Main
     void onSample(Sample *sample)
     {
         sample->print();
-    }
-
-    bool onResponse(Command *cmd, Response *resp, int retries)
-    {
-        cmd->print();
-        resp->print();
-        bool parsable = parser.parse(resp);
-        return true;
     }
 
     int run()

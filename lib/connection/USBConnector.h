@@ -13,9 +13,6 @@ public:
   static const int USBSerialSpeed = B4000000;
 
 private:
-  const uint16_t idVendor = 0x0483;
-  const uint16_t idProduct = 0x5740;
-
   char device[256];
   int handle;
 

@@ -16,17 +16,29 @@ size_t Connector::getResponseBufferSize()
 
 void Connector::grabPacket()
 {
-  if (rawBufferLength > Response::PacketSize)
+  while (rawBufferLength > Response::PacketSize)
   {
-    Response *response = new Response(rawBuffer);
-    // printf("old buffer length: %ld\n", rawBufferLength);
-    // hexdump(rawBuffer, rawBufferLength);
-    rawBufferLength -= Response::PacketSize;
-    // printf("new buffer length: %ld\n", rawBufferLength);
-    // hexdump(rawBuffer, rawBufferLength);
-    memcpy(rawBuffer, &rawBuffer[Response::PacketSize], rawBufferLength);
-    // hexdump(rawBuffer, rawBufferLength);
-    responseBuffer.push(response);
+    uint8_t packetSignature[2] = {0xff, 0x01};
+    for (size_t pos = 0; pos < rawBufferLength; pos++)
+    {
+      if (memcmp(&rawBuffer[pos], packetSignature, 2) == 0)
+      {
+        if ((rawBufferLength - pos) > Response::PacketSize)
+        {
+          Response *response = new Response(rawBuffer);
+          rawBufferLength -= Response::PacketSize + pos;
+          memcpy(rawBuffer, &rawBuffer[Response::PacketSize + pos], rawBufferLength);
+          responseBuffer.push(response);
+          break;
+        }
+        else
+        {
+          rawBufferLength -= pos;
+          memcpy(rawBuffer, &rawBuffer[pos], rawBufferLength);
+          break;
+        }
+      }
+    }
   }
 }
 

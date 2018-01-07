@@ -4,6 +4,10 @@ Sample::Sample(uint8_t *data) : Packet(data)
 {
 }
 
+Sample::Sample(Response *response) : Packet(response->getHeader())
+{
+}
+
 uint8_t *Sample::getPayload()
 {
     return &rawPacket[HeaderSize];
