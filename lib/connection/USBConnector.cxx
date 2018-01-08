@@ -66,12 +66,17 @@ void USBConnector::transmit(uint8_t *data, size_t length)
 
 size_t USBConnector::receive()
 {
-    if (rawBufferLength < RawBufferLength)
+    if (!rawBuffer.full())
     {
-        int result = read(handle, &rawBuffer[rawBufferLength], RawBufferLength - rawBufferLength);
+        size_t size = RawBufferLength - rawBuffer.size();
+        uint8_t tmp[size];
+        ssize_t result = read(handle, tmp, size);
         if (result > 0)
-            rawBufferLength += result;
+        {
+            for (ssize_t i = 0; i < result; i++)
+                rawBuffer.push_back(tmp[i]);
+        }
     }
     grabPacket();
-    return rawBufferLength;
+    return rawBuffer.size();
 }

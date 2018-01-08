@@ -2,6 +2,10 @@
 
 #include "../util/hexdump.h"
 
+Connector::Connector() : rawBuffer(RawBufferLength)
+{
+}
+
 Response *Connector::getLatestResponse()
 {
   Response *response = responseBuffer.front();
@@ -16,28 +20,18 @@ size_t Connector::getResponseBufferSize()
 
 void Connector::grabPacket()
 {
-  while (rawBufferLength > Response::PacketSize)
+  while (rawBuffer.size() > Response::PacketSize)
   {
-    uint8_t packetSignature[2] = {0xff, 0x01};
-    for (size_t pos = 0; pos < rawBufferLength; pos++)
+    if (rawBuffer[0] == 0xff && rawBuffer[1] == 0x01)
     {
-      if (memcmp(&rawBuffer[pos], packetSignature, 2) == 0)
-      {
-        if ((rawBufferLength - pos) > Response::PacketSize)
-        {
-          Response *response = new Response(rawBuffer);
-          rawBufferLength -= Response::PacketSize + pos;
-          memcpy(rawBuffer, &rawBuffer[Response::PacketSize + pos], rawBufferLength);
-          responseBuffer.push(response);
-          break;
-        }
-        else
-        {
-          rawBufferLength -= pos;
-          memcpy(rawBuffer, &rawBuffer[pos], rawBufferLength);
-          break;
-        }
-      }
+      rawBuffer.linearize();
+      Response *response = new Response(rawBuffer.array_one().first);
+      rawBuffer.erase_begin(Response::PacketSize);
+      responseBuffer.push(response);
+    }
+    else
+    {
+      rawBuffer.pop_front();
     }
   }
 }

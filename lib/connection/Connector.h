@@ -8,16 +8,17 @@
 
 #include <queue>
 
+#include <boost/circular_buffer.hpp>
+
 #include "../packets/Response.h"
 
 class Connector
 {
 public:
-  static const int RawBufferLength = 1024 * 32;
+  static const int RawBufferLength = 1024 * 4;
 
 protected:
-  uint8_t rawBuffer[RawBufferLength];
-  size_t rawBufferLength = 0;
+  boost::circular_buffer<uint8_t> rawBuffer;
   bool usbConnection;
 
   std::queue<Response *> responseBuffer;
@@ -25,6 +26,8 @@ protected:
   void grabPacket();
 
 public:
+  Connector();
+
   virtual void transmit(uint8_t *data, size_t length) = 0;
   virtual size_t receive() = 0;
 
@@ -33,7 +36,6 @@ public:
 
   Response *getLatestResponse();
   size_t getResponseBufferSize();
-  // void clearPacketBuffer();
 
   bool isUsbConnection();
 };

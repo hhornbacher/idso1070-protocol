@@ -47,12 +47,17 @@ void TCPConnector::transmit(uint8_t *data, size_t length)
 
 size_t TCPConnector::receive()
 {
-    if (rawBufferLength < RawBufferLength)
+    if (!rawBuffer.full())
     {
-        int result = recv(socketHandle, &rawBuffer[rawBufferLength], RawBufferLength - rawBufferLength, 0);
+        size_t size = RawBufferLength - rawBuffer.size();
+        uint8_t tmp[size];
+        ssize_t result = recv(socketHandle, tmp, size, 0);
         if (result > 0)
-            rawBufferLength += result;
+        {
+            for (ssize_t i = 0; i < result; i++)
+                rawBuffer.push_back(tmp[i]);
+        }
     }
     grabPacket();
-    return rawBufferLength;
+    return rawBuffer.size();
 }

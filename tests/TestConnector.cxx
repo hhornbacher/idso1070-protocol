@@ -31,7 +31,6 @@ void TestConnector::stop()
 
 void TestConnector::fakePacket(uint8_t *data)
 {
-    memcpy(rawBuffer, data, Response::PacketSize);
-    rawBufferLength = Response::PacketSize;
-    pending = true;
+    for (ssize_t i = 0; i < Response::PacketSize; i++)
+        rawBuffer.push_back(data[i]);
 }
