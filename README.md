@@ -11,6 +11,6 @@ It's possible to communicate with the device over WiFi (TCP) as well as USB.
 Just run the ```build.sh```.
 There is also a preconfigured task for building (CTRL-SHIFT-B) in vscode and a launch.json to debug(F5).
 
-## Attetion
+## Attention!
 This is not a production ready version, there's still a lot of stuff to do. If you're interested to support this library, just contact me.
  
