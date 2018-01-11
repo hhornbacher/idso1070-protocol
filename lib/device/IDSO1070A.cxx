@@ -199,7 +199,7 @@ TimeBase IDSO1070A::getTimebaseFromFreqDiv()
 
 size_t IDSO1070A::getSamplesNumberOfOneFrame()
 {
-    return (MemoryDepth == 2000 && timeBase == HDIV_5uS) ? 2500 : MemoryDepth;
+    return (timeBase == HDIV_5uS) ? 2500 : MemoryDepth;
 }
 uint8_t IDSO1070A::getEnabledChannelsCount()
 {
@@ -211,6 +211,5 @@ uint8_t IDSO1070A::getEnabledChannelsCount()
 }
 uint8_t IDSO1070A::getPacketsNumber()
 {
-    int enabledChannelsCount = getEnabledChannelsCount();
-    return enabledChannelsCount == 0 ? 0 : (enabledChannelsCount * getSamplesNumberOfOneFrame()) / SamplesCountPerPacket;
+    return (getEnabledChannelsCount() * getSamplesNumberOfOneFrame()) / SamplesCountPerPacket;
 }

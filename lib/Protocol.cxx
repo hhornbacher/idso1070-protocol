@@ -103,7 +103,7 @@ void Protocol::receive()
                 {
                     sampling = true;
                     Sample *sample = new Sample(currentResponse);
-                    sample->print();
+                    // sample->print();
                     sampleParser.parse(sample);
                     delete sample;
                 }
@@ -141,8 +141,7 @@ void Protocol::receive()
             else if (sampling)
             {
                 Sample *sample = new Sample(currentResponse->getHeader());
-
-                // sampleParser.parse(sample);
+                sampleParser.parse(sample);
                 delete sample;
             }
             delete currentResponse;

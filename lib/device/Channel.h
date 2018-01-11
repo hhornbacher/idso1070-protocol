@@ -21,7 +21,7 @@ private:
   bool enabled = true;
   VoltageDiv verticalDiv = VDIV_1V;
   InputCoupling coupling = COUPLING_AC;
-  int verticalPosition;
+  int16_t verticalPosition;
   uint16_t pwmArray[9][2];
 
   double voltage125;
@@ -45,8 +45,8 @@ public:
   InputCoupling getCoupling();
   void setCoupling(InputCoupling coupling);
 
-  int getVerticalPosition();
-  void setVerticalPosition(int verticalPosition);
+  int16_t getVerticalPosition();
+  void setVerticalPosition(int16_t verticalPosition);
 
   uint16_t getPWM(uint8_t a, uint8_t b);
   uint16_t *getPWM(uint8_t a);

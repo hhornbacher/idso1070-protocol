@@ -53,11 +53,11 @@ void Channel::setCoupling(InputCoupling coupling)
     this->coupling = coupling;
 }
 
-int Channel::getVerticalPosition()
+int16_t Channel::getVerticalPosition()
 {
     return verticalPosition;
 }
-void Channel::setVerticalPosition(int verticalPosition)
+void Channel::setVerticalPosition(int16_t verticalPosition)
 {
     if (verticalPosition < 8)
         verticalPosition = 8;

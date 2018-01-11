@@ -12,10 +12,10 @@ class SampleParser
 private:
   IDSO1070A &device;
 
-  void parseSamplePacket(Sample *packet, int i);
-  void parseBothChannelsData(Sample *packet, int i);
-  void parseChannel1Data(Sample *packet, int i);
-  void parseChannel2Data(Sample *packet, int i);
+  void parseSamplePacket(Sample *packet, int index);
+  void parseBothChannelsData(Sample *packet, int index);
+  void parseChannel1Data(Sample *packet, int index);
+  void parseChannel2Data(Sample *packet, int index);
 
 public:
   SampleParser(IDSO1070A &device);
