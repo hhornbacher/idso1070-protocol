@@ -42,11 +42,16 @@ class Main
         sample->print();
     }
 
+    void onProgress(float progress)
+    {
+        printf("\nProgress: %.2f\n", (progress * 100.0f));
+    }
+
     int run()
     {
         protocol.start();
         protocol.setSamplePacketHandler(Protocol::bindSamplePacketHandler(&Main::onSample, this));
-        protocol.setResponsePacketHandler(Protocol::bindResponsePacketHandler(&Main::onResponse, this));
+        protocol.setProgressHandler(Protocol::bindProgressHandler(&Main::onProgress, this));
         protocol.init();
         protocol.sendCommand(cmdFactory.startSampling());
 

@@ -76,6 +76,11 @@ void Protocol::setSamplePacketHandler(SamplePacketHandler handler)
     samplePacketHandler = handler;
 }
 
+void Protocol::setProgressHandler(ProgressHandler handler)
+{
+    progressHandler = handler;
+}
+
 void Protocol::receive()
 {
     connection.receive();
@@ -108,7 +113,7 @@ void Protocol::receive()
                 }
                 else
                 {
-                    // Parse received packet
+                    // Check & parse received packet
                     bool success = currentCommand->getPayload()[0] == currentResponse->getType() &&
                                    currentCommand->getPayload()[1] == currentResponse->getCommandID() &&
                                    parser.parse(currentResponse);
@@ -125,6 +130,8 @@ void Protocol::receive()
                         // Remove current command generator
                         commandQueue.pop_front();
                         retries = 0;
+
+                        progressHandler(1.0f / (float)commandQueue.size());
                     }
                 }
 

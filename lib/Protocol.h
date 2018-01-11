@@ -31,11 +31,14 @@ public:
   static const int MaxCommandRetries = 3;
 
   typedef std::function<void(Sample *)> SamplePacketHandler;
+  typedef std::function<void(float)> ProgressHandler;
 
 private:
   IDSO1070A device;
 
   Connector &connection;
+
+  ProgressHandler progressHandler;
 
   bool sampling = false;
   SamplePacketHandler samplePacketHandler;
@@ -61,6 +64,12 @@ public:
     return std::bind(f, self, std::placeholders::_1);
   }
 
+  template <class F, class S>
+  static ProgressHandler bindProgressHandler(F &&f, S *self)
+  {
+    return std::bind(f, self, std::placeholders::_1);
+  }
+
   void start();
   void stop();
   void process();
@@ -73,6 +82,7 @@ public:
   void init();
 
   void setSamplePacketHandler(SamplePacketHandler handler);
+  void setProgressHandler(ProgressHandler handler);
 
   void receive();
   void transmit();
