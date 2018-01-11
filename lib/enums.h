@@ -27,10 +27,10 @@ enum CommandCode
     CMDCODE_READ_RAM_COUNT = 0x16
 };
 
-enum ResponseType
+enum CommandType
 {
-    TYPE_AA = 0xaa,
-    TYPE_EE = 0xee,
+    TYPE_CONTROL = 0xaa,
+    TYPE_EEROM = 0xee,
     TYPE_FPGA = 0x55,
     TYPE_STATE = 0x57
 };

@@ -8,9 +8,9 @@ bool ResponseParser::parse(Response *packet)
 {
     switch (packet->getType())
     {
-    case TYPE_AA:
+    case TYPE_CONTROL:
         return parseAAResponse(packet);
-    case TYPE_EE:
+    case TYPE_EEROM:
         return parseEEResponse(packet);
     case TYPE_FPGA:
         return parseFPGAResponse(packet);

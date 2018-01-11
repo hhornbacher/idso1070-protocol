@@ -24,9 +24,9 @@ uint8_t Response::getCommandID()
     return rawPacket[4];
 }
 
-ResponseType Response::getType()
+CommandType Response::getType()
 {
-    return (ResponseType)rawPacket[3];
+    return (CommandType)rawPacket[3];
 }
 
 void Response::print()
