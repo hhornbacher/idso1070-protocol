@@ -10,10 +10,14 @@ void Trigger::print()
     printf("slope = %d\n", slope);
     printf("level = %d\n", level);
     printf("xPosition = %lf\n", xPosition);
-    printf("innerPWM = \n");
-    hexdump((uint8_t *)innerPWM, sizeof(innerPWM));
-    printf("outerPWM = \n");
-    hexdump((uint8_t *)outerPWM, sizeof(outerPWM));
+    for (int i = 0; i < 4; i++)
+    {
+        printf("innerPWM[%d] = %d\n", i, innerPWM[i]);
+    }
+    for (int j = 0; j < 2; j++)
+    {
+        printf("outerPWM[%d] = %d\n", j, outerPWM[j]);
+    }
     printf("\n\n");
 }
 
