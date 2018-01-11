@@ -1,5 +1,9 @@
 #include "Channel.h"
 
+Channel::Channel() : sampleBuffer(SampleBufferSize)
+{
+}
+
 void Channel::print()
 {
     printf("[Channel]\n");
@@ -105,4 +109,9 @@ double Channel::getVoltageRL2()
 void Channel::setVoltageRL2(double voltage)
 {
     this->voltageRL2 = voltage;
+}
+
+Channel::SampleBuffer &Channel::getSampleBuffer()
+{
+    return sampleBuffer;
 }

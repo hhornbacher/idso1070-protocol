@@ -18,7 +18,6 @@ public:
   Sample(uint8_t *data);
   Sample(Response *response);
 
-  uint8_t *getPayload();
   size_t getPayloadLength();
 
   void print();

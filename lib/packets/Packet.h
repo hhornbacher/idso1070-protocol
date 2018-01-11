@@ -20,8 +20,7 @@ public:
   uint8_t getCounter();
 
   uint8_t *getHeader();
-
-  virtual uint8_t *getPayload() = 0;
+  uint8_t *getPayload();
   virtual size_t getPayloadLength() = 0;
 
   virtual void print() = 0;

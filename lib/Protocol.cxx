@@ -3,7 +3,8 @@
 Protocol::Protocol(Connector &connection) : connection(connection),
                                             commandTimeout(200),
                                             cmdFactory(device),
-                                            parser(device)
+                                            responseParser(device),
+                                            sampleParser(device)
 {
     // device.getChannel1().parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
     // device.getChannel2().parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
@@ -33,10 +34,12 @@ IDSO1070A &Protocol::getDevice()
 void Protocol::sendCommand(CommandGenerator cmdFn)
 {
     commandQueue.push_back(cmdFn);
+    commandCount++;
 }
 
 void Protocol::sendCommands(CommandGeneratorVector cmdFns)
 {
+    commandCount += cmdFns.size();
     for (auto cmdFn : cmdFns)
         commandQueue.push_back(cmdFn);
 }
@@ -116,7 +119,7 @@ void Protocol::receive()
                     // Check & parse received packet
                     bool success = currentCommand->getPayload()[0] == currentResponse->getType() &&
                                    currentCommand->getPayload()[1] == currentResponse->getCommandID() &&
-                                   parser.parse(currentResponse);
+                                   responseParser.parse(currentResponse);
 
                     // If it's a wifi connection, then we get two responses per command
                     if (success && !connection.isUsbConnection())
@@ -131,7 +134,10 @@ void Protocol::receive()
                         commandQueue.pop_front();
                         retries = 0;
 
-                        progressHandler(1.0f / (float)commandQueue.size());
+                        // Update progress
+                        progressHandler(((float)commandCount - (float)commandQueue.size()) / (float)commandCount);
+                        if (commandQueue.size() == 0)
+                            commandCount = 0;
                     }
                 }
 
@@ -144,6 +150,7 @@ void Protocol::receive()
                 if (samplePacketHandler)
                 {
                     Sample *sample = new Sample(currentResponse->getHeader());
+                    sampleParser.parse(sample);
                     samplePacketHandler(sample);
                     delete sample;
                 }
@@ -156,14 +163,17 @@ void Protocol::receive()
 
 void Protocol::transmit()
 {
-    if (commandTimeout.isTimedOut() && commandQueue.size() > 0)
+    // Check if there are any commands and command limiting timeout
+    if (commandQueue.size() > 0 && commandTimeout.isTimedOut())
     {
+        // Create Command with CommandGenerator function
         CommandGenerator generateCommand = *(commandQueue.begin());
         currentCommand = generateCommand();
 
         // Transmit current command
         connection.transmit(currentCommand->getPayload(), 4);
 
+        // Reset command limiting timout
         commandTimeout.reset();
     }
 }

@@ -44,6 +44,7 @@ private:
   SamplePacketHandler samplePacketHandler;
 
   std::deque<CommandGenerator> commandQueue;
+  int commandCount = 0;
   int retries = 0;
   bool ignoreNextResponse = false;
   Timeout commandTimeout;
@@ -52,7 +53,8 @@ private:
   Response *currentResponse = NULL;
 
   CommandFactory cmdFactory;
-  ResponseParser parser;
+  ResponseParser responseParser;
+  SampleParser sampleParser;
 
 public:
   Protocol(Connector &connection);

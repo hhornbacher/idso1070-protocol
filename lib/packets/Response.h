@@ -19,7 +19,6 @@ public:
   uint8_t getCommandID();
   ResponseType getType();
 
-  uint8_t *getPayload();
   size_t getPayloadLength();
 
   void print();

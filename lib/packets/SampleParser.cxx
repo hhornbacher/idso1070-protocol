@@ -4,37 +4,63 @@ SampleParser::SampleParser(IDSO1070A &device) : device(device)
 {
 }
 
-bool SampleParser::parse(Response *packet)
+void SampleParser::parseSamplePacket(Sample *packet, int i)
 {
+    if (device.getEnabledChannelsCount() == 2)
+    {
+        parseBothChannelsData(packet, i);
+    }
+    else if (device.getChannel1().isEnabled() && !device.getChannel2().isEnabled())
+    {
+        parseChannel1Data(packet, i);
+    }
+    else if (device.getChannel2().isEnabled() && !device.getChannel1().isEnabled())
+    {
+        parseChannel2Data(packet, i);
+    }
+}
 
-    // byte[] bytes = replyPacket.getBytes();
-    // if (Utility.isSet(bytes[7], 5)) {
-    //     int i = bytes[7] & 15;
-    //     if (this.littlePacketStatus == i) {
-    //         this.littlePacketStatus++;
-    //         receiveSamplesPacket(replyPacket, i);
-    //         if (i == getLastPacketIndex()) {
-    //             this.littlePacketStatus = 0;
-    //             fixAdDiff();
-    //             interpolateSamples();
-    //             boolean z = Utility.isSet(bytes[7], 6);
-    //             if (this.connector.isSendingCommands()) {
-    //                 C0002a.m16a("正在发送命令，波形无效！", new Object[0]);
-    //                 return;
-    //             }
-    //             if (Utility.isSet(bytes[7], 4)) {
-    //                 waveisfound = true;
-    //             } else {
-    //                 waveisfound = false;
-    //             }
-    //             notifyNewWaveFrameFound();
-    //             notifyTriggerCompared(z);
-    //             return;
-    //         }
-    //         return;
-    //     }
-    //     this.littlePacketStatus = 0;
-    //     return;
-    // }
-    // C0002a.m16a("没有采集结束，返回。", new Object[0]);
+void SampleParser::parse(Sample *packet)
+{
+    uint8_t head = packet->getPayload()[0];
+    if (head & (1 << 5))
+    {
+        int i = head & 0x0f;
+        printf("head=%02x, i=%x\n", head, i);
+        if (device.getLittlePacketStatus() == i)
+        {
+            device.setLittlePacketStatus(device.getLittlePacketStatus() + 1);
+            parseSamplePacket(packet, i);
+            if (i == (device.getPacketsNumber() - 1))
+            {
+                device.setLittlePacketStatus(0);
+
+                //             fixAdDiff();
+                //             interpolateSamples();
+
+                //             if (this.connector.isSendingCommands()) {
+                //                 return;
+                //             }
+
+                if (head & (1 << 6))
+                {
+                    // trigger compared
+                }
+
+                if (head & (1 << 4))
+                {
+                    // wave found
+                }
+                else
+                {
+                    // wave not found
+                }
+
+                return;
+            }
+            return;
+        }
+        device.setLittlePacketStatus(0);
+        return;
+    }
 }

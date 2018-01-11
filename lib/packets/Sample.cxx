@@ -8,11 +8,6 @@ Sample::Sample(Response *response) : Packet(response->getHeader())
 {
 }
 
-uint8_t *Sample::getPayload()
-{
-    return &rawPacket[HeaderSize];
-}
-
 size_t Sample::getPayloadLength()
 {
     return IDSO1070A::SamplesCountPerPacket;

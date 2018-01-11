@@ -4,17 +4,8 @@ Response::Response(uint8_t *data) : Packet(data)
 {
     memcpy(&rawPacket, data, PacketSize);
 }
-
-uint8_t *Response::getPayload()
-{
-    // if (getType() == 0xaa && getCommandID() == 0x04)
-    //     return &rawPacket[HeaderSize];
-    return &rawPacket[HeaderSize];
-}
 size_t Response::getPayloadLength()
 {
-    // if (getType() == 0xaa && getCommandID() == 0x04)
-    //     return IDSO1070A::SamplesCountPerPacket;
     size_t pos = PayloadSize - 2;
     uint8_t filter = 0x5a;
 

@@ -39,7 +39,7 @@ class Main
 
     void onSample(Sample *sample)
     {
-        sample->print();
+        // sample->print();
     }
 
     void onProgress(float progress)

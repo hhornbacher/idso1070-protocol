@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <cstdint>
 
+#include <boost/circular_buffer.hpp>
+
 #include "../util/hexdump.h"
 #include "../enums.h"
 
@@ -11,6 +13,9 @@ class Channel
 {
 public:
   static const int MaxSample = 248;
+  static const int SampleBufferSize = 6000;
+
+  typedef boost::circular_buffer<int16_t> SampleBuffer;
 
 private:
   bool enabled = true;
@@ -23,7 +28,11 @@ private:
   double voltageRL1;
   double voltageRL2;
 
+  SampleBuffer sampleBuffer;
+
 public:
+  Channel();
+
   void print();
 
   void enable();
@@ -51,6 +60,8 @@ public:
 
   double getVoltageRL2();
   void setVoltageRL2(double voltage);
+
+  SampleBuffer &getSampleBuffer();
 };
 
 #endif // _CHANNEL_H_
