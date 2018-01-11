@@ -10,7 +10,7 @@ Address|Size (byte)|Description
 -|-|-
 `0x0000`|1|Command type/category
 `0x0001`|1|Command code
-`0x0002`|2|Parameters (can be one or two bytes, padded with zero)
+`0x0002`|2|Parameters (can be 0-2 bytes, padded with zero)
 
 ### Commands
 
