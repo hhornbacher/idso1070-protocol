@@ -31,10 +31,10 @@ CommandGeneratorVector &CommandFactory::readEEROMPages(bool internal)
 //         buffer.push_back(cmd);
 //     for (auto cmd : trigger())
 //         buffer.push_back(cmd);
-//     buffer.push_back(channel1Level());
-//     buffer.push_back(channel2Level());
-//     buffer.push_back(channel1Coupling());
-//     buffer.push_back(channel2Coupling());
+//     buffer.push_back(updateChannel1Level());
+//     buffer.push_back(updateChannel2Level());
+//     buffer.push_back(updateChannel1Coupling());
+//     buffer.push_back(updateChannel2Coupling());
 //     for (auto cmd : pullSamples())
 //         buffer.push_back(cmd);
 //     return buffer;
@@ -44,8 +44,8 @@ CommandGeneratorVector &CommandFactory::readEEROMPages(bool internal)
 // {
 //     if (!internal)
 //         buffer.clear();
-//     buffer.push_back(selectChannel());
-//     buffer.push_back(selectRAMChannel());
+//     buffer.push_back(updateChannelSelection());
+//     buffer.push_back(updateRAMChannelSelection());
 //     buffer.push_back(readRamCount());
 //     return buffer;
 // }
@@ -66,8 +66,8 @@ CommandGeneratorVector &CommandFactory::readEEROMPages(bool internal)
 //     if (!internal)
 //         buffer.clear();
 //     buffer.push_back(updateChannelVolts125());
-//     buffer.push_back(relay1());
-//     buffer.push_back(relay2());
+//     buffer.push_back(updateRelay1());
+//     buffer.push_back(updateRelay2());
 //     return buffer;
 // }
 
@@ -76,8 +76,8 @@ CommandGeneratorVector &CommandFactory::readEEROMPages(bool internal)
 //     if (!internal)
 //         buffer.clear();
 //     buffer.push_back(updateChannelVolts125());
-//     buffer.push_back(relay3());
-//     buffer.push_back(relay4());
+//     buffer.push_back(updateRelay3());
+//     buffer.push_back(updateRelay4());
 //     return buffer;
 // }
 
@@ -85,8 +85,8 @@ CommandGeneratorVector &CommandFactory::readEEROMPages(bool internal)
 // {
 //     if (!internal)
 //         buffer.clear();
-//     buffer.push_back(channel1Level());
-//     buffer.push_back(channel2Level());
+//     buffer.push_back(updateChannel1Level());
+//     buffer.push_back(updateChannel2Level());
 //     buffer.push_back(updateTriggerLevel());
 //     return buffer;
 // }
@@ -105,8 +105,8 @@ CommandGeneratorVector &CommandFactory::readEEROMPages(bool internal)
 //     if (!internal)
 //         buffer.clear();
 //     buffer.push_back(updateSampleRate());
-//     buffer.push_back(getFreqDivLowBytes());
-//     buffer.push_back(getFreqDivHighBytes());
+//     buffer.push_back(updateFreqDivLowBytes());
+//     buffer.push_back(updateFreqDivHighBytes());
 //     for (auto cmd : updateXTriggerPos())
 //         buffer.push_back(cmd);
 //     buffer.push_back(readRamCount());
@@ -136,12 +136,12 @@ CommandGeneratorVector &CommandFactory::readEEROMPages(bool internal)
 //     if (!internal)
 //         buffer.clear();
 //     buffer.push_back(updateChannelVolts125());
-//     buffer.push_back(relay1());
-//     buffer.push_back(relay2());
-//     buffer.push_back(relay3());
-//     buffer.push_back(relay4());
-//     buffer.push_back(channel1Level());
-//     buffer.push_back(channel2Level());
+//     buffer.push_back(updateRelay1());
+//     buffer.push_back(updateRelay2());
+//     buffer.push_back(updateRelay3());
+//     buffer.push_back(updateRelay4());
+//     buffer.push_back(updateChannel1Level());
+//     buffer.push_back(updateChannel2Level());
 //     return buffer;
 // }
 
@@ -149,8 +149,8 @@ CommandGeneratorVector &CommandFactory::readEEROMPages(bool internal)
 // {
 //     if (!internal)
 //         buffer.clear();
-//     buffer.push_back(preTrigger());
-//     buffer.push_back(postTrigger());
+//     buffer.push_back(updatePreTriggerLength());
+//     buffer.push_back(updatePostTriggerLength());
 //     return buffer;
 // }
 
@@ -294,30 +294,30 @@ CommandGenerator CommandFactory::updateSampleRate()
     };
 }
 
-CommandGenerator CommandFactory::getFreqDivLowBytes()
+CommandGenerator CommandFactory::updateFreqDivLowBytes()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
         // newTimeBase = idso1070.timeBase;
         uint16_t freqDiv = (uint16_t)(devRef.getTimebaseFromFreqDiv() & 0xffff);
         Command *cmd = new Command(CMDCODE_FREQ_DIV_LOW, (uint8_t)(freqDiv & 0xff), (uint8_t)((freqDiv >> 8) & 0xff));
-        cmd->setName("getFreqDivLowBytes");
+        cmd->setName("updateFreqDivLowBytes");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::getFreqDivHighBytes()
+CommandGenerator CommandFactory::updateFreqDivHighBytes()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
         uint16_t freqDiv = (uint16_t)((devRef.getTimebaseFromFreqDiv() >> 16) & 0xffff);
         Command *cmd = new Command(CMDCODE_FREQ_DIV_HIGH, (uint8_t)(freqDiv & 0xff), (uint8_t)((freqDiv >> 8) & 0xff));
-        cmd->setName("getFreqDivHighBytes");
+        cmd->setName("updateFreqDivHighBytes");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::selectRAMChannel()
+CommandGenerator CommandFactory::updateRAMChannelSelection()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
@@ -335,7 +335,7 @@ CommandGenerator CommandFactory::selectRAMChannel()
             b = 0x00;
         }
         Command *cmd = new Command(CMDCODE_RAM_CHANNEL_SELECTION, b);
-        cmd->setName("selectRAMChannel");
+        cmd->setName("updateRAMChannelSelection");
         return cmd;
     };
 }
@@ -393,7 +393,7 @@ CommandGenerator CommandFactory::updateChannelVolts125()
     };
 }
 
-CommandGenerator CommandFactory::relay1()
+CommandGenerator CommandFactory::updateRelay1()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
@@ -416,12 +416,12 @@ CommandGenerator CommandFactory::relay1()
             break;
         }
         Command *cmd = new Command(CMDCODE_SET_RELAY, b);
-        cmd->setName("relay1");
+        cmd->setName("updateRelay1");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::relay2()
+CommandGenerator CommandFactory::updateRelay2()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
@@ -445,12 +445,12 @@ CommandGenerator CommandFactory::relay2()
         }
 
         Command *cmd = new Command(CMDCODE_SET_RELAY, b);
-        cmd->setName("relay2");
+        cmd->setName("updateRelay2");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::relay3()
+CommandGenerator CommandFactory::updateRelay3()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
@@ -474,12 +474,12 @@ CommandGenerator CommandFactory::relay3()
         }
 
         Command *cmd = new Command(CMDCODE_SET_RELAY, b);
-        cmd->setName("relay3");
+        cmd->setName("updateRelay3");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::relay4()
+CommandGenerator CommandFactory::updateRelay4()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
@@ -503,12 +503,12 @@ CommandGenerator CommandFactory::relay4()
         }
 
         Command *cmd = new Command(CMDCODE_SET_RELAY, b);
-        cmd->setName("relay4");
+        cmd->setName("updateRelay4");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::channel1Coupling()
+CommandGenerator CommandFactory::updateChannel1Coupling()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
@@ -527,12 +527,12 @@ CommandGenerator CommandFactory::channel1Coupling()
             b1 = 0x10;
         }
         Command *cmd = new Command(CMDCODE_SET_RELAY, b1, b2);
-        cmd->setName("channel1Coupling");
+        cmd->setName("updateChannel1Coupling");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::channel2Coupling()
+CommandGenerator CommandFactory::updateChannel2Coupling()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
@@ -551,7 +551,7 @@ CommandGenerator CommandFactory::channel2Coupling()
             b1 = 0x01;
         }
         Command *cmd = new Command(CMDCODE_SET_RELAY, b1, b2);
-        cmd->setName("channel2Coupling");
+        cmd->setName("updateChannel2Coupling");
         return cmd;
     };
 }
@@ -602,7 +602,7 @@ CommandGenerator CommandFactory::readRamCount()
     };
 }
 
-CommandGenerator CommandFactory::channel1Level()
+CommandGenerator CommandFactory::updateChannel1Level()
 {
     Channel &channel1Ref = device.getChannel1();
     return [&channel1Ref]() {
@@ -621,7 +621,7 @@ CommandGenerator CommandFactory::channel1Level()
     };
 }
 
-CommandGenerator CommandFactory::channel2Level()
+CommandGenerator CommandFactory::updateChannel2Level()
 {
     Channel &channel2Ref = device.getChannel2();
     return [&channel2Ref]() {
@@ -680,7 +680,7 @@ CommandGenerator CommandFactory::updateTriggerLevel()
     };
 }
 
-CommandGenerator CommandFactory::selectChannel()
+CommandGenerator CommandFactory::updateChannelSelection()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
@@ -702,12 +702,12 @@ CommandGenerator CommandFactory::selectChannel()
             b = 0x03;
         }
         Command *cmd = new Command(CMDCODE_CHANNEL_SELECTION, b);
-        cmd->setName("selectChannel");
+        cmd->setName("updateChannelSelection");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::preTrigger()
+CommandGenerator CommandFactory::updatePreTriggerLength()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
@@ -715,12 +715,12 @@ CommandGenerator CommandFactory::preTrigger()
         Command *cmd = new Command(CMDCODE_PRE_TRIGGER_LENGTH,
                                    (uint8_t)(i & 0xff),
                                    (uint8_t)((i >> 8) & 0xff));
-        cmd->setName("preTrigger");
+        cmd->setName("updatePreTriggerLength");
         return cmd;
     };
 }
 
-CommandGenerator CommandFactory::postTrigger()
+CommandGenerator CommandFactory::updatePostTriggerLength()
 {
     IDSO1070A &devRef = device;
     return [&devRef]() {
@@ -728,7 +728,7 @@ CommandGenerator CommandFactory::postTrigger()
         Command *cmd = new Command(CMDCODE_POST_TRIGGER_LENGTH,
                                    (uint8_t)(i & 0xff),
                                    (uint8_t)((i >> 8) & 0xff));
-        cmd->setName("postTrigger");
+        cmd->setName("updatePostTriggerLength");
         return cmd;
     };
 }

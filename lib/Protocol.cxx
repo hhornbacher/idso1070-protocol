@@ -46,32 +46,32 @@ void Protocol::sendCommands(CommandGeneratorVector cmdFns)
 
 void Protocol::init()
 {
-    sendCommand(cmdFactory.selectRAMChannel());
+    sendCommand(cmdFactory.updateRAMChannelSelection());
     sendCommand(cmdFactory.readARMVersion());
     sendCommand(cmdFactory.readFPGAVersion());
     sendCommands(cmdFactory.readEEROMPages());
     sendCommand(cmdFactory.updateSampleRate());
-    sendCommand(cmdFactory.getFreqDivLowBytes());
-    sendCommand(cmdFactory.getFreqDivHighBytes());
-    sendCommand(cmdFactory.selectChannel());
+    sendCommand(cmdFactory.updateFreqDivLowBytes());
+    sendCommand(cmdFactory.updateFreqDivHighBytes());
+    sendCommand(cmdFactory.updateChannelSelection());
     sendCommand(cmdFactory.updateTriggerSourceAndSlope());
     sendCommand(cmdFactory.updateTriggerLevel());
-    sendCommand(cmdFactory.preTrigger());
-    sendCommand(cmdFactory.postTrigger());
+    sendCommand(cmdFactory.updatePreTriggerLength());
+    sendCommand(cmdFactory.updatePostTriggerLength());
     sendCommand(cmdFactory.readRamCount());
-    sendCommand(cmdFactory.selectRAMChannel());
+    sendCommand(cmdFactory.updateRAMChannelSelection());
     sendCommand(cmdFactory.updateChannelVolts125());
-    sendCommand(cmdFactory.relay1());
-    sendCommand(cmdFactory.relay2());
-    sendCommand(cmdFactory.relay3());
-    sendCommand(cmdFactory.relay4());
-    sendCommand(cmdFactory.channel1Level());
-    sendCommand(cmdFactory.channel2Level());
+    sendCommand(cmdFactory.updateRelay1());
+    sendCommand(cmdFactory.updateRelay2());
+    sendCommand(cmdFactory.updateRelay3());
+    sendCommand(cmdFactory.updateRelay4());
+    sendCommand(cmdFactory.updateChannel1Level());
+    sendCommand(cmdFactory.updateChannel2Level());
     sendCommand(cmdFactory.updateChannelVolts125());
     sendCommand(cmdFactory.updateTriggerMode());
     sendCommand(cmdFactory.updateTriggerLevel());
-    sendCommand(cmdFactory.channel1Coupling());
-    sendCommand(cmdFactory.channel2Coupling());
+    sendCommand(cmdFactory.updateChannel1Coupling());
+    sendCommand(cmdFactory.updateChannel2Coupling());
 }
 
 void Protocol::setProgressHandler(ProgressHandler handler)
