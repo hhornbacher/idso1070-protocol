@@ -1,4 +1,4 @@
-# IDS1070A Protocol Library
+# IDSO1070A Protocol Library
 This is a reverse engineered implementation of the protocol used to communicate with the mixed signal oscilloscope IDSO1070A from Hantek.
 It's possible to communicate with the device over WiFi (TCP) as well as USB.
 
