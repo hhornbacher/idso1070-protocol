@@ -33,26 +33,31 @@ public:
   typedef std::function<void(float)> ProgressHandler;
 
 private:
+  // Device class to store the device's states and resources
   IDSO1070A device;
 
+  // Connector abstraction for USB/TCP communication
   Connector &connection;
 
   ProgressHandler progressHandler;
 
-  bool sampling = false;
-
+  // Command dispatching related members
+  CommandFactory cmdFactory;
   std::deque<CommandGenerator> commandQueue;
   int commandCount = 0;
   int retries = 0;
-  bool ignoreNextResponse = false;
   Timeout commandTimeout;
-
   Command *currentCommand = NULL;
-  Response *currentResponse = NULL;
 
-  CommandFactory cmdFactory;
+  // Response handling related members
   ResponseParser responseParser;
+  Response *currentResponse = NULL;
+  bool ignoreNextResponse = false;
+
+  // Sample parsing related members
   SampleParser sampleParser;
+  bool sampling = false;
+
 
 public:
   Protocol(Connector &connection);
@@ -64,15 +69,24 @@ public:
     return std::bind(f, self, std::placeholders::_1);
   }
 
+  // Setup the connection for operation
   void start();
+
+  // Stop and release resources
   void stop();
+
+  // This has to be called in the main loop
   void process();
 
   IDSO1070A &getDevice();
 
+  // Send one command
   void sendCommand(CommandGenerator cmdFn);
+
+  // Send several commands
   void sendCommands(CommandGeneratorVector cmdFns);
 
+  // Send all commands required for initialization of the device
   void init();
 
   void setProgressHandler(ProgressHandler handler);
