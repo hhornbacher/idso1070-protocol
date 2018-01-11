@@ -8,10 +8,6 @@ else()
 include_directories(${libidso1070a_SOURCE_DIR})
 endif()
 
-
-find_package(Boost REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-
 add_executable(idso1070a-protocol main.cxx)
 
 target_link_libraries (idso1070a-protocol idso1070a)
