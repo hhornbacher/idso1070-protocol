@@ -6,7 +6,7 @@ ResponseParser::ResponseParser(IDSO1070A &device) : device(device)
 
 bool ResponseParser::parse(Response *packet)
 {
-    switch (packet->getType())
+    switch (packet->getCommandType())
     {
     case TYPE_CONTROL:
         return parseAAResponse(packet);
@@ -23,7 +23,7 @@ bool ResponseParser::parse(Response *packet)
 
 bool ResponseParser::parseAAResponse(Response *packet)
 {
-    switch (packet->getCommandID())
+    switch (packet->getCommandCode())
     {
     case 0x02:
         // Parse FPGA version
@@ -42,7 +42,7 @@ bool ResponseParser::parseAAResponse(Response *packet)
 
 bool ResponseParser::parseEEResponse(Response *packet)
 {
-    if (packet->getCommandID() == 0xaa)
+    if (packet->getCommandCode() == 0xaa)
     {
         switch (packet->getHeader()[5])
         {
@@ -82,7 +82,7 @@ bool ResponseParser::parseEEResponse(Response *packet)
 
 bool ResponseParser::parseFPGAResponse(Response *packet)
 {
-    switch (packet->getCommandID())
+    switch (packet->getCommandCode())
     {
     case 0x02:
         return parseTriggerMode(packet);
@@ -111,7 +111,7 @@ bool ResponseParser::parseFPGAResponse(Response *packet)
 
 bool ResponseParser::parseStateResponse(Response *packet)
 {
-    switch (packet->getCommandID())
+    switch (packet->getCommandCode())
     {
     case 0x03:
         device.setBatteryLevel(packet->getPayload()[0]);

@@ -19,145 +19,10 @@ CommandGeneratorVector &CommandFactory::readEEROMPages(bool internal)
     return buffer;
 }
 
-// CommandGeneratorVector &CommandFactory::init(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     for (auto cmd : channelStatusOnly())
-//         buffer.push_back(cmd);
-//     for (auto cmd : voltageDiv())
-//         buffer.push_back(cmd);
-//     for (auto cmd : updateTimeBase())
-//         buffer.push_back(cmd);
-//     for (auto cmd : trigger())
-//         buffer.push_back(cmd);
-//     buffer.push_back(updateChannel1Level());
-//     buffer.push_back(updateChannel2Level());
-//     buffer.push_back(updateChannel1Coupling());
-//     buffer.push_back(updateChannel2Coupling());
-//     for (auto cmd : pullSamples())
-//         buffer.push_back(cmd);
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::channelStatusOnly(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     buffer.push_back(updateChannelSelection());
-//     buffer.push_back(updateRAMChannelSelection());
-//     buffer.push_back(readRamCount());
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::channelStatus(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     for (auto cmd : channelStatusOnly())
-//         buffer.push_back(cmd);
-//     for (auto cmd : updateTimeBase())
-//         buffer.push_back(cmd);
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::channel1VoltageDiv(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     buffer.push_back(updateChannelVolts125());
-//     buffer.push_back(updateRelay1());
-//     buffer.push_back(updateRelay2());
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::channel2VoltageDiv(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     buffer.push_back(updateChannelVolts125());
-//     buffer.push_back(updateRelay3());
-//     buffer.push_back(updateRelay4());
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::levels(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     buffer.push_back(updateChannel1Level());
-//     buffer.push_back(updateChannel2Level());
-//     buffer.push_back(updateTriggerLevel());
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::pullSamples(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     buffer.push_back(updateTriggerMode());
-//     buffer.push_back(startSampling());
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::updateTimeBase(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     buffer.push_back(updateSampleRate());
-//     buffer.push_back(updateFreqDivLowBytes());
-//     buffer.push_back(updateFreqDivHighBytes());
-//     for (auto cmd : updateXTriggerPos())
-//         buffer.push_back(cmd);
-//     buffer.push_back(readRamCount());
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::trigger(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     buffer.push_back(updateTriggerSourceAndSlope());
-//     buffer.push_back(updateTriggerMode());
-//     buffer.push_back(updateTriggerLevel());
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::triggerSource(bool internal)
-// {
-//     buffer.clear();
-//     buffer.push_back(updateTriggerSourceAndSlope());
-//     buffer.push_back(updateTriggerLevel());
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::voltageDiv(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     buffer.push_back(updateChannelVolts125());
-//     buffer.push_back(updateRelay1());
-//     buffer.push_back(updateRelay2());
-//     buffer.push_back(updateRelay3());
-//     buffer.push_back(updateRelay4());
-//     buffer.push_back(updateChannel1Level());
-//     buffer.push_back(updateChannel2Level());
-//     return buffer;
-// }
-
-// CommandGeneratorVector &CommandFactory::updateXTriggerPos(bool internal)
-// {
-//     if (!internal)
-//         buffer.clear();
-//     buffer.push_back(updatePreTriggerLength());
-//     buffer.push_back(updatePostTriggerLength());
-//     return buffer;
-// }
-
 CommandGenerator CommandFactory::readEEROMPage(uint8_t address)
 {
     return [address]() {
-        uint8_t cmdBuffer[4] = {0xee, 0xaa, address, 0x00};
+        uint8_t cmdBuffer[4] = {TYPE_EEROM, 0xaa, address, 0x00};
         Command *cmd = new Command(cmdBuffer);
         cmd->setName("readEEROMPage");
         return cmd;
@@ -167,7 +32,7 @@ CommandGenerator CommandFactory::readEEROMPage(uint8_t address)
 CommandGenerator CommandFactory::readARMVersion()
 {
     return []() {
-        uint8_t cmdBuffer[4] = {0x57, 0x04, 0x00, 0x00};
+        uint8_t cmdBuffer[4] = {TYPE_STATE, 0x04, 0x00, 0x00};
         Command *cmd = new Command(cmdBuffer);
         cmd->setName("readARMVersion");
         return cmd;
@@ -177,7 +42,7 @@ CommandGenerator CommandFactory::readARMVersion()
 CommandGenerator CommandFactory::readFPGAVersion()
 {
     return []() {
-        uint8_t cmdBuffer[4] = {0xaa, 0x02, 0x00, 0x00};
+        uint8_t cmdBuffer[4] = {TYPE_CONTROL, 0x02, 0x00, 0x00};
         Command *cmd = new Command(cmdBuffer);
         cmd->setName("readFPGAVersion");
         return cmd;
@@ -187,7 +52,7 @@ CommandGenerator CommandFactory::readFPGAVersion()
 CommandGenerator CommandFactory::readBatteryLevel()
 {
     return []() {
-        uint8_t cmdBuffer[4] = {0x57, 0x03, 0x00, 0x00};
+        uint8_t cmdBuffer[4] = {TYPE_STATE, 0x03, 0x00, 0x00};
         Command *cmd = new Command(cmdBuffer);
         cmd->setName("readBatteryLevel");
         return cmd;
@@ -736,7 +601,7 @@ CommandGenerator CommandFactory::updatePostTriggerLength()
 CommandGenerator CommandFactory::startSampling()
 {
     return []() {
-        uint8_t cmdPayload[4] = {0xaa, 0x04, 0x00, 0x00};
+        uint8_t cmdPayload[4] = {TYPE_CONTROL, 0x04, 0x00, 0x00};
         Command *cmd = new Command(cmdPayload);
         cmd->setName("startSampling");
         return cmd;

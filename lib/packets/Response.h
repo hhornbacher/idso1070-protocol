@@ -16,8 +16,8 @@ private:
 public:
   Response(uint8_t *data);
 
-  uint8_t getCommandID();
-  CommandType getType();
+  uint8_t getCommandCode();
+  CommandType getCommandType();
 
   size_t getPayloadLength();
 

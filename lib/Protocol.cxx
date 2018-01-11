@@ -99,7 +99,7 @@ void Protocol::receive()
             if (currentCommand)
             {
                 // Check for sample data packet
-                if (currentResponse->getCommandID() == 0x04 && currentResponse->getType() == 0xaa)
+                if (currentResponse->getCommandCode() == 0x04 && currentResponse->getCommandType() == TYPE_CONTROL)
                 {
                     sampling = true;
                     Sample *sample = new Sample(currentResponse);
@@ -110,8 +110,8 @@ void Protocol::receive()
                 else
                 {
                     // Check & parse received packet
-                    bool success = currentCommand->getPayload()[0] == currentResponse->getType() &&
-                                   currentCommand->getPayload()[1] == currentResponse->getCommandID() &&
+                    bool success = currentCommand->getPayload()[0] == currentResponse->getCommandType() &&
+                                   currentCommand->getPayload()[1] == currentResponse->getCommandCode() &&
                                    responseParser.parse(currentResponse);
 
                     // If it's a wifi connection, then we get two responses per command

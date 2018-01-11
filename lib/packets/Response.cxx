@@ -9,7 +9,7 @@ size_t Response::getPayloadLength()
     size_t pos = PayloadSize - 2;
     uint8_t filter = 0x5a;
 
-    if (getType() == 0x57)
+    if (getCommandType() == TYPE_STATE)
         filter = 0x00;
     while (getPayload()[pos] == filter)
     {
@@ -19,12 +19,12 @@ size_t Response::getPayloadLength()
     return pos + 1;
 }
 
-uint8_t Response::getCommandID()
+uint8_t Response::getCommandCode()
 {
     return rawPacket[4];
 }
 
-CommandType Response::getType()
+CommandType Response::getCommandType()
 {
     return (CommandType)rawPacket[3];
 }
@@ -33,8 +33,8 @@ void Response::print()
 {
     printf("[Response]\n");
     printf("counter = %d\n", getCounter());
-    printf("commandID = %02x\n", getCommandID());
-    printf("packetType = %d\n", getType());
+    printf("commandID = %02x\n", getCommandCode());
+    printf("packetType = %d\n", getCommandType());
     printf("payloadLength = %ld\n", getPayloadLength());
     printf("[Header]\n");
     hexdump(getHeader(), HeaderSize);

@@ -58,6 +58,8 @@ private:
   SampleParser sampleParser;
   bool sampling = false;
 
+  void receive();
+  void transmit();
 
 public:
   Protocol(Connector &connection);
@@ -90,9 +92,6 @@ public:
   void init();
 
   void setProgressHandler(ProgressHandler handler);
-
-  void receive();
-  void transmit();
 
   void print();
 };
