@@ -85,7 +85,7 @@ bool ResponseParser::parseFPGAResponse(Response *packet)
     switch (packet->getCommandID())
     {
     case 0x02:
-        return parseStartCapture(packet);
+        return parseTriggerMode(packet);
     case 0x03:
         return parseRelay(packet);
     case 0x05:
@@ -329,7 +329,7 @@ bool ResponseParser::parseTriggerSourceAndSlope(Response *packet)
     }
 }
 
-bool ResponseParser::parseStartCapture(Response *packet)
+bool ResponseParser::parseTriggerMode(Response *packet)
 {
     device.setLittlePacketStatus(0);
 

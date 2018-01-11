@@ -26,7 +26,7 @@ private:
   bool parseVoltsDiv125(Response *packet);
   bool parseTriggerLevel(Response *packet);
   bool parseTriggerSourceAndSlope(Response *packet);
-  bool parseStartCapture(Response *packet);
+  bool parseTriggerMode(Response *packet);
   bool parseEEROMPage00(Response *packet);
   bool parseCoupling(Response *packet);
 

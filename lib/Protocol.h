@@ -30,7 +30,6 @@ class Protocol
 public:
   static const int MaxCommandRetries = 3;
 
-  typedef std::function<void(Sample *)> SamplePacketHandler;
   typedef std::function<void(float)> ProgressHandler;
 
 private:
@@ -41,7 +40,6 @@ private:
   ProgressHandler progressHandler;
 
   bool sampling = false;
-  SamplePacketHandler samplePacketHandler;
 
   std::deque<CommandGenerator> commandQueue;
   int commandCount = 0;
@@ -61,12 +59,6 @@ public:
   ~Protocol();
 
   template <class F, class S>
-  static SamplePacketHandler bindSamplePacketHandler(F &&f, S *self)
-  {
-    return std::bind(f, self, std::placeholders::_1);
-  }
-
-  template <class F, class S>
   static ProgressHandler bindProgressHandler(F &&f, S *self)
   {
     return std::bind(f, self, std::placeholders::_1);
@@ -83,7 +75,6 @@ public:
 
   void init();
 
-  void setSamplePacketHandler(SamplePacketHandler handler);
   void setProgressHandler(ProgressHandler handler);
 
   void receive();

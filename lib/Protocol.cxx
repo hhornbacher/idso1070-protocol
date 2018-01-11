@@ -74,11 +74,6 @@ void Protocol::init()
     sendCommand(cmdFactory.channel2Coupling());
 }
 
-void Protocol::setSamplePacketHandler(SamplePacketHandler handler)
-{
-    samplePacketHandler = handler;
-}
-
 void Protocol::setProgressHandler(ProgressHandler handler)
 {
     progressHandler = handler;
@@ -106,13 +101,11 @@ void Protocol::receive()
                 // Check for sample data packet
                 if (currentResponse->getCommandID() == 0x04 && currentResponse->getType() == 0xaa)
                 {
-                    if (samplePacketHandler)
-                    {
-                        sampling = true;
-                        Sample *sample = new Sample(currentResponse);
-                        samplePacketHandler(sample);
-                        delete sample;
-                    }
+                    sampling = true;
+                    Sample *sample = new Sample(currentResponse);
+                    sample->print();
+                    sampleParser.parse(sample);
+                    delete sample;
                 }
                 else
                 {
@@ -147,13 +140,10 @@ void Protocol::receive()
             }
             else if (sampling)
             {
-                if (samplePacketHandler)
-                {
-                    Sample *sample = new Sample(currentResponse->getHeader());
-                    sampleParser.parse(sample);
-                    samplePacketHandler(sample);
-                    delete sample;
-                }
+                Sample *sample = new Sample(currentResponse->getHeader());
+
+                // sampleParser.parse(sample);
+                delete sample;
             }
             delete currentResponse;
             currentResponse = NULL;
