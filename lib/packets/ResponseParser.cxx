@@ -72,7 +72,7 @@ bool ResponseParser::parseEEResponse(Response *packet)
             return true;
         case 0x0c:
             memcpy(&device.getEEROMData().diffFixData[1][200], packet->getPayload(), 56);
-            // readFPGAVersionAndEEROMHasDone();
+            // TBD: Set EEROM initialized = true
             return true;
         default:
             return false;
