@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "Protocol.h"
+#include "util/FIFOSerializer.h"
 
 void sigHandler(int sig);
 
@@ -12,6 +13,9 @@ void sigHandler(int sig);
 class Main
 {
   private:
+    const char *outChannel1Path = "./channel1-int16-raw.fifo";
+    // const char *outChannel2Path = "./channel2-int16-raw.fifo";
+
     bool runProgram = true;
     const char *device = "/dev/ttyACM0";
 
@@ -23,11 +27,15 @@ class Main
     USBConnector usbConnection;
     CommandFactory cmdFactory;
 
+    FIFOSerializer outChannel1;
+    // FIFOSerializer outChannel2;
+
   public:
     Protocol protocol;
     Main() : wifiConnection((char *)serverIP, serverPort),
              usbConnection((char *)device),
-             protocol(CONNECTION), cmdFactory(protocol.getDevice())
+             protocol(CONNECTION), cmdFactory(protocol.getDevice()),
+             outChannel1(outChannel1Path, true) //, outChannel2(outChannel2Path, true)
     {
         signal(SIGINT, sigHandler);
     }
@@ -52,6 +60,21 @@ class Main
         while (runProgram)
         {
             protocol.process();
+
+            while (protocol.getDevice().getChannel1().getSampleBuffer().size() > 0)
+            {
+                Channel::SampleBuffer &buffer = protocol.getDevice().getChannel1().getSampleBuffer();
+                int16_t data = *buffer.begin();
+                outChannel1.serialize(&data, 1);
+                buffer.pop_front();
+            }
+            // while (protocol.getDevice().getChannel2().getSampleBuffer().size() > 0)
+            // {
+            //     Channel::SampleBuffer &buffer = protocol.getDevice().getChannel2().getSampleBuffer();
+            //     int16_t data = *buffer.begin();
+            //     outChannel2.serialize(&data, 1);
+            //     buffer.pop_front();
+            // }
         }
         return EXIT_SUCCESS;
     }

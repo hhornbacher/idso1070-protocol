@@ -24,11 +24,6 @@ void SampleParser::parseBothChannelsData(Sample *packet, int index)
 {
     size_t pos = 0;
 
-    /*     if(index==0) {
-        device.getChannel1().getSampleBuffer().clear();
-        device.getChannel2().getSampleBuffer().clear();
-    } */
-
     size_t sampleOffset = index * (IDSO1070A::SamplesCountPerPacket / 2);
 
     while ((pos * 2) < IDSO1070A::SamplesCountPerPacket)
@@ -107,7 +102,6 @@ void SampleParser::parse(Sample *packet)
         int i = head & 0x0f;
         if (device.getLittlePacketStatus() == i)
         {
-            printf("A\n");
             device.setLittlePacketStatus(device.getLittlePacketStatus() + 1);
             parseSamplePacket(packet, i);
             if (i == (device.getPacketsNumber() - 1))

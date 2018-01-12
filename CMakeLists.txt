@@ -35,7 +35,9 @@ set (CMAKE_CXX_STANDARD 11)
 # add local cmake dir to module path
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
-find_package(Boost 1.58.0 REQUIRED)
+add_definitions(-DBOOST_FILESYSTEM_NO_DEPRECATED)
+
+find_package(Boost 1.58.0 COMPONENTS filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 add_subdirectory(lib)
