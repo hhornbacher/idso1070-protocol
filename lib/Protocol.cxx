@@ -102,10 +102,21 @@ void Protocol::receive()
                 if (currentResponse->getCommandCode() == 0x04 && currentResponse->getCommandType() == TYPE_CONTROL)
                 {
                     sampling = true;
+
                     Sample *sample = new Sample(currentResponse);
-                    // sample->print();
+
                     sampleParser.parse(sample);
+
+                    // Remove sample packet
                     delete sample;
+
+                    // Remove current command generator
+                    commandQueue.pop_front();
+                    retries = 0;
+
+                    // Remove current command
+                    delete currentCommand;
+                    currentCommand = NULL;
                 }
                 else
                 {
@@ -129,8 +140,6 @@ void Protocol::receive()
 
                         // Update progress
                         progressHandler(((float)commandCount - (float)commandQueue.size()) / (float)commandCount);
-                        if (commandQueue.size() == 0)
-                            commandCount = 0;
                     }
                 }
 
@@ -164,6 +173,11 @@ void Protocol::transmit()
 
         // Reset command limiting timout
         commandTimeout.reset();
+    }
+    else if (commandQueue.size() == 0 && commandCount != 0)
+    {
+        commandCount = 0;
+        progressHandler(1.0f);
     }
 }
 
