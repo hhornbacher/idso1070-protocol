@@ -25,7 +25,7 @@ void TCPConnector::start()
     if (connect(socketHandle,
                 (struct sockaddr *)&serverAddress,
                 sizeof(serverAddress)) == 0)
-        printf("Verbindung mit dem Server (%s) hergestellt\n",
+        printf("Connected to server: %s\n",
                inet_ntoa(serverAddress.sin_addr));
 
     if (fcntl(socketHandle, F_SETFL, fcntl(socketHandle, F_GETFL) | O_NONBLOCK) < 0)
