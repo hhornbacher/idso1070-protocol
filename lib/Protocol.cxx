@@ -3,8 +3,7 @@
 Protocol::Protocol(Connector &connection) : connection(connection),
                                             commandTimeout(200),
                                             cmdFactory(device),
-                                            responseParser(device),
-                                            sampleParser(device)
+                                            packetParser(device)
 {
     // device.getChannel1().parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
     // device.getChannel2().parseChVoltsDivStatus = PARSE_CHVOLTSDIV_S0;
@@ -105,7 +104,7 @@ void Protocol::receive()
 
                     Sample *sample = new Sample(currentResponse);
 
-                    sampleParser.parse(sample);
+                    packetParser.parse(sample);
 
                     // Remove sample packet
                     delete sample;
@@ -123,7 +122,7 @@ void Protocol::receive()
                     // Check & parse received packet
                     bool success = currentCommand->getPayload()[0] == currentResponse->getCommandType() &&
                                    currentCommand->getPayload()[1] == currentResponse->getCommandCode() &&
-                                   responseParser.parse(currentResponse);
+                                   packetParser.parse(currentResponse);
 
                     // If it's a wifi connection, then we get two responses per command
                     if (success && !connection.isUsbConnection())
@@ -150,7 +149,7 @@ void Protocol::receive()
             else if (sampling)
             {
                 Sample *sample = new Sample(currentResponse->getHeader());
-                sampleParser.parse(sample);
+                packetParser.parse(sample);
                 delete sample;
             }
             delete currentResponse;

@@ -1,10 +1,10 @@
-#include "ResponseParser.h"
+#include "PacketParser.h"
 
-ResponseParser::ResponseParser(IDSO1070A &device) : device(device)
+PacketParser::PacketParser(IDSO1070A &device) : device(device)
 {
 }
 
-bool ResponseParser::parse(Response *packet)
+bool PacketParser::parse(Response *packet)
 {
     switch (packet->getCommandType())
     {
@@ -21,7 +21,7 @@ bool ResponseParser::parse(Response *packet)
     }
 }
 
-bool ResponseParser::parseAAResponse(Response *packet)
+bool PacketParser::parseAAResponse(Response *packet)
 {
     switch (packet->getCommandCode())
     {
@@ -40,7 +40,7 @@ bool ResponseParser::parseAAResponse(Response *packet)
     }
 }
 
-bool ResponseParser::parseEEResponse(Response *packet)
+bool PacketParser::parseEEResponse(Response *packet)
 {
     if (packet->getCommandCode() == 0xaa)
     {
@@ -80,7 +80,7 @@ bool ResponseParser::parseEEResponse(Response *packet)
     }
 }
 
-bool ResponseParser::parseFPGAResponse(Response *packet)
+bool PacketParser::parseFPGAResponse(Response *packet)
 {
     switch (packet->getCommandCode())
     {
@@ -109,7 +109,7 @@ bool ResponseParser::parseFPGAResponse(Response *packet)
     }
 }
 
-bool ResponseParser::parseStateResponse(Response *packet)
+bool PacketParser::parseStateResponse(Response *packet)
 {
     switch (packet->getCommandCode())
     {
@@ -127,7 +127,7 @@ bool ResponseParser::parseStateResponse(Response *packet)
     }
 }
 
-bool ResponseParser::parseFreqDivLowBytes(Response *packet)
+bool PacketParser::parseFreqDivLowBytes(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 255) << 8) + (packet->getHeader()[5] & 255);
     if (device.getReceiveFreqDivStatus() == 0)
@@ -144,7 +144,7 @@ bool ResponseParser::parseFreqDivLowBytes(Response *packet)
     }
 }
 
-bool ResponseParser::parseFreqDivHighBytes(Response *packet)
+bool PacketParser::parseFreqDivHighBytes(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 0xff) << 8) + (packet->getHeader()[5] & 0xff);
 
@@ -162,7 +162,7 @@ bool ResponseParser::parseFreqDivHighBytes(Response *packet)
     }
 }
 
-bool ResponseParser::parseRamChannelSelection(Response *packet)
+bool PacketParser::parseRamChannelSelection(Response *packet)
 {
     switch (packet->getHeader()[5])
     {
@@ -187,7 +187,7 @@ bool ResponseParser::parseRamChannelSelection(Response *packet)
     }
 }
 
-bool ResponseParser::parseRelay(Response *packet)
+bool PacketParser::parseRelay(Response *packet)
 {
     switch (packet->getHeader()[5])
     {
@@ -242,7 +242,7 @@ bool ResponseParser::parseRelay(Response *packet)
     // }
 }
 
-bool ResponseParser::parseCh1ZeroLevel(Response *packet)
+bool PacketParser::parseCh1ZeroLevel(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
     int ordinal = (int)device.getChannel1().getVerticalDiv();
@@ -250,7 +250,7 @@ bool ResponseParser::parseCh1ZeroLevel(Response *packet)
     device.getChannel1().setVerticalPosition(i);
 }
 
-bool ResponseParser::parseCh2ZeroLevel(Response *packet)
+bool PacketParser::parseCh2ZeroLevel(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
     int ordinal = (int)device.getChannel2().getVerticalDiv();
@@ -258,7 +258,7 @@ bool ResponseParser::parseCh2ZeroLevel(Response *packet)
     device.getChannel2().setVerticalPosition(i);
 }
 
-bool ResponseParser::parseVoltsDiv125(Response *packet)
+bool PacketParser::parseVoltsDiv125(Response *packet)
 {
     switch (packet->getHeader()[5] & 3)
     {
@@ -288,14 +288,14 @@ bool ResponseParser::parseVoltsDiv125(Response *packet)
     // updateCh2VoltsDivStatusAfterReceived125();
 }
 
-bool ResponseParser::parseTriggerLevel(Response *packet)
+bool PacketParser::parseTriggerLevel(Response *packet)
 {
     uint16_t i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
     i = (uint16_t)roundf(mapValue(i, (float)device.getTrigger().getBottomPWM(), (float)device.getTrigger().getTopPWM(), 8.0f, 248.0f));
     device.getTrigger().setLevel(i);
 }
 
-bool ResponseParser::parseTriggerSourceAndSlope(Response *packet)
+bool PacketParser::parseTriggerSourceAndSlope(Response *packet)
 {
     uint8_t i = packet->getHeader()[5] & 3;
 
@@ -329,7 +329,7 @@ bool ResponseParser::parseTriggerSourceAndSlope(Response *packet)
     }
 }
 
-bool ResponseParser::parseTriggerMode(Response *packet)
+bool PacketParser::parseTriggerMode(Response *packet)
 {
     device.setLittlePacketStatus(0);
 
@@ -360,7 +360,7 @@ bool ResponseParser::parseTriggerMode(Response *packet)
     }
 }
 
-bool ResponseParser::parseCoupling(Response *packet)
+bool PacketParser::parseCoupling(Response *packet)
 {
     switch (packet->getHeader()[5])
     {
@@ -389,7 +389,7 @@ bool ResponseParser::parseCoupling(Response *packet)
     }
 }
 
-bool ResponseParser::parseEEROMPage00(Response *packet)
+bool PacketParser::parseEEROMPage00(Response *packet)
 {
     memcpy(device.getEEROMData().caliLevel, packet->getPayload(), 200);
     uint16_t *iArr;
@@ -466,4 +466,141 @@ bool ResponseParser::parseEEROMPage00(Response *packet)
         device.getTrigger().setInnerPWM(3, device.getTrigger().getInnerPWM(1));
     }
     return true;
+}
+
+void PacketParser::parseSamplePacket(Sample *packet, int index)
+{
+    if (device.getEnabledChannelsCount() == 2)
+    {
+        parseBothChannelsData(packet, index);
+    }
+    else if (device.getChannel1().isEnabled() && !device.getChannel2().isEnabled())
+    {
+        parseChannel1Data(packet, index);
+    }
+    else if (device.getChannel2().isEnabled() && !device.getChannel1().isEnabled())
+    {
+        parseChannel2Data(packet, index);
+    }
+}
+
+void PacketParser::parseBothChannelsData(Sample *packet, int index)
+{
+    size_t pos = 0;
+
+    size_t sampleOffset = index * (IDSO1070A::SamplesCountPerPacket / 2);
+
+    while ((pos * 2) < IDSO1070A::SamplesCountPerPacket)
+    {
+        if (device.getChannel1().getCoupling() == COUPLING_GND)
+        {
+            device.getChannel1().getSampleBuffer().push_back(device.getChannel1().getVerticalPosition());
+        }
+        else
+        {
+            device.getChannel1().getSampleBuffer().push_back((int16_t)(packet->getPayload()[1 + (pos * 2)] & 255));
+        }
+        if (device.getChannel2().getCoupling() == COUPLING_GND)
+        {
+            device.getChannel2().getSampleBuffer().push_back(device.getChannel2().getVerticalPosition());
+        }
+        else
+        {
+            device.getChannel2().getSampleBuffer().push_back((int16_t)(packet->getPayload()[1 + (pos * 2) + 1] & 255));
+        }
+        //     statisticCh1Max(sampleOffset + pos, this.channel1.getSamples()[sampleOffset + pos]);
+        //     statisticCh1Min(sampleOffset + pos, this.channel1.getSamples()[sampleOffset + pos]);
+        //     statisticCh2Max(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
+        //     statisticCh2Min(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
+        pos++;
+    }
+}
+
+void PacketParser::parseChannel1Data(Sample *packet, int index)
+{
+    size_t pos = 0;
+
+    size_t sampleOffset = index * IDSO1070A::SamplesCountPerPacket;
+    while (pos < IDSO1070A::SamplesCountPerPacket)
+    {
+        if (device.getChannel1().getCoupling() == COUPLING_GND)
+        {
+            device.getChannel1().getSampleBuffer().push_back(device.getChannel1().getVerticalPosition());
+        }
+        else
+        {
+            device.getChannel1().getSampleBuffer().push_back((int16_t)(packet->getPayload()[1 + pos] & 255));
+        }
+        //     statisticCh2Max(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
+        //     statisticCh2Min(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
+        pos++;
+    }
+}
+
+void PacketParser::parseChannel2Data(Sample *packet, int index)
+{
+    size_t pos = 0;
+
+    size_t sampleOffset = index * IDSO1070A::SamplesCountPerPacket;
+    while (pos < IDSO1070A::SamplesCountPerPacket)
+    {
+        if (device.getChannel2().getCoupling() == COUPLING_GND)
+        {
+            device.getChannel2().getSampleBuffer().push_back(device.getChannel2().getVerticalPosition());
+        }
+        else
+        {
+            device.getChannel2().getSampleBuffer().push_back((int16_t)(packet->getPayload()[1 + pos] & 255));
+        }
+        //     statisticCh2Max(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
+        //     statisticCh2Min(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
+        pos++;
+    }
+}
+
+void PacketParser::parse(Sample *packet)
+{
+    uint8_t head = packet->getPayload()[0];
+    if (head & (1 << 5))
+    {
+        int i = head & 0x0f;
+        if (device.getLittlePacketStatus() == i)
+        {
+            device.setLittlePacketStatus(device.getLittlePacketStatus() + 1);
+            parseSamplePacket(packet, i);
+            if (i == (device.getPacketsNumber() - 1))
+            {
+                printf("B\n");
+                device.setLittlePacketStatus(0);
+
+                //             fixAdDiff();
+                //             interpolateSamples();
+
+                //             if (this.connector.isSendingCommands()) {
+                //                 return;
+                //             }
+
+                if (head & (1 << 6))
+                {
+                    printf("\n\nTrigger compared\n\n");
+                    // trigger compared
+                }
+
+                if (head & (1 << 4))
+                {
+                    printf("\n\nWave found\n\n");
+                    // wave found
+                }
+                else
+                {
+                    // wave not found
+                }
+
+                return;
+            }
+            return;
+        }
+        device.setLittlePacketStatus(0);
+        return;
+    }
 }

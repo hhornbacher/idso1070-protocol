@@ -19,9 +19,8 @@
 
 #include "enums.h"
 #include "packets/Sample.h"
-#include "packets/SampleParser.h"
 #include "packets/Response.h"
-#include "packets/ResponseParser.h"
+#include "packets/PacketParser.h"
 #include "packets/Command.h"
 #include "packets/CommandFactory.h"
 
@@ -50,13 +49,13 @@ private:
   Command *currentCommand = NULL;
 
   // Response handling related members
-  ResponseParser responseParser;
   Response *currentResponse = NULL;
   bool ignoreNextResponse = false;
 
   // Sample parsing related members
-  SampleParser sampleParser;
   bool sampling = false;
+
+  PacketParser packetParser;
 
   void receive();
   void transmit();

@@ -7,12 +7,14 @@
 #include "../device/IDSO1070A.h"
 
 #include "Response.h"
+#include "Sample.h"
 
-class ResponseParser
+class PacketParser
 {
 private:
   IDSO1070A &device;
 
+  // Response parsing
   bool parseAAResponse(Response *packet);
   bool parseEEResponse(Response *packet);
   bool parseFPGAResponse(Response *packet);
@@ -30,9 +32,17 @@ private:
   bool parseEEROMPage00(Response *packet);
   bool parseCoupling(Response *packet);
 
+  // Sample parsing
+  void parseSamplePacket(Sample *packet, int index);
+  void parseBothChannelsData(Sample *packet, int index);
+  void parseChannel1Data(Sample *packet, int index);
+  void parseChannel2Data(Sample *packet, int index);
+
 public:
-  ResponseParser(IDSO1070A &device);
+  PacketParser(IDSO1070A &device);
+
   bool parse(Response *packet);
+  void parse(Sample *packet);
 };
 
 #endif // _RESPONSE_PARSER_H_
