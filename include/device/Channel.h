@@ -13,7 +13,7 @@ class Channel
 {
 public:
   static const int MaxSample = 248;
-  static const int SampleBufferSize = 6000;
+  static const int SampleBufferSize = 512 * 128;
 
   typedef boost::circular_buffer<int16_t> SampleBuffer;
 

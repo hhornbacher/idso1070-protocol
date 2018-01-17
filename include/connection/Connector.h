@@ -15,7 +15,7 @@
 class Connector
 {
 public:
-  static const int RawBufferLength = 1024 * 4;
+  static const int RawBufferLength = 1024 * 64;
 
 protected:
   boost::circular_buffer<uint8_t> rawBuffer;
