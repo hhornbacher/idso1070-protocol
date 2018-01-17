@@ -41,7 +41,7 @@ find_package(Boost 1.58.0 COMPONENTS filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 add_subdirectory(lib)
-add_subdirectory(src)
+add_subdirectory(example)
 
 # uninstall target
 # https://cmake.org/Wiki/CMake_FAQ#Can_I_do_.22make_uninstall.22_with_CMake.3F

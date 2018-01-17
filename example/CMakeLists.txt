@@ -1,4 +1,4 @@
-project (idso1070a-protocol)
+project (idso1070a-example)
 
 # Add libidso1070a include directory
 if(NOT libidso1070a_SOURCE_DIR)
@@ -8,8 +8,8 @@ else()
 include_directories(${libidso1070a_SOURCE_DIR})
 endif()
 
-add_executable(idso1070a-protocol main.cxx)
+add_executable(idso1070a-example main.cxx)
 
-target_link_libraries (idso1070a-protocol idso1070a)
+target_link_libraries (idso1070a-example idso1070a)
 
-install (TARGETS idso1070a-protocol DESTINATION bin)
+install (TARGETS idso1070a-example DESTINATION bin)

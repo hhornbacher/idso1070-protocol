@@ -52,6 +52,8 @@ class Main
 
     int run()
     {
+        Channel::SampleBuffer &buffer1 = protocol.getDevice().getChannel1().getSampleBuffer();
+        Channel::SampleBuffer &buffer2 = protocol.getDevice().getChannel2().getSampleBuffer();
         protocol.start();
         protocol.setProgressHandler(Protocol::bindProgressHandler(&Main::onProgress, this));
         protocol.init();
@@ -61,19 +63,17 @@ class Main
         {
             protocol.process();
 
-            while (protocol.getDevice().getChannel1().getSampleBuffer().size() > 0)
+            if (buffer1.size() > 0)
             {
-                Channel::SampleBuffer &buffer = protocol.getDevice().getChannel1().getSampleBuffer();
-                int16_t data = *buffer.begin();
-                outChannel1.serialize(&data, 1);
-                buffer.pop_front();
+                buffer1.linearize();
+                outChannel1.serialize(buffer1.array_one().first, buffer1.size() * sizeof(int16_t));
+                buffer1.clear();
             }
-            // while (protocol.getDevice().getChannel2().getSampleBuffer().size() > 0)
+            // if (buffer2.size() > 0)
             // {
-            //     Channel::SampleBuffer &buffer = protocol.getDevice().getChannel2().getSampleBuffer();
-            //     int16_t data = *buffer.begin();
-            //     outChannel2.serialize(&data, 1);
-            //     buffer.pop_front();
+            //     buffer2.linearize();
+            //     outChannel1.serialize(buffer2.array_one(), buffer2.size());
+            //     buffer2.clear();
             // }
         }
         return EXIT_SUCCESS;
@@ -89,8 +89,7 @@ void sigHandler(int sig)
 {
     if (sig == SIGINT)
     {
-        program.protocol.getDevice().print();
+        printf("\nExiting!\n\n");
         program.stop();
-        exit(0);
     }
 }
