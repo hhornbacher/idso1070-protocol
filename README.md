@@ -1,6 +1,6 @@
 # IDSO1070 Protocol Library (for Linux)
 
-This is a reverse engineered implementation of the protocol used to communicate with the mixed signal oscilloscope IDSO1070 from Hantek.
+This is a reverse engineered implementation of the protocol used to communicate with the 2 channel digital storage oscilloscope IDSO1070 from Hantek.
 It's possible to communicate with the device over WiFi (TCP) as well as USB.
 
 USB ID: ```0483:5740 [STMicroelectronics STM32F407]```
