@@ -75,6 +75,16 @@ Channel &IDSO1070A::getSelectedChannel()
     return *selectedChannel;
 }
 
+int IDSO1070A::getSelectedChannelIndex()
+{
+    if (selectedChannel == &channel1)
+        return 1;
+    else if (selectedChannel == &channel2)
+        return 2;
+    else
+        return -1;
+}
+
 void IDSO1070A::setSelectedChannel(Channel &channel)
 {
     this->selectedChannel = &channel;

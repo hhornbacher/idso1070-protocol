@@ -55,6 +55,7 @@ public:
   Channel &getChannel2();
 
   Channel &getSelectedChannel();
+  int getSelectedChannelIndex();
   void setSelectedChannel(Channel &channel);
 
   Trigger &getTrigger();
