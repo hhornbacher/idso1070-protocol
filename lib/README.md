@@ -1,8 +1,13 @@
-# About the Protocol
+# IDSO1070A Protocol Library (for Linux)
+
+This is a reverse engineered implementation of the protocol used to communicate with the mixed signal oscilloscope IDSO1070A from Hantek.
+It's possible to communicate with the device over WiFi (TCP) as well as USB.
+
+## About the Protocol
 
 The protocol itself is based on a simple request-response flow with the packets described here.
 
-## Request (Command) packet
+### Request (Command) packet
 
 This packet has the fixed size of 4 bytes
 
@@ -12,7 +17,7 @@ Address|Size (byte)|Description
 `0x0001`|1|Command code
 `0x0002`|2|Parameters (can be 0-2 bytes, padded with zero)
 
-### Commands
+#### Commands
 
 Type|=|Command|=|Parameters
 -|-|-|-|-
@@ -44,7 +49,7 @@ FPGA|`0x55`|Serial baud rate|`0x14`|*TBD*
 FPGA|`0x55`|RAM channel selection|`0x15`|*TBD*
 FPGA|`0x55`|Read RAM count|`0x16`|*TBD*
 
-## Response packet
+### Response packet
 
 This packet has the fixed size of 509 bytes.
 
@@ -56,7 +61,7 @@ HEADER|`0x0000`|2|HEADER: Magic bytes: `0xff 0x01`
 PAYLOAD|`0x0007`|501|PAYLOAD
 END|`0x01FC`|1|Magic byte: `0xce`
 
-## Connection
+### Connection
 
 There are two options connection to the device:
 
