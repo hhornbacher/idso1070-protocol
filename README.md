@@ -8,7 +8,8 @@ It's possible to communicate with the device over WiFi (TCP) as well as USB.
 * cmake: Helper scripts for cmake
 * include: Library headers
 * lib: Implementation of the protocol itself
-* example: Simple program using the library
+* server: Simple tcp server using this library
+* example: Simple program using this library
 
 ## Build instructions
 

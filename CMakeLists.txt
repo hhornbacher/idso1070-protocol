@@ -40,6 +40,7 @@ include_directories(include)
 
 # source directories
 add_subdirectory(lib)
+add_subdirectory(server)
 add_subdirectory(example)
 
 # install idso1070a.pc
