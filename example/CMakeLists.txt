@@ -1,12 +1,6 @@
 project (idso1070a-example)
 
-# Add libidso1070a include directory
-if(NOT libidso1070a_SOURCE_DIR)
-find_package(LIBIDSO1070A REQUIRED)
-include_directories(${LIBIDSO1070A_INCLUDE_DIR})
-else()
-include_directories(${libidso1070a_SOURCE_DIR})
-endif()
+include_directories(../include)
 
 add_executable(idso1070a-example main.cxx)
 

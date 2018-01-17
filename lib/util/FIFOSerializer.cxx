@@ -1,4 +1,4 @@
-#include "FIFOSerializer.h"
+#include "util/FIFOSerializer.h"
 
 FIFOSerializer::FIFOSerializer(const char *path, bool enabled) : Serializer(NULL), enabled(enabled)
 {

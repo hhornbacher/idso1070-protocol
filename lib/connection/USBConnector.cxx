@@ -1,4 +1,4 @@
-#include "USBConnector.h"
+#include "connection/USBConnector.h"
 
 USBConnector::USBConnector(const char *device)
 {

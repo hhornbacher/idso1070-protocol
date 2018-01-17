@@ -1,4 +1,4 @@
-#include "Channel.h"
+#include "device/Channel.h"
 
 Channel::Channel() : sampleBuffer(SampleBufferSize)
 {

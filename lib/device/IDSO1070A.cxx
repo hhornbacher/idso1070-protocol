@@ -1,4 +1,4 @@
-#include "IDSO1070A.h"
+#include "device/IDSO1070A.h"
 
 IDSO1070A::IDSO1070A()
 {

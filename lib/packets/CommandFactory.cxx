@@ -1,4 +1,4 @@
-#include "CommandFactory.h"
+#include "packets/CommandFactory.h"
 
 CommandFactory::CommandFactory(IDSO1070A &device) : device(device)
 {

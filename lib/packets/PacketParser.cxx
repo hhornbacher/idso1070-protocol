@@ -1,4 +1,4 @@
-#include "PacketParser.h"
+#include "packets/PacketParser.h"
 
 PacketParser::PacketParser(IDSO1070A &device) : device(device)
 {
@@ -18,6 +18,52 @@ bool PacketParser::parse(Response *packet)
         return parseStateResponse(packet);
     default:
         return false;
+    }
+}
+
+void PacketParser::parse(Sample *packet)
+{
+    uint8_t head = packet->getPayload()[0];
+    if (head & (1 << 5))
+    {
+        int i = head & 0x0f;
+        if (device.getLittlePacketStatus() == i)
+        {
+            device.setLittlePacketStatus(device.getLittlePacketStatus() + 1);
+            parseSamplePacket(packet, i);
+            if (i == (device.getPacketsNumber() - 1))
+            {
+                device.setLittlePacketStatus(0);
+
+                fixAdDiff();
+                interpolateSamples();
+
+                //             if (this.connector.isSendingCommands()) {
+                //                 return;
+                //             }
+
+                if (head & (1 << 6))
+                {
+                    printf("\n\nTrigger compared\n\n");
+                    // trigger compared
+                }
+
+                if (head & (1 << 4))
+                {
+                    printf("\n\nWave found\n\n");
+                    // wave found
+                }
+                else
+                {
+                    // wave not found
+                }
+
+                return;
+            }
+            return;
+        }
+        device.setLittlePacketStatus(0);
+        return;
     }
 }
 
@@ -558,49 +604,109 @@ void PacketParser::parseChannel2Data(Sample *packet, int index)
     }
 }
 
-void PacketParser::parse(Sample *packet)
+void PacketParser::fixAdDiff()
 {
-    uint8_t head = packet->getPayload()[0];
-    if (head & (1 << 5))
+    if (device.getEnabledChannelsCount() == 1 && device.getTimeBase() <= HDIV_1uS)
     {
-        int i = head & 0x0f;
-        if (device.getLittlePacketStatus() == i)
+        // fixCh1AdDiff();
+        // fixCh2AdDiff();
+    }
+}
+
+// void PacketParser::fixCh1AdDiff()
+// {
+//     if (device.getChannel1().isEnabled())
+//     {
+//         int i;
+//         short s;
+//         if ((EeromData.nFpgaAlert[16] == (short)0 ? 1 : 0) == 0)
+//         {
+//             for (i = 0; i < this.channel1.getLength(); i++)
+//             {
+//                 s = (short)(EeromData.adDiffFixData[0][this.channel1.getSamples()[i * 2]] + this.channel1.getSamples()[(i * 2) + 1]);
+//                 if (s > (short)255)
+//                 {
+//                     s = (short)255;
+//                 }
+//                 else if (s < (short)0)
+//                 {
+//                     s = (short)0;
+//                 }
+//                 this.channel1.getSamples()[(i * 2) + 1] = s;
+//             }
+//             return;
+//         }
+//         for (i = 0; i < this.channel1.getLength(); i++)
+//         {
+//             s = (short)(EeromData.adDiffFixData[0][this.channel1.getSamples()[i * 2]] + this.channel1.getSamples()[(i * 2) + 1]);
+//             if (s > (short)255)
+//             {
+//                 s = (short)255;
+//             }
+//             else if (s < (short)0)
+//             {
+//                 s = (short)0;
+//             }
+//             this.channel1.getSamples()[(i * 2) + 1] = this.channel1.getSamples()[i * 2];
+//             this.channel1.getSamples()[i * 2] = s;
+//         }
+//     }
+// }
+
+// void PacketParser::fixCh2AdDiff()
+// {
+//     int i;
+//     short s;
+//     if ((EeromData.nFpgaAlert[17] == (short)0 ? 1 : 0) == 0)
+//     {
+//         for (i = 0; i < this.channel2.getLength(); i++)
+//         {
+//             s = (short)(EeromData.adDiffFixData[1][this.channel2.getSamples()[(i * 2) + 1]] + this.channel2.getSamples()[i * 2]);
+//             if (s > (short)255)
+//             {
+//                 s = (short)255;
+//             }
+//             else if (s < (short)0)
+//             {
+//                 s = (short)0;
+//             }
+//             this.channel2.getSamples()[i * 2] = this.channel2.getSamples()[(i * 2) + 1];
+//             this.channel2.getSamples()[(i * 2) + 1] = s;
+//         }
+//         return;
+//     }
+//     for (i = 0; i < this.channel2.getLength(); i++)
+//     {
+//         s = (short)(EeromData.adDiffFixData[1][this.channel2.getSamples()[(i * 2) + 1]] + this.channel2.getSamples()[i * 2]);
+//         if (s > (short)255)
+//         {
+//             s = (short)255;
+//         }
+//         else if (s < (short)0)
+//         {
+//             s = (short)0;
+//         }
+//         this.channel2.getSamples()[i * 2] = s;
+//     }
+// }
+
+void PacketParser::interpolateSamples()
+{
+    int i = 1;
+    if (!(device.getTimeBase() == HDIV_1uS && device.getEnabledChannelsCount() == 2))
+    {
+        i = 0;
+    }
+    if (i != 0)
+    {
+        // IDSO1070Native.lerp_update(this.channel1.getInterpolatedSamples(), this.channel2.getInterpolatedSamples(), this.channel1.getSamples(), this.channel2.getSamples(), this.timeBase.ordinal(), channelStatus(), getTrigger().getTriggerChannel().ordinal(), (int)(getTrigger().getXPosition() * 100.0d), getTrigger().getTriggerLevel(), getTrigger().getTriggerSlope().ordinal(), getMemoryDepth(), this.interpolateType.ordinal());
+        if (device.getChannel1().isEnabled())
         {
-            device.setLittlePacketStatus(device.getLittlePacketStatus() + 1);
-            parseSamplePacket(packet, i);
-            if (i == (device.getPacketsNumber() - 1))
-            {
-                printf("B\n");
-                device.setLittlePacketStatus(0);
-
-                //             fixAdDiff();
-                //             interpolateSamples();
-
-                //             if (this.connector.isSendingCommands()) {
-                //                 return;
-                //             }
-
-                if (head & (1 << 6))
-                {
-                    printf("\n\nTrigger compared\n\n");
-                    // trigger compared
-                }
-
-                if (head & (1 << 4))
-                {
-                    printf("\n\nWave found\n\n");
-                    // wave found
-                }
-                else
-                {
-                    // wave not found
-                }
-
-                return;
-            }
-            return;
+            // System.arraycopy(this.channel1.getInterpolatedSamples(), 0, this.channel1.getSamples(), 0, getMemoryDepth());
         }
-        device.setLittlePacketStatus(0);
-        return;
+        if (device.getChannel2().isEnabled())
+        {
+            // System.arraycopy(this.channel2.getInterpolatedSamples(), 0, this.channel2.getSamples(), 0, getMemoryDepth());
+        }
     }
 }

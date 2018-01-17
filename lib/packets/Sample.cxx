@@ -1,4 +1,4 @@
-#include "Sample.h"
+#include "packets/Sample.h"
 
 Sample::Sample(uint8_t *data) : Packet(data)
 {

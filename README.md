@@ -6,6 +6,7 @@ It's possible to communicate with the device over WiFi (TCP) as well as USB.
 ## Directories
 
 * cmake: Helper scripts for cmake
+* include: Library headers
 * lib: Implementation of the protocol itself
 * example: Simple program using the library
 
@@ -17,7 +18,7 @@ There is also a preconfigured task for building (CTRL-SHIFT-B) in vscode and a l
 ## Dependencies
 
 * GCC
-* CMake: v3.0
+* CMake: v3.5
 * libboost: v1.58.0
 
 ## Attention

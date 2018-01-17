@@ -13,6 +13,7 @@ configure_file (
  
 # Add binary dir as include directory, to be able to include config.h
 include_directories("${PROJECT_BINARY_DIR}")
+include_directories(../include)
 
 add_subdirectory(device)
 add_subdirectory(connection)

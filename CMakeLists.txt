@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.5)
 
 # START: Include GoogleTest framework
 #configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -26,6 +26,9 @@ cmake_minimum_required (VERSION 3.0)
 #                 EXCLUDE_FROM_ALL)
 # END: Include GoogleTest framework
 
+# Default GNU install directories
+include(GNUInstallDirs)
+
 # Set buil to debug
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -35,11 +38,12 @@ set (CMAKE_CXX_STANDARD 11)
 # add local cmake dir to module path
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
+# add boost as dependency and configure
 add_definitions(-DBOOST_FILESYSTEM_NO_DEPRECATED)
-
 find_package(Boost 1.58.0 COMPONENTS filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
+# source directories
 add_subdirectory(lib)
 add_subdirectory(example)
 

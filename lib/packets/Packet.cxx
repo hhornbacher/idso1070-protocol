@@ -1,4 +1,4 @@
-#include "Packet.h"
+#include "packets/Packet.h"
 
 Packet::Packet(uint8_t *data)
 {

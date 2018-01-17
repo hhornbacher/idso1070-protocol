@@ -37,6 +37,10 @@ private:
   void parseBothChannelsData(Sample *packet, int index);
   void parseChannel1Data(Sample *packet, int index);
   void parseChannel2Data(Sample *packet, int index);
+  void fixAdDiff();
+  // void fixCh1AdDiff();
+  // void fixCh2AdDiff();
+  void interpolateSamples();
 
 public:
   PacketParser(IDSO1070A &device);

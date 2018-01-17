@@ -1,4 +1,4 @@
-#include "Command.h"
+#include "packets/Command.h"
 
 Command::Command(CommandCode cmd, uint8_t param1, uint8_t param2)
 {
