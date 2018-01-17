@@ -1,4 +1,4 @@
-#include "Server.h"
+#include "ControlServer.h"
 
 void sigHandler(int sig);
 
@@ -6,7 +6,7 @@ class Main
 {
   private:
     bool runProgram = true;
-    Server server;
+    ControlServer server;
 
   public:
     Main()
