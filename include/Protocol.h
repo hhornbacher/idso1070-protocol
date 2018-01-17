@@ -15,7 +15,7 @@
 #include "connection/TCPConnector.h"
 #include "connection/USBConnector.h"
 
-#include "device/IDSO1070A.h"
+#include "device/IDSO1070.h"
 
 #include "enums.h"
 #include "packets/Sample.h"
@@ -33,7 +33,7 @@ public:
 
 private:
   // Device class to store the device's states and resources
-  IDSO1070A device;
+  IDSO1070 device;
 
   // Connector abstraction for USB/TCP communication
   Connector &connection;
@@ -79,7 +79,7 @@ public:
   // This has to be called in the main loop
   void process();
 
-  IDSO1070A &getDevice();
+  IDSO1070 &getDevice();
 
   // Send one command
   void sendCommand(CommandGenerator cmdFn);

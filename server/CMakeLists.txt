@@ -1,11 +1,11 @@
-project (idso1070a-server)
+project (idso1070-server)
 
 # add libmicrohttpd
 find_package(MHD)
 include_directories(${MHD_INCLUDE_DIR})
 
-add_executable(idso1070a-server main.cxx StreamServer.cxx ControlServer.cxx)
+add_executable(idso1070-server main.cxx StreamServer.cxx ControlServer.cxx)
 
-target_link_libraries (idso1070a-server idso1070a ${MHD_LIBRARIES})
+target_link_libraries (idso1070-server idso1070 ${MHD_LIBRARIES})
 
-install (TARGETS idso1070a-server DESTINATION ${CMAKE_INSTALL_BINDIR})
+install (TARGETS idso1070-server DESTINATION ${CMAKE_INSTALL_BINDIR})

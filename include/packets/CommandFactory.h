@@ -7,7 +7,7 @@
 #include <deque>
 
 #include "../util/mapValue.h"
-#include "../device/IDSO1070A.h"
+#include "../device/IDSO1070.h"
 
 #include "Command.h"
 
@@ -18,11 +18,11 @@ class CommandFactory
 {
 public:
 private:
-  IDSO1070A &device;
+  IDSO1070 &device;
   CommandGeneratorVector buffer;
 
 public:
-  CommandFactory(IDSO1070A &device);
+  CommandFactory(IDSO1070 &device);
 
   CommandGeneratorVector &readEEROMPages(bool internal = false);
 

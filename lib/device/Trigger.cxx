@@ -1,5 +1,5 @@
 #include "device/Trigger.h"
-#include "device/IDSO1070A.h"
+#include "device/IDSO1070.h"
 
 void Trigger::print()
 {

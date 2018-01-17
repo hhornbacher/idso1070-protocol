@@ -1,6 +1,6 @@
 #include "packets/PacketParser.h"
 
-PacketParser::PacketParser(IDSO1070A &device) : device(device)
+PacketParser::PacketParser(IDSO1070 &device) : device(device)
 {
 }
 
@@ -503,11 +503,11 @@ bool PacketParser::parseEEROMPage00(Response *packet)
     iArr = device.getTrigger().getInnerPWM();
     i = tmpB + 1;
     iArr[3] = ((packet->getPayload()[tmpB] & 255) << 8) + iArr[3];
-    if (device.getTrigger().getInnerPWM(2) < IDSO1070A::SamplesCountPerPacket || device.getTrigger().getInnerPWM(2) > 4000)
+    if (device.getTrigger().getInnerPWM(2) < IDSO1070::SamplesCountPerPacket || device.getTrigger().getInnerPWM(2) > 4000)
     {
         device.getTrigger().setInnerPWM(2, device.getTrigger().getInnerPWM(0));
     }
-    if (device.getTrigger().getInnerPWM(3) < IDSO1070A::SamplesCountPerPacket || device.getTrigger().getInnerPWM(3) > 4000)
+    if (device.getTrigger().getInnerPWM(3) < IDSO1070::SamplesCountPerPacket || device.getTrigger().getInnerPWM(3) > 4000)
     {
         device.getTrigger().setInnerPWM(3, device.getTrigger().getInnerPWM(1));
     }
@@ -534,9 +534,9 @@ void PacketParser::parseBothChannelsData(Sample *packet, int index)
 {
     size_t pos = 0;
 
-    size_t sampleOffset = index * (IDSO1070A::SamplesCountPerPacket / 2);
+    size_t sampleOffset = index * (IDSO1070::SamplesCountPerPacket / 2);
 
-    while ((pos * 2) < IDSO1070A::SamplesCountPerPacket)
+    while ((pos * 2) < IDSO1070::SamplesCountPerPacket)
     {
         if (device.getChannel1().getCoupling() == COUPLING_GND)
         {
@@ -566,8 +566,8 @@ void PacketParser::parseChannel1Data(Sample *packet, int index)
 {
     size_t pos = 0;
 
-    size_t sampleOffset = index * IDSO1070A::SamplesCountPerPacket;
-    while (pos < IDSO1070A::SamplesCountPerPacket)
+    size_t sampleOffset = index * IDSO1070::SamplesCountPerPacket;
+    while (pos < IDSO1070::SamplesCountPerPacket)
     {
         if (device.getChannel1().getCoupling() == COUPLING_GND)
         {
@@ -587,8 +587,8 @@ void PacketParser::parseChannel2Data(Sample *packet, int index)
 {
     size_t pos = 0;
 
-    size_t sampleOffset = index * IDSO1070A::SamplesCountPerPacket;
-    while (pos < IDSO1070A::SamplesCountPerPacket)
+    size_t sampleOffset = index * IDSO1070::SamplesCountPerPacket;
+    while (pos < IDSO1070::SamplesCountPerPacket)
     {
         if (device.getChannel2().getCoupling() == COUPLING_GND)
         {

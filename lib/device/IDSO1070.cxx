@@ -1,6 +1,6 @@
-#include "device/IDSO1070A.h"
+#include "device/IDSO1070.h"
 
-IDSO1070A::IDSO1070A()
+IDSO1070::IDSO1070()
 {
     armFirmwareVersion[0] = 0;
     fpgaFirmwareVersion[0] = 0;
@@ -11,9 +11,9 @@ IDSO1070A::IDSO1070A()
     // this.channel2.setAttenuationFactor(AttenuationFactor.X1);
 }
 
-void IDSO1070A::print()
+void IDSO1070::print()
 {
-    printf("[IDSO1070A]\n");
+    printf("[IDSO1070]\n");
     printf("armFirmwareVersion = %s\n", armFirmwareVersion);
     printf("fpgaFirmwareVersion = %s\n", fpgaFirmwareVersion);
     printf("batteryLevel = %d\n", batteryLevel);
@@ -29,53 +29,53 @@ void IDSO1070A::print()
     printf("\n\n");
 }
 
-TimeBase IDSO1070A::getTimeBase()
+TimeBase IDSO1070::getTimeBase()
 {
     return timeBase;
 }
-void IDSO1070A::setTimeBase(TimeBase timeBase)
+void IDSO1070::setTimeBase(TimeBase timeBase)
 {
     this->timeBase = timeBase;
 }
 
-CaptureMode IDSO1070A::getCaptureMode()
+CaptureMode IDSO1070::getCaptureMode()
 {
     return captureMode;
 }
-void IDSO1070A::setCaptureMode(CaptureMode captureMode)
+void IDSO1070::setCaptureMode(CaptureMode captureMode)
 {
     this->captureMode = captureMode;
 }
 
-ScopeMode IDSO1070A::getScopeMode()
+ScopeMode IDSO1070::getScopeMode()
 {
     return scopeMode;
 }
-void IDSO1070A::setScopeMode(ScopeMode scopeMode)
+void IDSO1070::setScopeMode(ScopeMode scopeMode)
 {
     this->scopeMode = scopeMode;
 }
 
-EEROMData &IDSO1070A::getEEROMData()
+EEROMData &IDSO1070::getEEROMData()
 {
     return eeromData;
 }
 
-Channel &IDSO1070A::getChannel1()
+Channel &IDSO1070::getChannel1()
 {
     return channel1;
 }
-Channel &IDSO1070A::getChannel2()
+Channel &IDSO1070::getChannel2()
 {
     return channel2;
 }
 
-Channel &IDSO1070A::getSelectedChannel()
+Channel &IDSO1070::getSelectedChannel()
 {
     return *selectedChannel;
 }
 
-int IDSO1070A::getSelectedChannelIndex()
+int IDSO1070::getSelectedChannelIndex()
 {
     if (selectedChannel == &channel1)
         return 1;
@@ -85,68 +85,68 @@ int IDSO1070A::getSelectedChannelIndex()
         return -1;
 }
 
-void IDSO1070A::setSelectedChannel(Channel &channel)
+void IDSO1070::setSelectedChannel(Channel &channel)
 {
     this->selectedChannel = &channel;
 }
 
-Trigger &IDSO1070A::getTrigger()
+Trigger &IDSO1070::getTrigger()
 {
     return trigger;
 }
 
-void IDSO1070A::setBatteryLevel(uint8_t batteryLevel)
+void IDSO1070::setBatteryLevel(uint8_t batteryLevel)
 {
     this->batteryLevel = batteryLevel;
 }
-uint8_t IDSO1070A::getBatteryLevel()
+uint8_t IDSO1070::getBatteryLevel()
 {
     return batteryLevel;
 }
 
-void IDSO1070A::setLittlePacketStatus(int littlePacketStatus)
+void IDSO1070::setLittlePacketStatus(int littlePacketStatus)
 {
     this->littlePacketStatus = littlePacketStatus;
 }
-int IDSO1070A::getLittlePacketStatus()
+int IDSO1070::getLittlePacketStatus()
 {
     return littlePacketStatus;
 }
 
-void IDSO1070A::setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus)
+void IDSO1070::setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus)
 {
     this->receiveFreqDivStatus = receiveFreqDivStatus;
 }
-uint8_t IDSO1070A::getReceiveFreqDivStatus()
+uint8_t IDSO1070::getReceiveFreqDivStatus()
 {
     return receiveFreqDivStatus;
 }
 
-void IDSO1070A::setFreqDiv(uint32_t freqDiv)
+void IDSO1070::setFreqDiv(uint32_t freqDiv)
 {
     this->freqDiv = freqDiv;
 }
-uint32_t IDSO1070A::getFreqDiv()
+uint32_t IDSO1070::getFreqDiv()
 {
     return freqDiv;
 }
 
-void IDSO1070A::setARMFirmwareVersion(char *version)
+void IDSO1070::setARMFirmwareVersion(char *version)
 {
     strncpy(armFirmwareVersion, version, 9);
 }
 
-void IDSO1070A::setFPGAFirmwareVersion(char *version)
+void IDSO1070::setFPGAFirmwareVersion(char *version)
 {
     strncpy(fpgaFirmwareVersion, version, 9);
 }
 
-bool IDSO1070A::isSampleRate200Mor250M()
+bool IDSO1070::isSampleRate200Mor250M()
 {
     return timeBase <= HDIV_1uS;
 }
 
-TimeBase IDSO1070A::getTimebaseFromFreqDiv()
+TimeBase IDSO1070::getTimebaseFromFreqDiv()
 {
     switch (freqDiv)
     {
@@ -207,11 +207,11 @@ TimeBase IDSO1070A::getTimebaseFromFreqDiv()
     }
 }
 
-size_t IDSO1070A::getSamplesNumberOfOneFrame()
+size_t IDSO1070::getSamplesNumberOfOneFrame()
 {
     return (timeBase == HDIV_5uS) ? 2500 : MemoryDepth;
 }
-uint8_t IDSO1070A::getEnabledChannelsCount()
+uint8_t IDSO1070::getEnabledChannelsCount()
 {
     if (channel1.isEnabled() && channel2.isEnabled())
         return 2;
@@ -219,7 +219,7 @@ uint8_t IDSO1070A::getEnabledChannelsCount()
         return 1;
     return 0;
 }
-uint8_t IDSO1070A::getPacketsNumber()
+uint8_t IDSO1070::getPacketsNumber()
 {
     return (getEnabledChannelsCount() * getSamplesNumberOfOneFrame()) / SamplesCountPerPacket;
 }

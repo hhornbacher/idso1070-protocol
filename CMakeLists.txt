@@ -1,10 +1,10 @@
 cmake_minimum_required (VERSION 3.5)
 
 # version numbers
-set (libidso1070a_VERSION_MAJOR 1)
-set (libidso1070a_VERSION_MINOR 0)
+set (libidso1070_VERSION_MAJOR 1)
+set (libidso1070_VERSION_MINOR 0)
 
-project (libidso1070a VERSION "${libidso1070a_VERSION_MAJOR}.${libidso1070a_VERSION_MINOR}")
+project (libidso1070 VERSION "${libidso1070_VERSION_MAJOR}.${libidso1070_VERSION_MINOR}")
  
 # create config.h
 configure_file (
@@ -12,8 +12,8 @@ configure_file (
   "${PROJECT_BINARY_DIR}/config.h"
 )
 
-# create idso1070a.pc
-configure_file(idso1070a.pc.in idso1070a.pc @ONLY)
+# create idso1070.pc
+configure_file(idso1070.pc.in idso1070.pc @ONLY)
 
 # default GNU install directories
 include(GNUInstallDirs)
@@ -42,11 +42,11 @@ include_directories(include)
 add_subdirectory(lib)
 add_subdirectory(server)
 
-# install idso1070a.pc
-install(FILES ${CMAKE_BINARY_DIR}/idso1070a.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
+# install idso1070.pc
+install(FILES ${CMAKE_BINARY_DIR}/idso1070.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
 
 # install include directory
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/idso1070a)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/idso1070)
 
 # uninstall target
 # https://cmake.org/Wiki/CMake_FAQ#Can_I_do_.22make_uninstall.22_with_CMake.3F

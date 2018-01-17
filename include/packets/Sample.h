@@ -4,7 +4,7 @@
 #include <cstdio>
 
 #include "../util/hexdump.h"
-#include "../device/IDSO1070A.h"
+#include "../device/IDSO1070.h"
 
 #include "Packet.h"
 #include "Response.h"

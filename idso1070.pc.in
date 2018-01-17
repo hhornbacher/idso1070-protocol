@@ -8,5 +8,5 @@ Description: library to communicate with hantek idso1070 digital oscilloscope
 Version: @PROJECT_VERSION@
 
 Requires:
-Libs: -L${libdir} -lidso1070a
+Libs: -L${libdir} -lidso1070
 Cflags: -I${includedir}

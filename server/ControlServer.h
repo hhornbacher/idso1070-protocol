@@ -20,9 +20,9 @@ using json = nlohmann::json;
 class ControlServer
 {
 public:
-  static const int HttpPort = 8000;
-  static const int StreamChannel1Port = 8010;
-  static const int StreamChannel2Port = 8020;
+  static const int HttpPort = 8800;
+  static const int StreamChannel1Port = 8810;
+  static const int StreamChannel2Port = 8820;
   static const int ResponseBufferSize = 1024 * 16;
 
 private:

@@ -1,5 +1,5 @@
-#ifndef _IDSO1070A_H_
-#define _IDSO1070A_H_
+#ifndef _IDSO1070_H_
+#define _IDSO1070_H_
 
 #include <cstdio>
 #include <cstdint>
@@ -11,7 +11,7 @@
 #include "Channel.h"
 #include "Trigger.h"
 
-class IDSO1070A
+class IDSO1070
 {
 public:
   static const int MaxPWM = 4095;
@@ -40,7 +40,7 @@ private:
   char fpgaFirmwareVersion[9];
 
 public:
-  IDSO1070A();
+  IDSO1070();
   TimeBase getTimeBase();
   void setTimeBase(TimeBase timeBase);
 
@@ -86,4 +86,4 @@ public:
   void print();
 };
 
-#endif // _IDSO1070A_H_
+#endif // _IDSO1070_H_

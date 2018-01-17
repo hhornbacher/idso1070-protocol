@@ -10,7 +10,7 @@ Sample::Sample(Response *response) : Packet(response->getHeader())
 
 size_t Sample::getPayloadLength()
 {
-    return IDSO1070A::SamplesCountPerPacket;
+    return IDSO1070::SamplesCountPerPacket;
 }
 
 void Sample::print()

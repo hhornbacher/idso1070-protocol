@@ -4,7 +4,7 @@
 #include <cmath>
 
 #include "../util/mapValue.h"
-#include "../device/IDSO1070A.h"
+#include "../device/IDSO1070.h"
 
 #include "Response.h"
 #include "Sample.h"
@@ -12,7 +12,7 @@
 class PacketParser
 {
 private:
-  IDSO1070A &device;
+  IDSO1070 &device;
 
   // Response parsing
   bool parseAAResponse(Response *packet);
@@ -43,7 +43,7 @@ private:
   void interpolateSamples();
 
 public:
-  PacketParser(IDSO1070A &device);
+  PacketParser(IDSO1070 &device);
 
   bool parse(Response *packet);
   void parse(Sample *packet);

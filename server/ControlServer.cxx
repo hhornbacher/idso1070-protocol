@@ -17,6 +17,7 @@ void ControlServer::start()
     protocol.start();
     protocol.setProgressHandler(Protocol::bindProgressHandler(&ControlServer::onProgress, this));
     protocol.init();
+    protocol.startSampling();
 }
 
 void ControlServer::stop()
@@ -93,7 +94,7 @@ int ControlServer::statusResponse(MHD_Connection *connection)
 
 int ControlServer::deviceResponse(MHD_Connection *connection)
 {
-    IDSO1070A &device = protocol.getDevice();
+    IDSO1070 &device = protocol.getDevice();
     json j = {
         {"timeBase", (int)device.getTimeBase()},
         {"captureMode", (int)device.getCaptureMode()},
@@ -106,6 +107,7 @@ int ControlServer::deviceResponse(MHD_Connection *connection)
 int ControlServer::channel1Response(MHD_Connection *connection)
 {
     Channel &channel = protocol.getDevice().getChannel1();
+    int port = StreamChannel1Port;
     json j = {
         {"enabled", channel.isEnabled()},
         {"verticalDiv", (int)channel.getVerticalDiv()},
@@ -114,7 +116,8 @@ int ControlServer::channel1Response(MHD_Connection *connection)
         {"voltage125", channel.getVoltage125()},
         {"voltageRelay1", channel.getVoltageRL1()},
         {"voltageRelay2", channel.getVoltageRL2()},
-        {"sampleBufferSize", channel.getSampleBuffer().size()}};
+        {"sampleBufferSize", (float)channel.getSampleBuffer().size()},
+        {"streamPort", port}};
 
     return sendResponse(connection, j);
 }
@@ -122,6 +125,7 @@ int ControlServer::channel1Response(MHD_Connection *connection)
 int ControlServer::channel2Response(MHD_Connection *connection)
 {
     Channel &channel = protocol.getDevice().getChannel2();
+    int port = StreamChannel2Port;
     json j = {
         {"enabled", channel.isEnabled()},
         {"verticalDiv", (int)channel.getVerticalDiv()},
@@ -130,7 +134,8 @@ int ControlServer::channel2Response(MHD_Connection *connection)
         {"voltage125", channel.getVoltage125()},
         {"voltageRelay1", channel.getVoltageRL1()},
         {"voltageRelay2", channel.getVoltageRL2()},
-        {"sampleBufferSize", channel.getSampleBuffer().size()}};
+        {"sampleBufferSize", channel.getSampleBuffer().size()},
+        {"streamPort", port}};
 
     return sendResponse(connection, j);
 }

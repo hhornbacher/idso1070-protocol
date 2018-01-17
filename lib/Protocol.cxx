@@ -25,7 +25,7 @@ void Protocol::stop()
     connection.stop();
 }
 
-IDSO1070A &Protocol::getDevice()
+IDSO1070 &Protocol::getDevice()
 {
     return device;
 }
