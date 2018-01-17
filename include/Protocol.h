@@ -90,6 +90,8 @@ public:
   // Send all commands required for initialization of the device
   void init();
 
+  void startSampling();
+
   void setProgressHandler(ProgressHandler handler);
 
   void print();

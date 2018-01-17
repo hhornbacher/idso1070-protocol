@@ -73,6 +73,11 @@ void Protocol::init()
     sendCommand(cmdFactory.updateChannel2Coupling());
 }
 
+void Protocol::startSampling()
+{
+    sendCommand(cmdFactory.startSampling());
+}
+
 void Protocol::setProgressHandler(ProgressHandler handler)
 {
     progressHandler = handler;
