@@ -9,7 +9,6 @@ It's possible to communicate with the device over WiFi (TCP) as well as USB.
 * include: Library headers
 * lib: Implementation of the protocol itself
 * server: Simple tcp server using this library
-* example: Simple program using this library
 
 ## Build instructions
 

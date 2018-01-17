@@ -41,7 +41,6 @@ include_directories(include)
 # source directories
 add_subdirectory(lib)
 add_subdirectory(server)
-add_subdirectory(example)
 
 # install idso1070a.pc
 install(FILES ${CMAKE_BINARY_DIR}/idso1070a.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
