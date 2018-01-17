@@ -93,6 +93,8 @@ public:
   void setProgressHandler(ProgressHandler handler);
 
   void print();
+
+  bool isSampling();
 };
 
 #endif // _PROTOCOL_H_

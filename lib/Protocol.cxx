@@ -186,6 +186,11 @@ void Protocol::process()
     receive();
 }
 
+bool Protocol::isSampling()
+{
+    return sampling;
+}
+
 void Protocol::print()
 {
     device.print();
