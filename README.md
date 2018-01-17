@@ -21,7 +21,9 @@ There is also a preconfigured task for building (CTRL-SHIFT-B) in vscode and a l
 
 * GCC
 * CMake: v3.5
-* libboost: v1.58.0
+* Boost: v1.58.0
+
+On Ubuntu/Mint you can run `apt install libboost-all-dev cmake gcc` to install the dependencies.
 
 ## Attention
 
