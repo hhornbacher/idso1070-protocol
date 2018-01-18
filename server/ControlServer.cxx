@@ -2,6 +2,7 @@
 
 ControlServer::ControlServer() : usbConnection((char *)usbDevice),
                                  protocol(usbConnection), cmdFactory(protocol.getDevice()),
+                                 httpServer(HttpPort),
                                  channel1StreamServer(protocol.getDevice().getChannel1(), StreamChannel1Port),
                                  channel2StreamServer(protocol.getDevice().getChannel2(), StreamChannel2Port)
 {
@@ -9,10 +10,16 @@ ControlServer::ControlServer() : usbConnection((char *)usbDevice),
 
 void ControlServer::start()
 {
-    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, HttpPort, NULL, NULL,
-                              &_handleRequest, this, MHD_OPTION_END);
+    httpServer.start();
     channel1StreamServer.start();
     channel2StreamServer.start();
+
+    httpServer.registerRoute(METHOD_GET, "/status", HttpServer::bindRequestHandler(&ControlServer::statusRequestHandler, this));
+    httpServer.registerRoute(METHOD_GET, "/device", HttpServer::bindRequestHandler(&ControlServer::deviceRequestHandler, this));
+    httpServer.registerRoute(METHOD_GET, "/trigger", HttpServer::bindRequestHandler(&ControlServer::triggerRequestHandler, this));
+    httpServer.registerRoute(METHOD_GET, "/channel/1", HttpServer::bindRequestHandler(&ControlServer::channel1RequestHandler, this));
+    httpServer.registerRoute(METHOD_GET, "/channel/2", HttpServer::bindRequestHandler(&ControlServer::channel2RequestHandler, this));
+    httpServer.registerRoute(METHOD_PUT, "/control", HttpServer::bindRequestHandler(&ControlServer::controlRequestHandler, this));
 
     protocol.start();
     protocol.setProgressHandler(Protocol::bindProgressHandler(&ControlServer::onProgress, this));
@@ -22,7 +29,7 @@ void ControlServer::start()
 
 void ControlServer::stop()
 {
-    MHD_stop_daemon(daemon);
+    httpServer.stop();
     channel1StreamServer.stop();
     channel2StreamServer.stop();
 }
@@ -30,69 +37,21 @@ void ControlServer::stop()
 void ControlServer::process()
 {
     protocol.process();
+    httpServer.process();
     channel1StreamServer.process();
     channel2StreamServer.process();
 }
 
-int ControlServer::handleRequest(MHD_Connection *connection, const char *url, const char *method)
-{
-    if (strcmp(method, "GET") == 0)
-    {
-        if (strcmp(url, "/status") == 0)
-        {
-            return statusResponse(connection);
-        }
-        else if (strcmp(url, "/device") == 0)
-        {
-            return deviceResponse(connection);
-        }
-        else if (strcmp(url, "/trigger") == 0)
-        {
-            return triggerResponse(connection);
-        }
-        else if (strcmp(url, "/channel/1") == 0)
-        {
-            return channel1Response(connection);
-        }
-        else if (strcmp(url, "/channel/2") == 0)
-        {
-            return channel2Response(connection);
-        }
-    }
-    else if (strcmp(method, "PUT") == 0)
-    {
-        return MHD_NO;
-    }
-
-    return MHD_NO;
-}
-
-int ControlServer::sendResponse(MHD_Connection *connection, json &j)
-{
-    int ret;
-    char responseBuffer[ResponseBufferSize];
-    MHD_Response *response;
-    strncpy(responseBuffer, j.dump(4).c_str(), ResponseBufferSize);
-    response = MHD_create_response_from_buffer(strlen(responseBuffer),
-                                               (void *)responseBuffer, MHD_RESPMEM_MUST_COPY);
-
-    MHD_add_response_header(response, "Content-Type", "application/json");
-
-    ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-    MHD_destroy_response(response);
-    return ret;
-}
-
-int ControlServer::statusResponse(MHD_Connection *connection)
+int ControlServer::statusRequestHandler(HttpServer::Connection connection, json *)
 {
     json j = {
         {"initialized", progress == 1.0f},
         {"progress", progress * 100},
         {"sampling", protocol.isSampling()}};
-    return sendResponse(connection, j);
+    return httpServer.sendResponse(connection, j);
 }
 
-int ControlServer::deviceResponse(MHD_Connection *connection)
+int ControlServer::deviceRequestHandler(HttpServer::Connection connection, json *)
 {
     IDSO1070 &device = protocol.getDevice();
     json j = {
@@ -101,10 +60,10 @@ int ControlServer::deviceResponse(MHD_Connection *connection)
         {"scopeMode", (int)device.getScopeMode()},
         {"selectedChannel", device.getSelectedChannelIndex()}};
 
-    return sendResponse(connection, j);
+    return httpServer.sendResponse(connection, j);
 }
 
-int ControlServer::channel1Response(MHD_Connection *connection)
+int ControlServer::channel1RequestHandler(HttpServer::Connection connection, json *)
 {
     Channel &channel = protocol.getDevice().getChannel1();
     int port = StreamChannel1Port;
@@ -116,13 +75,13 @@ int ControlServer::channel1Response(MHD_Connection *connection)
         {"voltage125", channel.getVoltage125()},
         {"voltageRelay1", channel.getVoltageRL1()},
         {"voltageRelay2", channel.getVoltageRL2()},
-        {"sampleBufferSize", (float)channel.getSampleBuffer().size()},
+        {"sampleBufferUsage", ((float)channel.getSampleBuffer().size() / (float)channel.getSampleBuffer().capacity()) * 100.0f},
         {"streamPort", port}};
 
-    return sendResponse(connection, j);
+    return httpServer.sendResponse(connection, j);
 }
 
-int ControlServer::channel2Response(MHD_Connection *connection)
+int ControlServer::channel2RequestHandler(HttpServer::Connection connection, json *)
 {
     Channel &channel = protocol.getDevice().getChannel2();
     int port = StreamChannel2Port;
@@ -134,13 +93,13 @@ int ControlServer::channel2Response(MHD_Connection *connection)
         {"voltage125", channel.getVoltage125()},
         {"voltageRelay1", channel.getVoltageRL1()},
         {"voltageRelay2", channel.getVoltageRL2()},
-        {"sampleBufferSize", channel.getSampleBuffer().size()},
+        {"sampleBufferUsage", ((float)channel.getSampleBuffer().size() / (float)channel.getSampleBuffer().capacity()) * 100.0f},
         {"streamPort", port}};
 
-    return sendResponse(connection, j);
+    return httpServer.sendResponse(connection, j);
 }
 
-int ControlServer::triggerResponse(MHD_Connection *connection)
+int ControlServer::triggerRequestHandler(HttpServer::Connection connection, json *)
 {
     Trigger &trigger = protocol.getDevice().getTrigger();
     json j = {
@@ -152,19 +111,18 @@ int ControlServer::triggerResponse(MHD_Connection *connection)
         {"mode", (int)trigger.getMode()},
         {"xPosition", trigger.getXPosition()}};
 
-    return sendResponse(connection, j);
+    return ControlServer::httpServer.sendResponse(connection, j);
+}
+
+int ControlServer::controlRequestHandler(HttpServer::Connection connection, json *)
+{
+    Trigger &trigger = protocol.getDevice().getTrigger();
+    json j = {};
+
+    return ControlServer::httpServer.sendResponse(connection, j);
 }
 
 void ControlServer::onProgress(float progress)
 {
     this->progress = progress;
-}
-
-int ControlServer::_handleRequest(void *cls, MHD_Connection *connection,
-                                  const char *url,
-                                  const char *method, const char *version,
-                                  const char *upload_data,
-                                  size_t *upload_data_size, void **con_cls)
-{
-    return ((ControlServer *)cls)->handleRequest(connection, url, method);
 }

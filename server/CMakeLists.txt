@@ -4,7 +4,7 @@ project (idso1070-server)
 find_package(MHD)
 include_directories(${MHD_INCLUDE_DIR})
 
-add_executable(idso1070-server main.cxx StreamServer.cxx ControlServer.cxx)
+add_executable(idso1070-server main.cxx StreamServer.cxx HttpServer.cxx ControlServer.cxx)
 
 target_link_libraries (idso1070-server idso1070 ${MHD_LIBRARIES})
 
