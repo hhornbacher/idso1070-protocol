@@ -16,6 +16,7 @@
 #include <Poco/Net/HTTPServerResponse.h>
 
 #include <Poco/JSON/Object.h>
+#include <Poco/JSON/Array.h>
 
 #include <iostream>
 #include <functional>

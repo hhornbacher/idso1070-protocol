@@ -17,6 +17,8 @@ class USBConnector : public Connector
 public:
   static const int USBSerialSpeed = B4000000;
 
+  typedef list<string> USBDeviceList;
+
 private:
   char device[256];
   int handle;
@@ -28,7 +30,7 @@ public:
   void transmit(uint8_t *data, size_t length);
   size_t receive();
 
-  static void enumerateDevices(list<string> &list);
+  static void enumerateDevices(USBDeviceList &list);
 
   void start();
   void stop();

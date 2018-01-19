@@ -14,14 +14,18 @@ void ControlServer::start()
     channel1StreamServer.start();
     channel2StreamServer.start();
 
-    httpServer.registerRoute(METHOD_GET, "/status", HttpServer::bindRequestHandler(&ControlServer::statusRequestHandler, this));
     httpServer.registerRoute(METHOD_GET, "/device", HttpServer::bindRequestHandler(&ControlServer::deviceRequestHandler, this));
     httpServer.registerRoute(METHOD_GET, "/trigger", HttpServer::bindRequestHandler(&ControlServer::triggerRequestHandler, this));
     httpServer.registerRoute(METHOD_GET, "/channel/1", HttpServer::bindRequestHandler(&ControlServer::channel1RequestHandler, this));
     httpServer.registerRoute(METHOD_GET, "/channel/2", HttpServer::bindRequestHandler(&ControlServer::channel2RequestHandler, this));
+
+    httpServer.registerRoute(METHOD_GET, "/status", HttpServer::bindRequestHandler(&ControlServer::statusRequestHandler, this));
     httpServer.registerRoute(METHOD_PUT, "/control", HttpServer::bindRequestHandler(&ControlServer::controlRequestHandler, this));
-    httpServer.registerRoute(METHOD_PUT, "/connect/usb", HttpServer::bindRequestHandler(&ControlServer::controlRequestHandler, this));
-    httpServer.registerRoute(METHOD_PUT, "/connect/wifi", HttpServer::bindRequestHandler(&ControlServer::controlRequestHandler, this));
+
+    httpServer.registerRoute(METHOD_GET, "/usb/list", HttpServer::bindRequestHandler(&ControlServer::usbListRequestHandler, this));
+    httpServer.registerRoute(METHOD_PUT, "/usb/connect", HttpServer::bindRequestHandler(&ControlServer::usbConnectRequestHandler, this));
+
+    httpServer.registerRoute(METHOD_PUT, "/wifi/connect", HttpServer::bindRequestHandler(&ControlServer::wifiConnectRequestHandler, this));
 
     protocol.start();
     protocol.setProgressHandler(Protocol::bindProgressHandler(&ControlServer::onProgress, this));
@@ -72,15 +76,15 @@ void ControlServer::channel1RequestHandler(HTTPServerRequest &req, HTTPServerRes
     int port = StreamChannel1Port;
 
     Object json;
-        json.set("enabled", channel.isEnabled());
-        json.set("verticalDiv", (int)channel.getVerticalDiv());
-        json.set("coupling", (int)channel.getCoupling());
-        json.set("verticalPosition", channel.getVerticalPosition());
-        json.set("voltage125", channel.getVoltage125());
-        json.set("voltageRelay1", channel.getVoltageRL1());
-        json.set("voltageRelay2", channel.getVoltageRL2());
-        json.set("sampleBufferUsage", ((float)channel.getSampleBuffer().size() / (float)channel.getSampleBuffer().capacity()) * 100.0f);
-        json.set("streamPort", port);
+    json.set("enabled", channel.isEnabled());
+    json.set("verticalDiv", (int)channel.getVerticalDiv());
+    json.set("coupling", (int)channel.getCoupling());
+    json.set("verticalPosition", channel.getVerticalPosition());
+    json.set("voltage125", channel.getVoltage125());
+    json.set("voltageRelay1", channel.getVoltageRL1());
+    json.set("voltageRelay2", channel.getVoltageRL2());
+    json.set("sampleBufferUsage", ((float)channel.getSampleBuffer().size() / (float)channel.getSampleBuffer().capacity()) * 100.0f);
+    json.set("streamPort", port);
 
     httpServer.sendResponse(req, resp, json);
 }
@@ -90,15 +94,15 @@ void ControlServer::channel2RequestHandler(HTTPServerRequest &req, HTTPServerRes
     Channel &channel = protocol.getDevice().getChannel2();
     int port = StreamChannel2Port;
     Object json;
-        json.set("enabled", channel.isEnabled());
-        json.set("verticalDiv", (int)channel.getVerticalDiv());
-        json.set("coupling", (int)channel.getCoupling());
-        json.set("verticalPosition", channel.getVerticalPosition());
-        json.set("voltage125", channel.getVoltage125());
-        json.set("voltageRelay1", channel.getVoltageRL1());
-        json.set("voltageRelay2", channel.getVoltageRL2());
-        json.set("sampleBufferUsage", ((float)channel.getSampleBuffer().size() / (float)channel.getSampleBuffer().capacity()) * 100.0f);
-        json.set("streamPort", port);
+    json.set("enabled", channel.isEnabled());
+    json.set("verticalDiv", (int)channel.getVerticalDiv());
+    json.set("coupling", (int)channel.getCoupling());
+    json.set("verticalPosition", channel.getVerticalPosition());
+    json.set("voltage125", channel.getVoltage125());
+    json.set("voltageRelay1", channel.getVoltageRL1());
+    json.set("voltageRelay2", channel.getVoltageRL2());
+    json.set("sampleBufferUsage", ((float)channel.getSampleBuffer().size() / (float)channel.getSampleBuffer().capacity()) * 100.0f);
+    json.set("streamPort", port);
 
     httpServer.sendResponse(req, resp, json);
 }
@@ -107,18 +111,52 @@ void ControlServer::triggerRequestHandler(HTTPServerRequest &req, HTTPServerResp
 {
     Trigger &trigger = protocol.getDevice().getTrigger();
     Object json;
-        json.set("bottomPWM", trigger.getBottomPWM());
-        json.set("topPWM", trigger.getTopPWM());
-        json.set("level", trigger.getLevel());
-        json.set("channel", (int)trigger.getChannel());
-        json.set("slope", (int)trigger.getSlope());
-        json.set("mode", (int)trigger.getMode());
-        json.set("xPosition", trigger.getXPosition());
+    json.set("bottomPWM", trigger.getBottomPWM());
+    json.set("topPWM", trigger.getTopPWM());
+    json.set("level", trigger.getLevel());
+    json.set("channel", (int)trigger.getChannel());
+    json.set("slope", (int)trigger.getSlope());
+    json.set("mode", (int)trigger.getMode());
+    json.set("xPosition", trigger.getXPosition());
 
     ControlServer::httpServer.sendResponse(req, resp, json);
 }
 
 void ControlServer::controlRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
+{
+    Object json;
+    json.set("test", 123);
+
+    ControlServer::httpServer.sendResponse(req, resp, json);
+}
+
+void ControlServer::usbListRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
+{
+    USBConnector::USBDeviceList devices;
+    USBConnector::enumerateDevices(devices);
+
+    Object json;
+    Array deviceList;
+
+    for (auto device : devices)
+    {
+        deviceList.add(device.c_str());
+    }
+
+    json.set("devices", deviceList);
+
+    ControlServer::httpServer.sendResponse(req, resp, json);
+}
+
+void ControlServer::usbConnectRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
+{
+    Object json;
+    json.set("test", 123);
+
+    ControlServer::httpServer.sendResponse(req, resp, json);
+}
+
+void ControlServer::wifiConnectRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
     Object json;
     json.set("test", 123);

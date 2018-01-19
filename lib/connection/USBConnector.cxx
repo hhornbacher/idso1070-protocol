@@ -12,7 +12,7 @@ USBConnector::~USBConnector()
         close(handle);
 }
 
-void USBConnector::enumerateDevices(list<string> &list)
+void USBConnector::enumerateDevices(USBDeviceList &list)
 {
     DIR *dp;
     dirent *dirp;
@@ -46,7 +46,6 @@ void USBConnector::enumerateDevices(list<string> &list)
                     {
                         string device = "/dev/";
                         device += dirp->d_name;
-                        printf("Found device: %s\n", device.c_str());
                         list.push_back(device);
                     }
                 }

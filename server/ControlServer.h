@@ -31,11 +31,18 @@ private:
   float progress = 0;
 
   void statusRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
+
   void deviceRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
   void channel1RequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
   void channel2RequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
   void triggerRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
+
   void controlRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
+
+  void usbListRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
+  void usbConnectRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
+
+  void wifiConnectRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
 
   void onProgress(float progress);
 
