@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/src/idso1070-protocol",
+            "program": "${workspaceFolder}/build/server/idso1070-server",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
