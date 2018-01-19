@@ -20,6 +20,8 @@ void ControlServer::start()
     httpServer.registerRoute(METHOD_GET, "/channel/1", HttpServer::bindRequestHandler(&ControlServer::channel1RequestHandler, this));
     httpServer.registerRoute(METHOD_GET, "/channel/2", HttpServer::bindRequestHandler(&ControlServer::channel2RequestHandler, this));
     httpServer.registerRoute(METHOD_PUT, "/control", HttpServer::bindRequestHandler(&ControlServer::controlRequestHandler, this));
+    httpServer.registerRoute(METHOD_PUT, "/connect/usb", HttpServer::bindRequestHandler(&ControlServer::controlRequestHandler, this));
+    httpServer.registerRoute(METHOD_PUT, "/connect/wifi", HttpServer::bindRequestHandler(&ControlServer::controlRequestHandler, this));
 
     protocol.start();
     protocol.setProgressHandler(Protocol::bindProgressHandler(&ControlServer::onProgress, this));
@@ -42,84 +44,86 @@ void ControlServer::process()
     channel2StreamServer.process();
 }
 
-int ControlServer::statusRequestHandler(HttpServer::Connection connection, json *)
+void ControlServer::statusRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
-    json j = {
-        {"initialized", progress == 1.0f},
-        {"progress", progress * 100},
-        {"sampling", protocol.isSampling()}};
-    return httpServer.sendResponse(connection, j);
+    Object json;
+    json.set("initialized", progress == 1.0f);
+    json.set("progress", progress * 100);
+    json.set("sampling", protocol.isSampling());
+    httpServer.sendResponse(req, resp, json);
 }
 
-int ControlServer::deviceRequestHandler(HttpServer::Connection connection, json *)
+void ControlServer::deviceRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
     IDSO1070 &device = protocol.getDevice();
-    json j = {
-        {"timeBase", (int)device.getTimeBase()},
-        {"captureMode", (int)device.getCaptureMode()},
-        {"scopeMode", (int)device.getScopeMode()},
-        {"selectedChannel", device.getSelectedChannelIndex()}};
 
-    return httpServer.sendResponse(connection, j);
+    Object json;
+    json.set("timeBase", (int)device.getTimeBase());
+    json.set("captureMode", (int)device.getCaptureMode());
+    json.set("scopeMode", (int)device.getScopeMode());
+    json.set("selectedChannel", device.getSelectedChannelIndex());
+
+    httpServer.sendResponse(req, resp, json);
 }
 
-int ControlServer::channel1RequestHandler(HttpServer::Connection connection, json *)
+void ControlServer::channel1RequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
     Channel &channel = protocol.getDevice().getChannel1();
     int port = StreamChannel1Port;
-    json j = {
-        {"enabled", channel.isEnabled()},
-        {"verticalDiv", (int)channel.getVerticalDiv()},
-        {"coupling", (int)channel.getCoupling()},
-        {"verticalPosition", channel.getVerticalPosition()},
-        {"voltage125", channel.getVoltage125()},
-        {"voltageRelay1", channel.getVoltageRL1()},
-        {"voltageRelay2", channel.getVoltageRL2()},
-        {"sampleBufferUsage", ((float)channel.getSampleBuffer().size() / (float)channel.getSampleBuffer().capacity()) * 100.0f},
-        {"streamPort", port}};
 
-    return httpServer.sendResponse(connection, j);
+    Object json;
+        json.set("enabled", channel.isEnabled());
+        json.set("verticalDiv", (int)channel.getVerticalDiv());
+        json.set("coupling", (int)channel.getCoupling());
+        json.set("verticalPosition", channel.getVerticalPosition());
+        json.set("voltage125", channel.getVoltage125());
+        json.set("voltageRelay1", channel.getVoltageRL1());
+        json.set("voltageRelay2", channel.getVoltageRL2());
+        json.set("sampleBufferUsage", ((float)channel.getSampleBuffer().size() / (float)channel.getSampleBuffer().capacity()) * 100.0f);
+        json.set("streamPort", port);
+
+    httpServer.sendResponse(req, resp, json);
 }
 
-int ControlServer::channel2RequestHandler(HttpServer::Connection connection, json *)
+void ControlServer::channel2RequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
     Channel &channel = protocol.getDevice().getChannel2();
     int port = StreamChannel2Port;
-    json j = {
-        {"enabled", channel.isEnabled()},
-        {"verticalDiv", (int)channel.getVerticalDiv()},
-        {"coupling", (int)channel.getCoupling()},
-        {"verticalPosition", channel.getVerticalPosition()},
-        {"voltage125", channel.getVoltage125()},
-        {"voltageRelay1", channel.getVoltageRL1()},
-        {"voltageRelay2", channel.getVoltageRL2()},
-        {"sampleBufferUsage", ((float)channel.getSampleBuffer().size() / (float)channel.getSampleBuffer().capacity()) * 100.0f},
-        {"streamPort", port}};
+    Object json;
+        json.set("enabled", channel.isEnabled());
+        json.set("verticalDiv", (int)channel.getVerticalDiv());
+        json.set("coupling", (int)channel.getCoupling());
+        json.set("verticalPosition", channel.getVerticalPosition());
+        json.set("voltage125", channel.getVoltage125());
+        json.set("voltageRelay1", channel.getVoltageRL1());
+        json.set("voltageRelay2", channel.getVoltageRL2());
+        json.set("sampleBufferUsage", ((float)channel.getSampleBuffer().size() / (float)channel.getSampleBuffer().capacity()) * 100.0f);
+        json.set("streamPort", port);
 
-    return httpServer.sendResponse(connection, j);
+    httpServer.sendResponse(req, resp, json);
 }
 
-int ControlServer::triggerRequestHandler(HttpServer::Connection connection, json *)
+void ControlServer::triggerRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
     Trigger &trigger = protocol.getDevice().getTrigger();
-    json j = {
-        {"bottomPWM", trigger.getBottomPWM()},
-        {"topPWM", trigger.getTopPWM()},
-        {"level", trigger.getLevel()},
-        {"channel", (int)trigger.getChannel()},
-        {"slope", (int)trigger.getSlope()},
-        {"mode", (int)trigger.getMode()},
-        {"xPosition", trigger.getXPosition()}};
+    Object json;
+        json.set("bottomPWM", trigger.getBottomPWM());
+        json.set("topPWM", trigger.getTopPWM());
+        json.set("level", trigger.getLevel());
+        json.set("channel", (int)trigger.getChannel());
+        json.set("slope", (int)trigger.getSlope());
+        json.set("mode", (int)trigger.getMode());
+        json.set("xPosition", trigger.getXPosition());
 
-    return ControlServer::httpServer.sendResponse(connection, j);
+    ControlServer::httpServer.sendResponse(req, resp, json);
 }
 
-int ControlServer::controlRequestHandler(HttpServer::Connection connection, json *)
+void ControlServer::controlRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
-    Trigger &trigger = protocol.getDevice().getTrigger();
-    json j = {};
+    Object json;
+    json.set("test", 123);
 
-    return ControlServer::httpServer.sendResponse(connection, j);
+    ControlServer::httpServer.sendResponse(req, resp, json);
 }
 
 void ControlServer::onProgress(float progress)

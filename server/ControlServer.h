@@ -6,9 +6,6 @@
 #include <csignal>
 #include <unistd.h>
 
-#include "json.h"
-using json = nlohmann::json;
-
 #include "Protocol.h"
 #include "HttpServer.h"
 #include "StreamServer.h"
@@ -33,12 +30,12 @@ private:
 
   float progress = 0;
 
-  int statusRequestHandler(HttpServer::Connection connection, json *);
-  int deviceRequestHandler(HttpServer::Connection connection, json *);
-  int channel1RequestHandler(HttpServer::Connection connection, json *);
-  int channel2RequestHandler(HttpServer::Connection connection, json *);
-  int triggerRequestHandler(HttpServer::Connection connection, json *);
-  int controlRequestHandler(HttpServer::Connection connection, json *);
+  void statusRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
+  void deviceRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
+  void channel1RequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
+  void channel2RequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
+  void triggerRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
+  void controlRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
 
   void onProgress(float progress);
 

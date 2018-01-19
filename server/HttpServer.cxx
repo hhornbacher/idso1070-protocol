@@ -1,26 +1,56 @@
 #include "HttpServer.h"
 
-HttpServer::HttpServer(int port) : port(port)
+HttpServer::HttpServer(int port) : _server(this, ServerSocket(port), new HTTPServerParams)
 {
+    notFoundHandler = bindRequestHandler(&HttpServer::sendErrorNotFound, this);
 }
 
 void HttpServer::start()
 {
-    daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, port,
-                              NULL, NULL,
-                              &_handleRequest, this,
-                              MHD_OPTION_NOTIFY_COMPLETED,
-                              &_handleRequestComplete, this,
-                              MHD_OPTION_END);
+    _server.start();
 }
 
 void HttpServer::stop()
 {
-    MHD_stop_daemon(daemon);
+    _server.stop();
 }
 
 void HttpServer::process()
 {
+}
+
+void HttpServer::sendErrorNotFound(HTTPServerRequest &req, HTTPServerResponse &resp)
+{
+    resp.setStatus(HTTPResponse::HTTP_NOT_FOUND);
+    resp.setContentType("application/json");
+
+    Object json;
+    json.set("error", 404);
+    json.set("msg", "Not found!");
+    ostream &out = resp.send();
+    json.stringify(out, 4);
+    out.flush();
+}
+
+void HttpServer::sendResponse(HTTPServerRequest &req, HTTPServerResponse &resp, Object &json)
+{
+    resp.setStatus(HTTPResponse::HTTP_OK);
+    resp.setContentType("application/json");
+
+    try
+    {
+        // Add access control allow headers
+        resp.set("Access-Control-Allow-Origin", req.get("Origin"));
+        resp.set("Access-Control-Allow-Headers", req.get("Access-Control-Request-Headers"));
+        resp.set("Access-Control-Allow-Methods", "OPTIONS, GET, PUT");
+    }
+    catch (Poco::NotFoundException e)
+    {
+    }
+
+    ostream &out = resp.send();
+    json.stringify(out, 4);
+    out.flush();
 }
 
 void HttpServer::registerRoute(HttpMethod method, string url, RequestHandler handler)
@@ -42,141 +72,66 @@ void HttpServer::registerRoute(HttpMethod method, string url, RequestHandler han
     }
 }
 
-int HttpServer::handleRequest(Connection connection,
-                              string url, string method, string version,
-                              const char *uploadData, size_t *uploadDataSize,
-                              ConnectionInfo **conInfoPtr)
+HTTPRequestHandler *HttpServer::createRequestHandler(const HTTPServerRequest &req)
 {
-    if (*conInfoPtr == NULL)
-    {
-        ConnectionInfo *conInfo = new ConnectionInfo();
-        conInfo->answerString = NULL;
-        if (method == "POST")
-        {
-            conInfo->postProcessor = MHD_create_post_processor(connection, PostBufferSize,
-                                                               _iteratePost, (void *)conInfo);
 
-            if (NULL == conInfo->postProcessor)
-            {
-                free(conInfo);
-                return MHD_NO;
-            }
-            conInfo->method = METHOD_POST;
+    string method = req.getMethod();
+    string url = req.getURI();
+    // CORS support
+    if (method == "OPTIONS")
+    {
+        try
+        {
+            method = req.get("Access-Control-Request-Method");
         }
-        else
-            conInfo->method = METHOD_GET;
-        *conInfoPtr = conInfo;
-        return MHD_YES;
+        catch (Poco::NotFoundException e)
+        {
+        }
     }
+
     if (method == "GET")
     {
         try
         {
-            return getRoutes.at(url)(connection, (json *)NULL);
+            return new HttpRequestHandler(getRoutes.at(url));
         }
         catch (out_of_range e)
         {
-            return MHD_NO;
+            return new HttpRequestHandler(notFoundHandler);
         }
     }
     else if (method == "POST")
     {
         try
         {
-            return postRoutes.at(url)(connection, (json *)NULL);
+            return new HttpRequestHandler(postRoutes.at(url));
         }
         catch (out_of_range e)
         {
-            return MHD_NO;
+            return new HttpRequestHandler(notFoundHandler);
         }
     }
     else if (method == "PUT")
     {
         try
         {
-            return putRoutes.at(url)(connection, (json *)NULL);
+            return new HttpRequestHandler(putRoutes.at(url));
         }
         catch (out_of_range e)
         {
-            return MHD_NO;
+            return new HttpRequestHandler(notFoundHandler);
         }
     }
     else if (method == "DELETE")
     {
         try
         {
-            return deleteRoutes.at(url)(connection, (json *)NULL);
+            return new HttpRequestHandler(deleteRoutes.at(url));
         }
         catch (out_of_range e)
         {
-            return MHD_NO;
+            return new HttpRequestHandler(notFoundHandler);
         }
     }
-    // if (0 == strcmp(method, "POST"))
-    // {
-    //     struct connection_info_struct *con_info = *con_cls;
-
-    //     if (*upload_data_size != 0)
-    //     {
-    //         MHD_post_process(con_info->postprocessor, upload_data,
-    //                          *upload_data_size);
-    //         *upload_data_size = 0;
-
-    //         return MHD_YES;
-    //     }
-    //     else if (NULL != con_info->answerstring)
-    //         return send_page(connection, con_info->answerstring);
-    // }
-    // return send_page(connection, errorpage);
-    return MHD_NO;
-}
-
-int HttpServer::sendResponse(Connection connection, json &j)
-{
-    int ret;
-    char responseBuffer[ResponseBufferSize];
-    MHD_Response *response;
-    strncpy(responseBuffer, j.dump(4).c_str(), ResponseBufferSize);
-    response = MHD_create_response_from_buffer(strlen(responseBuffer),
-                                               (void *)responseBuffer, MHD_RESPMEM_MUST_COPY);
-
-    MHD_add_response_header(response, "Content-Type", "application/json");
-
-    ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-    MHD_destroy_response(response);
-    return ret;
-}
-
-int HttpServer::_handleRequest(void *cls, Connection connection,
-                               const char *url, const char *method, const char *version,
-                               const char *uploadData, size_t *uploadDataSize,
-                               void **conCls)
-{
-    return ((HttpServer *)cls)->handleRequest(connection, url, method, version, uploadData, uploadDataSize, (ConnectionInfo **)conCls);
-}
-
-void HttpServer::_handleRequestComplete(void *cls, Connection connection,
-                                        void **conCls, enum MHD_RequestTerminationCode toe)
-{
-    ConnectionInfo *conInfo = (ConnectionInfo *)*conCls;
-
-    if (NULL == conInfo)
-        return;
-    if (conInfo->method == METHOD_POST)
-    {
-        MHD_destroy_post_processor(conInfo->postProcessor);
-        if (conInfo->answerString)
-            free(conInfo->answerString);
-    }
-
-    free(conInfo);
-    *conCls = NULL;
-}
-
-int HttpServer::_iteratePost(void *coninfoCls,
-                             enum MHD_ValueKind kind, const char *key,
-                             const char *filename, const char *contentType,
-                             const char *transferEncoding, const char *data,
-                             uint64_t off, size_t size)
-{
+    return new HttpRequestHandler(notFoundHandler);
 }

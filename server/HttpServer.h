@@ -6,17 +6,24 @@
 #include <csignal>
 #include <unistd.h>
 
-#include <sys/types.h>
-#include <sys/select.h>
-#include <sys/socket.h>
+#include <Poco/Exception.h>
+#include <Poco/Net/ServerSocket.h>
+#include <Poco/Net/HTTPServer.h>
+#include <Poco/Net/HTTPRequestHandler.h>
+#include <Poco/Net/HTTPRequestHandlerFactory.h>
+#include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPServerRequest.h>
+#include <Poco/Net/HTTPServerResponse.h>
 
+#include <Poco/JSON/Object.h>
+
+#include <iostream>
 #include <functional>
 
-#include <microhttpd.h>
+#include <util/hexdump.h>
 
-#include "json.h"
-
-using json = nlohmann::json;
+using namespace Poco::JSON;
+using namespace Poco::Net;
 using namespace std;
 
 enum HttpMethod
@@ -27,51 +34,43 @@ enum HttpMethod
   METHOD_DELETE
 };
 
-class HttpServer
+class HttpServer : public HTTPRequestHandlerFactory
 {
 public:
   static const int ResponseBufferSize = 1024 * 16;
   static const int PostBufferSize = 1024 * 16;
 
-  typedef MHD_Connection *Connection;
-  typedef function<int(Connection, json *)> RequestHandler;
+  typedef function<void(HTTPServerRequest &, HTTPServerResponse &)> RequestHandler;
   typedef map<string, RequestHandler> ServerRoutes;
 
 private:
-  struct ConnectionInfo
-  {
-    HttpMethod method;
-    char *answerString;
-    MHD_PostProcessor *postProcessor;
-  };
-
   int port = 0;
-  MHD_Daemon *daemon;
 
   ServerRoutes getRoutes;
   ServerRoutes putRoutes;
   ServerRoutes postRoutes;
   ServerRoutes deleteRoutes;
 
-  int handleRequest(Connection connection,
-                    string url, string method, string version,
-                    const char *uploadData, size_t *uploadDataSize,
-                    ConnectionInfo **conInfoPtr);
+  HTTPServer _server;
 
-  static int _handleRequest(void *cls, Connection connection,
-                            const char *url,
-                            const char *method, const char *version,
-                            const char *uploadData,
-                            size_t *uploadDataSize, void **conCls);
+  RequestHandler notFoundHandler;
 
-  static void _handleRequestComplete(void *cls, Connection connection,
-                                     void **conCls, enum MHD_RequestTerminationCode toe);
+  class HttpRequestHandler : public HTTPRequestHandler
+  {
+  private:
+    RequestHandler handler;
 
-  static int _iteratePost(void *coninfoCls,
-                          enum MHD_ValueKind kind, const char *key,
-                          const char *filename, const char *contentType,
-                          const char *transferEncoding, const char *data,
-                          uint64_t off, size_t size);
+  public:
+    HttpRequestHandler(RequestHandler handler) : handler(handler)
+    {
+    }
+
+    void handleRequest(HTTPServerRequest &req, HTTPServerResponse &resp)
+    {
+      handler(req, resp);
+    }
+  };
+  void sendErrorNotFound(HTTPServerRequest &req, HTTPServerResponse &resp);
 
 public:
   HttpServer(int port);
@@ -84,7 +83,9 @@ public:
 
   void registerRoute(HttpMethod method, string url, RequestHandler handler);
 
-  int sendResponse(Connection connection, json &j);
+  void sendResponse(HTTPServerRequest &req, HTTPServerResponse &resp, Object &json);
+
+  HTTPRequestHandler *createRequestHandler(const HTTPServerRequest &req);
 
   void start();
   void stop();
