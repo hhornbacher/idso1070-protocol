@@ -5,12 +5,10 @@
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
-
 #include <queue>
-
 #include <boost/circular_buffer.hpp>
 
-#include "../packets/Response.h"
+#include "packets/Response.h"
 
 class Connector
 {

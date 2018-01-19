@@ -12,6 +12,50 @@ USBConnector::~USBConnector()
         close(handle);
 }
 
+void USBConnector::enumerateDevices(list<string> &list)
+{
+    DIR *dp;
+    dirent *dirp;
+    const char *path = "/sys/class/tty";
+    if ((dp = opendir(path)) == NULL)
+    {
+        return;
+    }
+
+    while ((dirp = readdir(dp)) != NULL)
+    {
+        if (dirp->d_type == DT_LNK)
+        {
+            string currentPath = path;
+            currentPath += "/";
+            currentPath += dirp->d_name;
+            currentPath += "/device";
+            struct stat buffer;
+            if (stat(currentPath.c_str(), &buffer) == 0)
+            {
+                string infoPath = currentPath;
+                infoPath += "/modalias";
+                int info = open(infoPath.c_str(), O_RDONLY);
+                if (info != -1)
+                {
+                    char buffer[15];
+                    int size = read(info, buffer, 14);
+                    buffer[14] = 0;
+                    close(info);
+                    if (strcmp(buffer, "usb:v0483p5740") == 0)
+                    {
+                        string device = "/dev/";
+                        device += dirp->d_name;
+                        printf("Found device: %s\n", device.c_str());
+                        list.push_back(device);
+                    }
+                }
+            }
+        }
+    }
+    closedir(dp);
+}
+
 void USBConnector::start()
 {
 
