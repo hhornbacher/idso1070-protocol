@@ -114,7 +114,10 @@ ConnectorType USBConnector::getType()
 
 void USBConnector::transmit(uint8_t *data, size_t length)
 {
-    write(handle, data, length);
+    if(write(handle, data, length) < 0)
+    {
+        stop();
+    }
 }
 
 size_t USBConnector::receive()
@@ -124,7 +127,11 @@ size_t USBConnector::receive()
         size_t size = RawBufferLength - rawBuffer.size();
         uint8_t tmp[size];
         ssize_t result = read(handle, tmp, size);
-        if (result > 0)
+        if(result < 0)
+        {
+            stop();
+        }
+        else if (result > 0)
         {
             for (ssize_t i = 0; i < result; i++)
                 rawBuffer.push_back(tmp[i]);

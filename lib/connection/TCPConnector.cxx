@@ -49,7 +49,10 @@ ConnectorType TCPConnector::getType()
 
 void TCPConnector::transmit(uint8_t *data, size_t length)
 {
-    send(socketHandle, data, length, 0);
+    if(send(socketHandle, data, length, 0) < 0)
+    {
+        stop();
+    }
 }
 
 size_t TCPConnector::receive()
@@ -59,7 +62,11 @@ size_t TCPConnector::receive()
         size_t size = RawBufferLength - rawBuffer.size();
         uint8_t tmp[size];
         ssize_t result = recv(socketHandle, tmp, size, 0);
-        if (result > 0)
+        if(result < 0)
+        {
+            stop();
+        }
+        else if (result > 0)
         {
             for (ssize_t i = 0; i < result; i++)
                 rawBuffer.push_back(tmp[i]);
