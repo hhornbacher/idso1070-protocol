@@ -1,14 +1,14 @@
 #ifndef _USB_CONNECTOR_H_
 #define _USB_CONNECTOR_H_
 
+#include "Connector.h"
+
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <termios.h>
 #include <list>
-
-#include "connection/Connector.h"
 
 using namespace std;
 

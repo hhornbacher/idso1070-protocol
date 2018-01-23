@@ -1,40 +1,14 @@
 #ifndef _CONNECTOR_H_
 #define _CONNECTOR_H_
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <unistd.h>
+#include "base.h"
+#include "packets/Response.h"
+
 #include <queue>
 #include <stdexcept>
 #include <boost/circular_buffer.hpp>
 
-#include "packets/Response.h"
-
 using namespace std;
-
-class ConnectException : public runtime_error
-{
-public:
-  ConnectException(string description)
-      : runtime_error("connection failed"), description(description)
-  {
-  }
-
-  virtual const char *what() const throw()
-  {
-    return description.c_str();
-  }
-
-private:
-  string description;
-};
-
-enum ConnectorType
-{
-  CONNECTOR_USB,
-  CONNECTOR_WIFI
-};
 
 class Connector
 {
@@ -62,6 +36,23 @@ protected:
   boost::circular_buffer<uint8_t> rawBuffer;
   std::queue<Response *> responseBuffer;
   bool connected = false;
+};
+
+class ConnectException : public runtime_error
+{
+public:
+  ConnectException(string description)
+      : runtime_error("connection failed"), description(description)
+  {
+  }
+
+  virtual const char *what() const throw()
+  {
+    return description.c_str();
+  }
+
+private:
+  string description;
 };
 
 #endif // _CONNECTOR_H_

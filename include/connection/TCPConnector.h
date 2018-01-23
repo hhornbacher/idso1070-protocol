@@ -1,14 +1,14 @@
 #ifndef _TCP_CONNECTOR_H_
 #define _TCP_CONNECTOR_H_
 
+#include "Connector.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <errno.h>
-
-#include "Connector.h"
 
 using namespace std;
 
