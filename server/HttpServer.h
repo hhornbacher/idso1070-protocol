@@ -22,8 +22,6 @@
 #include <iostream>
 #include <functional>
 
-#include <util/hexdump.h>
-
 using namespace Poco::JSON;
 using namespace Poco::Net;
 using namespace std;

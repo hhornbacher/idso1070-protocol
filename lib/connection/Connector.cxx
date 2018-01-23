@@ -1,7 +1,5 @@
 #include "connection/Connector.h"
 
-#include "util/hexdump.h"
-
 Connector::Connector() : rawBuffer(RawBufferLength)
 {
 }
