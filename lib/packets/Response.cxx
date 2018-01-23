@@ -28,17 +28,3 @@ CommandType Response::getCommandType()
 {
     return (CommandType)rawPacket[3];
 }
-
-void Response::print()
-{
-    printf("[Response]\n");
-    printf("counter = %d\n", getCounter());
-    printf("commandID = %02x\n", getCommandCode());
-    printf("packetType = %d\n", getCommandType());
-    printf("payloadLength = %ld\n", getPayloadLength());
-    printf("[Header]\n");
-    hexdump(getHeader(), HeaderSize);
-    printf("[Payload]\n");
-    hexdump(getPayload(), getPayloadLength());
-    printf("\n\n");
-}

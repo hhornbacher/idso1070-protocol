@@ -12,15 +12,3 @@ size_t Sample::getPayloadLength()
 {
     return IDSO1070::SamplesCountPerPacket;
 }
-
-void Sample::print()
-{
-    printf("[Sample]\n");
-    printf("counter = %d\n", getCounter());
-    printf("payloadLength = %ld\n", getPayloadLength());
-    printf("[Header]\n");
-    hexdump(getHeader(), HeaderSize);
-    printf("[Payload]\n");
-    hexdump(getPayload(), getPayloadLength());
-    printf("\n\n");
-}
