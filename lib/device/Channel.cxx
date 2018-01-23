@@ -4,24 +4,6 @@ Channel::Channel() : sampleBuffer(SampleBufferSize)
 {
 }
 
-void Channel::print()
-{
-    printf("[Channel]\n");
-    printf("enabled = %d\n", enabled);
-    printf("verticalDiv = %d\n", verticalDiv);
-    printf("coupling = %d\n", coupling);
-    printf("verticalPosition = %d\n", coupling);
-    printf("voltage125 = %lf\n", voltage125);
-    printf("voltageRL1 = %lf\n", voltageRL1);
-    printf("voltageRL2 = %lf\n", voltageRL2);
-    for (int i = 0; i < 9; i++)
-    {
-        printf("pwmArray[%d][0] = %d\n", i, pwmArray[i][0]);
-        printf("pwmArray[%d][1] = %d\n", i, pwmArray[i][1]);
-    }
-    printf("\n\n");
-}
-
 void Channel::enable()
 {
     enabled = true;

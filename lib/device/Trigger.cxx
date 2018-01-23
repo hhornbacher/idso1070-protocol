@@ -1,26 +1,6 @@
 #include "device/Trigger.h"
 #include "device/IDSO1070.h"
 
-void Trigger::print()
-{
-    printf("[Trigger]\n");
-    printf("isHold = %d\n", isHold);
-    printf("mode = %d\n", mode);
-    printf("channel = %d\n", channel);
-    printf("slope = %d\n", slope);
-    printf("level = %d\n", level);
-    printf("xPosition = %lf\n", xPosition);
-    for (int i = 0; i < 4; i++)
-    {
-        printf("innerPWM[%d] = %d\n", i, innerPWM[i]);
-    }
-    for (int j = 0; j < 2; j++)
-    {
-        printf("outerPWM[%d] = %d\n", j, outerPWM[j]);
-    }
-    printf("\n\n");
-}
-
 uint16_t Trigger::getBottomPWM()
 {
     if (channel == TRIGCHAN_CH1)

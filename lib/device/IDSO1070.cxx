@@ -11,24 +11,6 @@ IDSO1070::IDSO1070()
     // this.channel2.setAttenuationFactor(AttenuationFactor.X1);
 }
 
-void IDSO1070::print()
-{
-    printf("[IDSO1070]\n");
-    printf("armFirmwareVersion = %s\n", armFirmwareVersion);
-    printf("fpgaFirmwareVersion = %s\n", fpgaFirmwareVersion);
-    printf("batteryLevel = %d\n", batteryLevel);
-    printf("receiveFreqDivStatus = 0x%02x\n", receiveFreqDivStatus);
-    printf("freqDiv = %d\n", freqDiv);
-    printf("timeBase = %d\n", timeBase);
-    printf("captureMode = %d\n", captureMode);
-    printf("scopeMode = %d\n", scopeMode);
-    channel1.print();
-    channel2.print();
-    trigger.print();
-    eeromData.print();
-    printf("\n\n");
-}
-
 TimeBase IDSO1070::getTimeBase()
 {
     return timeBase;
