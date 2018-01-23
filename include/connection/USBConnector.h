@@ -33,7 +33,7 @@ public:
   ConnectorType getType();
 
 private:
-  char device[256];
+  string device;
   int handle;
 };
 

@@ -1,8 +1,7 @@
 #include "connection/USBConnector.h"
 
-USBConnector::USBConnector(string device)
+USBConnector::USBConnector(string device) : device(device)
 {
-    strncpy(this->device, device.c_str(), 256);
 }
 
 USBConnector::~USBConnector()
@@ -43,9 +42,9 @@ void USBConnector::enumerateDevices(USBDeviceList &list)
                     close(info);
                     if (strcmp(buffer, "usb:v0483p5740") == 0)
                     {
-                        string device = "/dev/";
-                        device += dirp->d_name;
-                        list.push_back(device);
+                        string dev = "/dev/";
+                        dev += dirp->d_name;
+                        list.push_back(dev);
                     }
                 }
             }
@@ -58,7 +57,7 @@ void USBConnector::start()
 {
 
     termios tty;
-    handle = open(device, O_RDWR | O_NOCTTY | O_SYNC);
+    handle = open(device.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     if (!handle)
     {
         throw ConnectException("Cannot open device");
