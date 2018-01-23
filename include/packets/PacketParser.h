@@ -1,16 +1,20 @@
 #ifndef _RESPONSE_PARSER_H_
 #define _RESPONSE_PARSER_H_
 
-#include <cmath>
-
-#include "../util/mapValue.h"
-#include "../device/IDSO1070.h"
-
+#include "base.h"
+#include "util/mapValue.h"
+#include "device/IDSO1070.h"
 #include "Response.h"
 #include "Sample.h"
 
 class PacketParser
 {
+public:
+  PacketParser(IDSO1070 &device);
+
+  bool parse(Response *packet);
+  void parse(Sample *packet);
+
 private:
   IDSO1070 &device;
 
@@ -41,12 +45,6 @@ private:
   // void fixCh1AdDiff();
   // void fixCh2AdDiff();
   void interpolateSamples();
-
-public:
-  PacketParser(IDSO1070 &device);
-
-  bool parse(Response *packet);
-  void parse(Sample *packet);
 };
 
 #endif // _RESPONSE_PARSER_H_

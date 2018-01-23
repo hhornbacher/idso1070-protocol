@@ -1,14 +1,11 @@
 #ifndef _COMMAND_H_
 #define _COMMAND_H_
 
-#include <cstdint>
-#include <cstdio>
-#include <cstring>
+#include "base.h"
+#include "enums.h"
+#include "Response.h"
 
 #include <functional>
-
-#include "../enums.h"
-#include "Response.h"
 
 class Command
 {

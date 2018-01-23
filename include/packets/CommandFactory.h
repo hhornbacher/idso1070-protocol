@@ -1,15 +1,13 @@
 #ifndef _COMMANDS_GENERATOR_H_
 #define _COMMANDS_GENERATOR_H_
 
-#include <cstdio>
+#include "base.h"
+#include "util/mapValue.h"
+#include "device/IDSO1070.h"
+#include "Command.h"
 
 #include <functional>
 #include <deque>
-
-#include "../util/mapValue.h"
-#include "../device/IDSO1070.h"
-
-#include "Command.h"
 
 typedef std::function<Command *()> CommandGenerator;
 

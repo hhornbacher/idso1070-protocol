@@ -1,18 +1,12 @@
 #ifndef _RESPONSE_H_
 #define _RESPONSE_H_
 
-#include <cstdio>
-
-#include "../util/hexdump.h"
-#include "../device/IDSO1070.h"
-
+#include "base.h"
+#include "device/IDSO1070.h"
 #include "Packet.h"
 
 class Response : public Packet
 {
-private:
-  uint8_t rawPacket[PacketSize];
-
 public:
   Response(uint8_t *data);
 
@@ -21,7 +15,8 @@ public:
 
   size_t getPayloadLength();
 
-  void print();
+private:
+  uint8_t rawPacket[PacketSize];
 };
 
 #endif // _RESPONSE_H_
