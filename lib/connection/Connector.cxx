@@ -36,7 +36,7 @@ void Connector::grabPacket()
   }
 }
 
-bool Connector::isUsbConnection()
+bool Connector::isConnected()
 {
-  return usbConnection;
+  return connected;
 }

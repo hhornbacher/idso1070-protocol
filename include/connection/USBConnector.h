@@ -19,12 +19,7 @@ public:
 
   typedef list<string> USBDeviceList;
 
-private:
-  char device[256];
-  int handle;
-
-public:
-  USBConnector(const char *device);
+  USBConnector(string device);
   ~USBConnector();
 
   void transmit(uint8_t *data, size_t length);
@@ -34,6 +29,12 @@ public:
 
   void start();
   void stop();
+
+  ConnectorType getType();
+
+private:
+  char device[256];
+  int handle;
 };
 
 #endif // _USB_CONNECTOR_H_

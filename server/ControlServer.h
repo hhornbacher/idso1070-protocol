@@ -10,6 +10,8 @@
 #include "HttpServer.h"
 #include "StreamServer.h"
 
+using namespace std;
+
 class ControlServer
 {
 public:
@@ -17,10 +19,13 @@ public:
   static const int StreamChannel1Port = 8810;
   static const int StreamChannel2Port = 8820;
 
-private:
-  const char *usbDevice = "/dev/ttyACM0";
-  USBConnector usbConnection;
+  ControlServer();
 
+  void start();
+  void stop();
+  void process();
+
+private:
   CommandFactory cmdFactory;
   Protocol protocol;
 
@@ -29,6 +34,8 @@ private:
   StreamServer channel2StreamServer;
 
   float progress = 0;
+
+  void registerRoutes();
 
   void statusRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
 
@@ -45,13 +52,6 @@ private:
   void wifiConnectRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp);
 
   void onProgress(float progress);
-
-public:
-  ControlServer();
-
-  void start();
-  void stop();
-  void process();
 };
 
 #endif // _CONTROL_SERVER_H_

@@ -1,19 +1,14 @@
 #include "ControlServer.h"
 
-ControlServer::ControlServer() : usbConnection((char *)usbDevice),
-                                 protocol(usbConnection), cmdFactory(protocol.getDevice()),
+ControlServer::ControlServer() : protocol(),
                                  httpServer(HttpPort),
                                  channel1StreamServer(protocol.getDevice().getChannel1(), StreamChannel1Port),
                                  channel2StreamServer(protocol.getDevice().getChannel2(), StreamChannel2Port)
 {
 }
 
-void ControlServer::start()
+void ControlServer::registerRoutes()
 {
-    httpServer.start();
-    channel1StreamServer.start();
-    channel2StreamServer.start();
-
     httpServer.registerRoute(METHOD_GET, "/device", HttpServer::bindRequestHandler(&ControlServer::deviceRequestHandler, this));
     httpServer.registerRoute(METHOD_GET, "/trigger", HttpServer::bindRequestHandler(&ControlServer::triggerRequestHandler, this));
     httpServer.registerRoute(METHOD_GET, "/channel/1", HttpServer::bindRequestHandler(&ControlServer::channel1RequestHandler, this));
@@ -26,11 +21,17 @@ void ControlServer::start()
     httpServer.registerRoute(METHOD_PUT, "/usb/connect", HttpServer::bindRequestHandler(&ControlServer::usbConnectRequestHandler, this));
 
     httpServer.registerRoute(METHOD_PUT, "/wifi/connect", HttpServer::bindRequestHandler(&ControlServer::wifiConnectRequestHandler, this));
+}
 
-    protocol.start();
+void ControlServer::start()
+{
+    httpServer.start();
+    channel1StreamServer.start();
+    channel2StreamServer.start();
+
+    registerRoutes();
+
     protocol.setProgressHandler(Protocol::bindProgressHandler(&ControlServer::onProgress, this));
-    protocol.init();
-    protocol.startSampling();
 }
 
 void ControlServer::stop()
@@ -51,9 +52,29 @@ void ControlServer::process()
 void ControlServer::statusRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
     Object json;
-    json.set("initialized", progress == 1.0f);
-    json.set("progress", progress * 100);
-    json.set("sampling", protocol.isSampling());
+    Connector *connector = protocol.getConnector();
+    if (connector)
+    {
+        bool isConnected = connector->isConnected();
+        json.set("connected", isConnected);
+        if (isConnected)
+        {
+            string connectedTo = connector->getType() == CONNECTOR_USB ? "USB" : "WIFI";
+            json.set("connectedTo", connectedTo);
+        }
+        else if (protocol.getConnectError().length() > 0)
+        {
+            json.set("connectError", protocol.getConnectError());
+        }
+        json.set("progress", progress * 100);
+        json.set("initialized", progress == 1.0f);
+        json.set("sampling", protocol.isSampling());
+    }
+    else
+    {
+        json.set("connected", false);
+    }
+
     httpServer.sendResponse(req, resp, json);
 }
 
@@ -119,7 +140,7 @@ void ControlServer::triggerRequestHandler(HTTPServerRequest &req, HTTPServerResp
     json.set("mode", (int)trigger.getMode());
     json.set("xPosition", trigger.getXPosition());
 
-    ControlServer::httpServer.sendResponse(req, resp, json);
+    httpServer.sendResponse(req, resp, json);
 }
 
 void ControlServer::controlRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
@@ -127,7 +148,7 @@ void ControlServer::controlRequestHandler(HTTPServerRequest &req, HTTPServerResp
     Object json;
     json.set("test", 123);
 
-    ControlServer::httpServer.sendResponse(req, resp, json);
+    httpServer.sendResponse(req, resp, json);
 }
 
 void ControlServer::usbListRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
@@ -145,23 +166,44 @@ void ControlServer::usbListRequestHandler(HTTPServerRequest &req, HTTPServerResp
 
     json.set("devices", deviceList);
 
-    ControlServer::httpServer.sendResponse(req, resp, json);
+    httpServer.sendResponse(req, resp, json);
 }
 
 void ControlServer::usbConnectRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
-    Object json;
-    json.set("test", 123);
+    Poco::Dynamic::Var jsonRequest;
+    httpServer.getJSONBody(req, jsonRequest);
+    Object::Ptr jsonRequestObject = jsonRequest.extract<Object::Ptr>();
+    Poco::Dynamic::Var device = jsonRequestObject->get("device");
 
-    ControlServer::httpServer.sendResponse(req, resp, json);
+    Object json;
+    json.set("connectTo", device.toString());
+
+    protocol.connect(device);
+    protocol.init();
+
+    httpServer.sendResponse(req, resp, json);
 }
 
 void ControlServer::wifiConnectRequestHandler(HTTPServerRequest &req, HTTPServerResponse &resp)
 {
-    Object json;
-    json.set("test", 123);
+    Poco::Dynamic::Var jsonRequest;
+    httpServer.getJSONBody(req, jsonRequest);
+    Object::Ptr jsonRequestObject = jsonRequest.extract<Object::Ptr>();
+    Poco::Dynamic::Var server = jsonRequestObject->get("server");
+    Poco::Dynamic::Var port = jsonRequestObject->get("port");
 
-    ControlServer::httpServer.sendResponse(req, resp, json);
+    string connectTo = server.toString() + ":" + port.toString();
+
+    Object json;
+    json.set("connectTo", connectTo);
+
+    int p;
+    port.convert(p);
+    protocol.connect(server.toString(), p);
+    protocol.init();
+
+    httpServer.sendResponse(req, resp, json);
 }
 
 void ControlServer::onProgress(float progress)

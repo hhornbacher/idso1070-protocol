@@ -1,9 +1,8 @@
 #include "connection/USBConnector.h"
 
-USBConnector::USBConnector(const char *device)
+USBConnector::USBConnector(string device)
 {
-    usbConnection = true;
-    strncpy(this->device, device, 256);
+    strncpy(this->device, device.c_str(), 256);
 }
 
 USBConnector::~USBConnector()
@@ -60,10 +59,14 @@ void USBConnector::start()
 
     termios tty;
     handle = open(device, O_RDWR | O_NOCTTY | O_SYNC);
+    if (!handle)
+    {
+        throw ConnectException("Cannot open device");
+    }
     memset(&tty, 0, sizeof tty);
     if (tcgetattr(handle, &tty) != 0)
     {
-        printf("error %d from tcgetattr", errno);
+        throw ConnectException("Cannot read serial port configuration");
     }
 
     cfsetospeed(&tty, USBSerialSpeed);
@@ -92,14 +95,22 @@ void USBConnector::start()
 
     if (tcsetattr(handle, TCSANOW, &tty) != 0)
     {
-        printf("error %d from tcsetattr", errno);
+        throw ConnectException("Cannot set serial port configuration");
     }
+
+    connected = true;
 }
 
 void USBConnector::stop()
 {
     close(handle);
+    connected = false;
     handle = -1;
+}
+
+ConnectorType USBConnector::getType()
+{
+    return CONNECTOR_USB;
 }
 
 void USBConnector::transmit(uint8_t *data, size_t length)

@@ -31,12 +31,41 @@ public:
 
   typedef std::function<void(float)> ProgressHandler;
 
+  Protocol();
+  ~Protocol();
+
+  void connect(string serialDevice);
+  void connect(string serverHost, int port);
+  void disconnect();
+  void process();
+
+  IDSO1070 &getDevice();
+
+  void sendCommand(CommandGenerator cmdFn);
+
+  void init();
+  void startSampling();
+
+  void setProgressHandler(ProgressHandler handler);
+
+  bool isSampling();
+
+  string getConnectError();
+  Connector *getConnector();
+
+  template <class F, class S>
+  static ProgressHandler bindProgressHandler(F &&f, S *self)
+  {
+    return std::bind(f, self, std::placeholders::_1);
+  }
+
 private:
   // Device class to store the device's states and resources
   IDSO1070 device;
 
   // Connector abstraction for USB/TCP communication
-  Connector &connection;
+  Connector *connector = NULL;
+  string connectError;
 
   ProgressHandler progressHandler;
 
@@ -59,44 +88,6 @@ private:
 
   void receive();
   void transmit();
-
-public:
-  Protocol(Connector &connection);
-  ~Protocol();
-
-  template <class F, class S>
-  static ProgressHandler bindProgressHandler(F &&f, S *self)
-  {
-    return std::bind(f, self, std::placeholders::_1);
-  }
-
-  // Setup the connection for operation
-  void start();
-
-  // Stop and release resources
-  void stop();
-
-  // This has to be called in the main loop
-  void process();
-
-  IDSO1070 &getDevice();
-
-  // Send one command
-  void sendCommand(CommandGenerator cmdFn);
-
-  // Send several commands
-  void sendCommands(CommandGeneratorVector cmdFns);
-
-  // Send all commands required for initialization of the device
-  void init();
-
-  void startSampling();
-
-  void setProgressHandler(ProgressHandler handler);
-
-  void print();
-
-  bool isSampling();
 };
 
 #endif // _PROTOCOL_H_

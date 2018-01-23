@@ -10,14 +10,12 @@
 
 #include "Connector.h"
 
+using namespace std;
+
 class TCPConnector : public Connector
 {
-private:
-  int socketHandle;
-  sockaddr_in serverAddress;
-
 public:
-  TCPConnector(char *host, int port);
+  TCPConnector(string host, int port);
   ~TCPConnector();
 
   void transmit(uint8_t *data, size_t length);
@@ -25,6 +23,15 @@ public:
 
   void start();
   void stop();
+
+  ConnectorType getType();
+
+private:
+  int socketHandle;
+  sockaddr_in serverAddress;
+
+  string host;
+  int port;
 };
 
 #endif // _TCP_CONNECTOR_H_
