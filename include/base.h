@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
+#include <cmath>
 #include <unistd.h>
 
 #endif // _BASE_H_
