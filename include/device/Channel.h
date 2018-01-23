@@ -1,13 +1,10 @@
 #ifndef _CHANNEL_H_
 #define _CHANNEL_H_
 
-#include <cstdio>
-#include <cstdint>
+#include "base.h"
+#include "enums.h"
 
 #include <boost/circular_buffer.hpp>
-
-#include "../util/hexdump.h"
-#include "../enums.h"
 
 class Channel
 {
@@ -17,23 +14,7 @@ public:
 
   typedef boost::circular_buffer<int16_t> SampleBuffer;
 
-private:
-  bool enabled = true;
-  VoltageDiv verticalDiv = VDIV_1V;
-  InputCoupling coupling = COUPLING_AC;
-  int16_t verticalPosition;
-  uint16_t pwmArray[9][2];
-
-  double voltage125;
-  double voltageRL1;
-  double voltageRL2;
-
-  SampleBuffer sampleBuffer;
-
-public:
   Channel();
-
-  void print();
 
   void enable();
   void disable();
@@ -62,6 +43,19 @@ public:
   void setVoltageRL2(double voltage);
 
   SampleBuffer &getSampleBuffer();
+
+private:
+  bool enabled = true;
+  VoltageDiv verticalDiv = VDIV_1V;
+  InputCoupling coupling = COUPLING_AC;
+  int16_t verticalPosition;
+  uint16_t pwmArray[9][2];
+
+  double voltage125;
+  double voltageRL1;
+  double voltageRL2;
+
+  SampleBuffer sampleBuffer;
 };
 
 #endif // _CHANNEL_H_

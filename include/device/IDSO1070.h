@@ -1,11 +1,8 @@
 #ifndef _IDSO1070_H_
 #define _IDSO1070_H_
 
-#include <cstdio>
-#include <cstdint>
-
-#include "../util/hexdump.h"
-#include "../enums.h"
+#include "base.h"
+#include "enums.h"
 
 #include "EEROMData.h"
 #include "Channel.h"
@@ -18,28 +15,6 @@ public:
   static const int MemoryDepth = 2000;
   static const int SamplesCountPerPacket = 500;
 
-private:
-  TimeBase timeBase = HDIV_1mS;
-  CaptureMode captureMode = CAPMODE_NORMAL;
-  ScopeMode scopeMode = SCOMODE_ANALOG;
-
-  EEROMData eeromData;
-  Channel channel1;
-  Channel channel2;
-  Channel *selectedChannel = &channel1;
-  Trigger trigger;
-
-  uint8_t batteryLevel = 0;
-
-  int littlePacketStatus = 0;
-
-  uint8_t receiveFreqDivStatus = 0;
-  uint32_t freqDiv = 0;
-
-  char armFirmwareVersion[9];
-  char fpgaFirmwareVersion[9];
-
-public:
   IDSO1070();
   TimeBase getTimeBase();
   void setTimeBase(TimeBase timeBase);
@@ -83,7 +58,26 @@ public:
   uint8_t getEnabledChannelsCount();
   uint8_t getPacketsNumber();
 
-  void print();
+private:
+  TimeBase timeBase = HDIV_1mS;
+  CaptureMode captureMode = CAPMODE_NORMAL;
+  ScopeMode scopeMode = SCOMODE_ANALOG;
+
+  EEROMData eeromData;
+  Channel channel1;
+  Channel channel2;
+  Channel *selectedChannel = &channel1;
+  Trigger trigger;
+
+  uint8_t batteryLevel = 0;
+
+  int littlePacketStatus = 0;
+
+  uint8_t receiveFreqDivStatus = 0;
+  uint32_t freqDiv = 0;
+
+  char armFirmwareVersion[9];
+  char fpgaFirmwareVersion[9];
 };
 
 #endif // _IDSO1070_H_
