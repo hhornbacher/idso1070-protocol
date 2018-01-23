@@ -53,6 +53,17 @@ void HttpServer::sendResponse(HTTPServerRequest &req, HTTPServerResponse &resp, 
     out.flush();
 }
 
+void HttpServer::getJSONBody(HTTPServerRequest &req, Poco::Dynamic::Var &json)
+{
+    std::istream &i = req.stream();
+    int len = req.getContentLength();
+    char *bodyBuffer = new char[len];
+    i.read(bodyBuffer, len);
+
+    Parser parser;
+    json = parser.parse(bodyBuffer);
+}
+
 void HttpServer::registerRoute(HttpMethod method, string url, RequestHandler handler)
 {
     switch (method)

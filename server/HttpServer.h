@@ -17,6 +17,7 @@
 
 #include <Poco/JSON/Object.h>
 #include <Poco/JSON/Array.h>
+#include <Poco/JSON/Parser.h>
 
 #include <iostream>
 #include <functional>
@@ -85,6 +86,7 @@ public:
   void registerRoute(HttpMethod method, string url, RequestHandler handler);
 
   void sendResponse(HTTPServerRequest &req, HTTPServerResponse &resp, Object &json);
+  void getJSONBody(HTTPServerRequest &req, Poco::Dynamic::Var &json);
 
   HTTPRequestHandler *createRequestHandler(const HTTPServerRequest &req);
 
