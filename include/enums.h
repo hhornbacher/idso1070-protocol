@@ -35,6 +35,12 @@ enum CommandType
     TYPE_STATE = 0x57
 };
 
+enum ConnectorType
+{
+    CONNECTOR_USB,
+    CONNECTOR_WIFI
+};
+
 enum ParseChVoltsDivStatus
 {
     PARSE_CHVOLTSDIV_S0,
