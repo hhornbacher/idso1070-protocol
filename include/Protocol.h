@@ -9,7 +9,6 @@
 #include <deque>
 #include <functional>
 
-#include "util/hexdump.h"
 #include "util/Timeout.h"
 
 #include "connection/TCPConnector.h"
