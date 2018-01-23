@@ -117,6 +117,7 @@ void USBConnector::transmit(uint8_t *data, size_t length)
     if(write(handle, data, length) < 0)
     {
         stop();
+        throw ConnectException("Connection lost");
     }
 }
 
@@ -130,6 +131,7 @@ size_t USBConnector::receive()
         if(result < 0)
         {
             stop();
+            throw ConnectException("Connection lost");
         }
         else if (result > 0)
         {

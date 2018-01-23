@@ -223,8 +223,13 @@ void Protocol::process()
 {
     if (connector && connector->isConnected())
     {
-        transmit();
-        receive();
+        try {
+            transmit();
+            receive();
+        }
+        catch(ConnectException &e) {
+            connectError = e.what();
+        }
     }
 }
 

@@ -52,6 +52,7 @@ void TCPConnector::transmit(uint8_t *data, size_t length)
     if(send(socketHandle, data, length, 0) < 0)
     {
         stop();
+        throw ConnectException("Connection lost");
     }
 }
 
@@ -65,6 +66,7 @@ size_t TCPConnector::receive()
         if(result < 0)
         {
             stop();
+            throw ConnectException("Connection lost");
         }
         else if (result > 0)
         {
