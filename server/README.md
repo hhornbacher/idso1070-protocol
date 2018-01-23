@@ -18,6 +18,7 @@ The server binds to port 8800 for API calls.
 * `GET /trigger`: get trigger configuration
 * `GET /channel/1`: get channel 1 configuration
 * `GET /channel/2`: get channel 2 configuration
+* `GET /usb/list`: list detected USB devices
 
 ### Sample streams
 
