@@ -35,7 +35,9 @@
                 "/usr/include/x86_64-linux-gnu",
                 "/usr/include",
                 "${workspaceRoot}",
-                "${workspaceRoot}/include"
+                "${workspaceRoot}/include",
+                "/usr/include/gtkmm-3.0",
+                "/usr/include/gdkmm-3.0"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
