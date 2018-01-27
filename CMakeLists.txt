@@ -39,7 +39,6 @@ include_directories(include)
 
 # source directories
 add_subdirectory(lib)
-add_subdirectory(server)
 add_subdirectory(gui)
 
 # install idso1070.pc
