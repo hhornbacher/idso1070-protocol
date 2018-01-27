@@ -17,3 +17,14 @@ uint8_t *Command::getPayload()
 {
     return payload;
 }
+
+void Command::callResponseHandler()
+{
+    if (responseHandler)
+        responseHandler();
+}
+
+void Command::setResponseHandler(ResponseHandler responseHandler)
+{
+    this->responseHandler = responseHandler;
+}

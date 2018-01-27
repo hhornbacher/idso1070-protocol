@@ -2,7 +2,6 @@
 #define _IDSO1070_H_
 
 #include "base.h"
-#include "enums.h"
 
 #include "EEROMData.h"
 #include "Channel.h"

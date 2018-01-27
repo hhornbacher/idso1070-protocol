@@ -1,14 +1,7 @@
 #ifndef _PROTOCOL_H_
 #define _PROTOCOL_H_
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <unistd.h>
-
-#include <deque>
-#include <functional>
-
+#include "base.h"
 #include "util/Timeout.h"
 
 #include "connection/TCPConnector.h"
@@ -16,7 +9,6 @@
 
 #include "device/IDSO1070.h"
 
-#include "enums.h"
 #include "packets/Sample.h"
 #include "packets/Response.h"
 #include "packets/PacketParser.h"
@@ -40,23 +32,23 @@ public:
 
   IDSO1070 &getDevice();
 
-  void sendCommand(CommandGenerator cmdFn);
+  void sendCommand(Command *cmd);
 
   void init();
   void startSampling();
 
   void setProgressHandler(ProgressHandler handler);
 
+  template <class S, class F>
+  void setProgressHandler(S *self, F &&f)
+  {
+    setProgressHandler(std::bind(f, self, std::placeholders::_1));
+  }
+
   bool isSampling();
 
   string getConnectError();
   Connector *getConnector();
-
-  template <class F, class S>
-  static ProgressHandler bindProgressHandler(F &&f, S *self)
-  {
-    return std::bind(f, self, std::placeholders::_1);
-  }
 
 private:
   // Device class to store the device's states and resources
@@ -70,8 +62,7 @@ private:
 
   // Command dispatching related members
   CommandFactory cmdFactory;
-  std::deque<CommandGenerator> commandQueue;
-  int commandCount = 0;
+  std::deque<Command *> commandQueue;
   int retries = 0;
   Timeout commandTimeout;
   Command *currentCommand = NULL;

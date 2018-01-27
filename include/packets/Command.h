@@ -2,21 +2,33 @@
 #define _COMMAND_H_
 
 #include "base.h"
-#include "enums.h"
-#include "Response.h"
 
-#include <functional>
+#include "Response.h"
 
 class Command
 {
 public:
+  typedef std::function<void(void)> ResponseHandler;
+
   Command(CommandCode cmd, uint8_t param1 = 0, uint8_t param2 = 0);
   Command(uint8_t *payload);
 
   uint8_t *getPayload();
 
+  void callResponseHandler();
+
+  void setResponseHandler(ResponseHandler responseHandler);
+
+  template <class S, class F>
+  void setResponseHandler(S *self, F &&f)
+  {
+    setResponseHandler(std::bind(f, self, std::placeholders::_1));
+  }
+
 private:
   uint8_t payload[4];
+
+  ResponseHandler responseHandler;
 };
 
 #endif // _COMMAND_H_

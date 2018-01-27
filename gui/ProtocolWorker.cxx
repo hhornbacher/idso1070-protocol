@@ -3,7 +3,7 @@
 
 ProtocolWorker::ProtocolWorker() : shallStop(false), stopped(false), update(false), progress(0)
 {
-    protocol.setProgressHandler(Protocol::bindProgressHandler(&ProtocolWorker::onUpdateProgress, this));
+    protocol.setProgressHandler(this, &ProtocolWorker::onUpdateProgress);
 }
 
 void ProtocolWorker::process(AppWindow *caller)
@@ -13,7 +13,6 @@ void ProtocolWorker::process(AppWindow *caller)
         stopped = false;
     }
 
-    // Simulate a long calculation.
     while (!shallStop)
     {
         {

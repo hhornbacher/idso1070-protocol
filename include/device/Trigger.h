@@ -2,7 +2,7 @@
 #define _TRIGGER_H_
 
 #include "base.h"
-#include "enums.h"
+
 #include "Channel.h"
 
 class Trigger

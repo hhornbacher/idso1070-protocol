@@ -2,7 +2,6 @@
 #define _CHANNEL_H_
 
 #include "base.h"
-#include "enums.h"
 
 #include <boost/circular_buffer.hpp>
 
