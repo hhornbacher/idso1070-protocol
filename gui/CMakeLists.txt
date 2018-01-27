@@ -4,9 +4,13 @@ project (idso1070-gui)
 find_package(Gtkmm REQUIRED)
 include_directories(${GTKMM_INCLUDE_DIRS})
 
-add_executable(idso1070-gui main.cxx AppWindow.cxx)
+# add PThread
+find_package(PThread REQUIRED)
+include_directories(${PTHREAD_INCLUDE_DIRS})
 
-target_link_libraries (idso1070-gui idso1070 ${GTKMM_LIBRARIES})
+add_executable(idso1070-gui main.cxx ProtocolWorker.cxx AppWindow.cxx)
+
+target_link_libraries (idso1070-gui idso1070 ${GTKMM_LIBRARIES} ${PTHREAD_LIBRARIES})
 
 # Copy glade file to binary dir for local testing
 add_custom_command(
