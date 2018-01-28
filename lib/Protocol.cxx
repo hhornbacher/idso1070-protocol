@@ -70,11 +70,7 @@ void Protocol::sendCommandBatch(deque<Command *> cmds, ProgressHandler progressH
 
     for (Command *cmd : cmds)
     {
-        if (cmd == NULL)
-        {
-            printf("Fuck, error: cmd @ 0x%08lx, i = %d\n", (long)cmd, i);
-        }
-        else
+        if (cmd)
         {
             float progress = ((float)i + 1.0f) / (float)total;
             if ((i + 1) < total)
