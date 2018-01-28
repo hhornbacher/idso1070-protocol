@@ -26,6 +26,7 @@ protected:
   Label *pDeviceInfo;
   Label *pChannelsInfo;
   Label *pTriggerInfo;
+  ProgressBar *pProgressbarConnection;
 
   Glib::Dispatcher dispatcher;
   ProtocolWorker worker;

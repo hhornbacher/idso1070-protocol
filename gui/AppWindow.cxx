@@ -7,12 +7,14 @@ AppWindow::AppWindow(BaseObjectType *cobject, const Glib::RefPtr<Builder> &refGl
       pDeviceInfo(nullptr),
       pChannelsInfo(nullptr),
       pTriggerInfo(nullptr),
+      pProgressbarConnection(nullptr),
       workerThread(nullptr)
 {
     refGlade->get_widget("buttonConnect", pButtonConnect);
     refGlade->get_widget("labelDeviceInfo", pDeviceInfo);
     refGlade->get_widget("labelChannelsInfo", pChannelsInfo);
     refGlade->get_widget("labelTriggerInfo", pTriggerInfo);
+    refGlade->get_widget("progressbarConnection", pProgressbarConnection);
     if (pButtonConnect)
     {
         pButtonConnect->signal_clicked().connect(sigc::mem_fun(*this, &AppWindow::onButtonConnect));
@@ -56,7 +58,7 @@ void AppWindow::onNotificationFromWorker()
     ustring label = ustring::compose("Progress: %1 %%", ustring::format(fixed, setprecision(1), worker.getProgress() * 100));
     pDeviceInfo->set_label(label);
 
-    cout << label << endl;
+    pProgressbarConnection->set_fraction((double)worker.getProgress());
 }
 
 void AppWindow::notify()
