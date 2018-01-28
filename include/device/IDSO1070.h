@@ -14,7 +14,7 @@ public:
   static const int MaxSample = 248;
   static const int SampleBufferSize = 512 * 128;
 
-  typedef boost::circular_buffer<int16_t> SampleBuffer;
+  // typedef boost::circular_buffer<int16_t> SampleBuffer;
 
   struct ChannelSettings
   {
@@ -57,9 +57,12 @@ public:
   };
 
   IDSO1070();
+  ~IDSO1070()
+  {
+  }
 
-  // Copy constructor
-  IDSO1070(const IDSO1070 &obj);
+  // Copy assignment operator
+  IDSO1070 &operator=(IDSO1070 obj);
 
   // General device settings
   void setDeviceTimeBase(TimeBase timeBase);
@@ -70,6 +73,32 @@ public:
 
   void setDeviceScopeMode(ScopeMode scopeMode);
   ScopeMode getDeviceScopeMode();
+
+  void setARMFirmwareVersion(string version);
+  string getARMFirmwareVersion();
+
+  void setFPGAFirmwareVersion(string version);
+  string getFPGAFirmwareVersion();
+
+  void setProductName(string productName);
+  string getProductName();
+
+  void setUserName(string userName);
+  string getUserName();
+
+  void setCaliLevel(uint8_t *data);
+  uint16_t *getCaliLevel();
+
+  void setFPGAAlert(uint8_t *data);
+  uint8_t *getFPGAAlert();
+
+  void setDiffFixData(size_t channel, size_t offset, uint8_t *data);
+
+  void setBatteryLevel(uint8_t batteryLevel);
+  uint8_t getBatteryLevel();
+
+  void setFreqDiv(uint32_t freqDiv);
+  uint32_t getFreqDiv();
 
   // Channel data access methods
   void setSelectedChannel(ChannelSelector channel);
@@ -128,39 +157,12 @@ public:
   uint16_t getTriggerBottomPWM();
   uint16_t getTriggerTopPWM();
 
-  // EEPROM data access methods
-  void setARMFirmwareVersion(string version);
-  string getARMFirmwareVersion();
-
-  void setFPGAFirmwareVersion(string version);
-  string getFPGAFirmwareVersion();
-
-  void setProductName(string productName);
-  string getProductName();
-
-  void setUserName(string userName);
-  string getUserName();
-
-  void setCaliLevel(uint8_t *data);
-  uint16_t *getCaliLevel();
-
-  void setFPGAAlert(uint8_t *data);
-  uint8_t *getFPGAAlert();
-
-  void setDiffFixData(size_t channel, size_t offset, uint8_t *data);
-
   // Misc
-  void setBatteryLevel(uint8_t batteryLevel);
-  uint8_t getBatteryLevel();
-
   void setLittlePacketStatus(int littlePacketStatus);
   int getLittlePacketStatus();
 
   void setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus);
   uint8_t getReceiveFreqDivStatus();
-
-  void setFreqDiv(uint32_t freqDiv);
-  uint32_t getFreqDiv();
 
   bool isSampleRate200Mor250M();
 

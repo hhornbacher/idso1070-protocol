@@ -8,15 +8,17 @@ IDSO1070::IDSO1070() : selectedChannel(CHANNEL_1), littlePacketStatus(0), receiv
     // this.channel2.setAttenuationFactor(AttenuationFactor.X1);
 }
 
-IDSO1070::IDSO1070(const IDSO1070 &obj)
+IDSO1070 &IDSO1070::operator=(IDSO1070 obj)
 {
-    memcpy(&deviceSettings, &obj.deviceSettings, sizeof(deviceSettings));
-    memcpy(&channels, &obj.channels, sizeof(channels));
-    memcpy(&triggerSettings, &obj.triggerSettings, sizeof(triggerSettings));
+    deviceSettings = obj.deviceSettings;
+    channels[0] = obj.channels[0];
+    channels[1] = obj.channels[1];
+    triggerSettings = obj.triggerSettings;
 
     selectedChannel = obj.selectedChannel;
     littlePacketStatus = obj.littlePacketStatus;
     receiveFreqDivStatus = obj.receiveFreqDivStatus;
+    return *this;
 }
 
 TimeBase IDSO1070::getDeviceTimeBase()

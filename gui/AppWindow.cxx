@@ -59,7 +59,7 @@ void AppWindow::onButtonConnect()
 
 void AppWindow::onNotificationFromWorker()
 {
-    IDSO1070 &currentDeviceState;
+    IDSO1070 currentDeviceState;
     worker.getDevice(currentDeviceState);
     updateConnectionControls(currentDeviceState);
     updateDeviceInfo(currentDeviceState);
@@ -100,9 +100,10 @@ void AppWindow::updateDeviceInfo(IDSO1070 &deviceState)
     else
     {
         ustring deviceInfo = ustring::compose(
-            "",
-            12,
-            ustring::format(std::hex, 16));
+            "User name: %1\n"
+            "Product name: %2",
+            deviceState.getUserName(),
+            deviceState.getProductName());
 
         pDeviceInfo->set_label(deviceInfo);
     }
@@ -116,6 +117,13 @@ void AppWindow::updateChannelsInfo(IDSO1070 &deviceState)
     }
     else
     {
+        ustring channelsInfo = ustring::compose(
+            "Channel 1: %1\n"
+            "Channel 2: %2",
+            deviceState.isChannelEnabled(CHANNEL_1) ? "ON" : "OFF",
+            deviceState.isChannelEnabled(CHANNEL_2) ? "ON" : "OFF");
+
+        pChannelsInfo->set_label(channelsInfo);
     }
 }
 
@@ -127,6 +135,11 @@ void AppWindow::updateTriggerInfo(IDSO1070 &deviceState)
     }
     else
     {
+        ustring triggerInfo = ustring::compose(
+            "Trigger Channel: %1",
+            deviceState.getTriggerChannel());
+
+        pTriggerInfo->set_label(triggerInfo);
     }
 }
 
