@@ -10,7 +10,8 @@ USB ID: ```0483:5740 [STMicroelectronics STM32F407]```
 * GCC
 * CMake: v3.5
 * Boost: v1.58.0
-* POCO: v1.7.8
+* gtkmm: v3.18.0
+* [gtkmm-plplot](https://tschoonj.github.io/gtkmm-plplot/installation_instructions.html): v2.2
 
 On Ubuntu/Mint you can run ```apt install libboost-all-dev libpoco-dev cmake gcc``` to install the dependencies.
 
