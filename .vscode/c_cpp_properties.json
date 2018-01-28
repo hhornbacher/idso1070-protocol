@@ -37,7 +37,8 @@
                 "${workspaceRoot}",
                 "${workspaceRoot}/include",
                 "/usr/include/gtkmm-3.0",
-                "/usr/include/gdkmm-3.0"
+                "/usr/include/gdkmm-3.0",
+                "/usr/include/gtkmm-plplot-2.0"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
