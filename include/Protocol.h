@@ -21,7 +21,7 @@ public:
   static const int MaxCommandRetries = 3;
 
   typedef function<void(float)> ProgressHandler;
-  typedef function<void(void)> BatchFinishedHandler;
+  typedef Command::ResponseHandler BatchFinishedHandler;
 
   Protocol();
   ~Protocol();
@@ -71,7 +71,7 @@ private:
   void receive();
   void transmit();
 
-  void initStage2(ProgressHandler progressHandler);
+  void initStage2(ProgressHandler progressHandler, BatchFinishedHandler finishedHandler);
 };
 
 #endif // _PROTOCOL_H_
