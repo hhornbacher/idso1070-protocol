@@ -126,6 +126,12 @@ enum ScopeMode
     SCOMODE_DIGITAL
 };
 
+enum ChannelSelector
+{
+    CHANNEL_1,
+    CHANNEL_2
+};
+
 enum TriggerChannel
 {
     TRIGCHAN_CH1,

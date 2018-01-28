@@ -3,9 +3,7 @@
 
 #include "base.h"
 
-#include "EEROMData.h"
-#include "Channel.h"
-#include "Trigger.h"
+#include <boost/circular_buffer.hpp>
 
 class IDSO1070
 {
@@ -13,27 +11,145 @@ public:
   static const int MaxPWM = 4095;
   static const int MemoryDepth = 2000;
   static const int SamplesCountPerPacket = 500;
+  static const int MaxSample = 248;
+  static const int SampleBufferSize = 512 * 128;
+
+  typedef boost::circular_buffer<int16_t> SampleBuffer;
+
+  struct ChannelSettings
+  {
+    bool enabled = true;
+    VoltageDiv verticalDiv = VDIV_1V;
+    InputCoupling coupling = COUPLING_AC;
+    int16_t verticalPosition;
+    uint16_t pwmArray[9][2];
+
+    double voltage125;
+    double voltageRL1;
+    double voltageRL2;
+  };
+  struct TriggerSettings
+  {
+    bool isHold = false;
+    TriggerMode mode = TRIGMODE_AUTO;
+    TriggerChannel channel = TRIGCHAN_CH1;
+    TriggerSlope slope = TRIGSLOPE_RISING;
+    uint16_t level = 0;
+    double xPosition = 0.5;
+    uint16_t innerPWM[4];
+    uint16_t outerPWM[2];
+  };
+  struct DeviceSettings
+  {
+    TimeBase timeBase = HDIV_1mS;
+    CaptureMode captureMode = CAPMODE_NORMAL;
+    ScopeMode scopeMode = SCOMODE_ANALOG;
+
+    uint32_t freqDiv = 0;
+    uint8_t batteryLevel = 0;
+    string armFirmwareVersion;
+    string fpgaFirmwareVersion;
+    string productName;
+    string userName;
+    uint8_t diffFixData[2][256];
+    uint16_t caliLevel[100];
+    uint8_t fpgaAlert[40];
+  };
 
   IDSO1070();
-  TimeBase getTimeBase();
-  void setTimeBase(TimeBase timeBase);
 
-  CaptureMode getCaptureMode();
-  void setCaptureMode(CaptureMode captureMode);
+  // Copy constructor
+  IDSO1070(const IDSO1070 &obj);
 
-  ScopeMode getScopeMode();
-  void setScopeMode(ScopeMode scopeMode);
+  // General device settings
+  void setDeviceTimeBase(TimeBase timeBase);
+  TimeBase getDeviceTimeBase();
 
-  EEROMData &getEEROMData();
-  Channel &getChannel1();
-  Channel &getChannel2();
+  void setDeviceCaptureMode(CaptureMode captureMode);
+  CaptureMode getDeviceCaptureMode();
 
-  Channel &getSelectedChannel();
-  int getSelectedChannelIndex();
-  void setSelectedChannel(Channel &channel);
+  void setDeviceScopeMode(ScopeMode scopeMode);
+  ScopeMode getDeviceScopeMode();
 
-  Trigger &getTrigger();
+  // Channel data access methods
+  void setSelectedChannel(ChannelSelector channel);
+  ChannelSelector getSelectedChannel();
 
+  void enableChannel(ChannelSelector channel);
+  void disableChannel(ChannelSelector channel);
+  bool isChannelEnabled(ChannelSelector channel);
+
+  void setChannelVerticalDiv(ChannelSelector channel, VoltageDiv verticalDiv);
+  VoltageDiv getChannelVerticalDiv(ChannelSelector channel);
+
+  void setChannelCoupling(ChannelSelector channel, InputCoupling coupling);
+  InputCoupling getChannelCoupling(ChannelSelector channel);
+
+  void setChannelVerticalPosition(ChannelSelector channel, int16_t verticalPosition);
+  int16_t getChannelVerticalPosition(ChannelSelector channel);
+
+  void setChannelPWM(ChannelSelector channel, uint16_t pwm, uint8_t a, uint8_t b);
+  uint16_t getChannelPWM(ChannelSelector channel, uint8_t a, uint8_t b);
+  uint16_t *getChannelPWM(ChannelSelector channel, uint8_t a);
+
+  void setChannelVoltage125(ChannelSelector channel, double voltage);
+  double getChannelVoltage125(ChannelSelector channel);
+
+  void setChannelVoltageRL1(ChannelSelector channel, double voltage);
+  double getChannelVoltageRL1(ChannelSelector channel);
+
+  void setChannelVoltageRL2(ChannelSelector channel, double voltage);
+  double getChannelVoltageRL2(ChannelSelector channel);
+
+  // Trigger data access methods
+  void setTriggerLevel(uint16_t i);
+  uint16_t getTriggerLevel();
+
+  void setTriggerChannel(TriggerChannel channel);
+  TriggerChannel getTriggerChannel();
+
+  void setTriggerSlope(TriggerSlope slope);
+  TriggerSlope getTriggerSlope();
+
+  void setTriggerMode(TriggerMode mode);
+  TriggerMode getTriggerMode();
+
+  double getTriggerXPosition();
+  void setTriggerXPosition(double xPosition);
+
+  void setTriggerInnerPWM(uint8_t index, uint16_t pwm);
+  uint16_t getTriggerInnerPWM(uint8_t index);
+  uint16_t *getTriggerInnerPWM();
+
+  void setTriggerOuterPWM(uint8_t index, uint16_t pwm);
+  uint16_t getTriggerOuterPWM(uint8_t index);
+  uint16_t *getTriggerOuterPWM();
+
+  uint16_t getTriggerBottomPWM();
+  uint16_t getTriggerTopPWM();
+
+  // EEPROM data access methods
+  void setARMFirmwareVersion(string version);
+  string getARMFirmwareVersion();
+
+  void setFPGAFirmwareVersion(string version);
+  string getFPGAFirmwareVersion();
+
+  void setProductName(string productName);
+  string getProductName();
+
+  void setUserName(string userName);
+  string getUserName();
+
+  void setCaliLevel(uint8_t *data);
+  uint16_t *getCaliLevel();
+
+  void setFPGAAlert(uint8_t *data);
+  uint8_t *getFPGAAlert();
+
+  void setDiffFixData(size_t channel, size_t offset, uint8_t *data);
+
+  // Misc
   void setBatteryLevel(uint8_t batteryLevel);
   uint8_t getBatteryLevel();
 
@@ -46,37 +162,28 @@ public:
   void setFreqDiv(uint32_t freqDiv);
   uint32_t getFreqDiv();
 
-  void setARMFirmwareVersion(char *version);
-  void setFPGAFirmwareVersion(char *version);
-
   bool isSampleRate200Mor250M();
 
-  TimeBase getTimebaseFromFreqDiv();
+  TimeBase getDeviceTimeBaseFromFreqDiv();
 
   size_t getSamplesNumberOfOneFrame();
   uint8_t getEnabledChannelsCount();
   uint8_t getPacketsNumber();
 
 private:
-  TimeBase timeBase = HDIV_1mS;
-  CaptureMode captureMode = CAPMODE_NORMAL;
-  ScopeMode scopeMode = SCOMODE_ANALOG;
+  // Device members
+  DeviceSettings deviceSettings;
 
-  EEROMData eeromData;
-  Channel channel1;
-  Channel channel2;
-  Channel *selectedChannel = &channel1;
-  Trigger trigger;
+  // Channel members
+  ChannelSettings channels[2];
+  ChannelSelector selectedChannel;
 
-  uint8_t batteryLevel = 0;
+  // Trigger members
+  TriggerSettings triggerSettings;
 
-  int littlePacketStatus = 0;
-
-  uint8_t receiveFreqDivStatus = 0;
-  uint32_t freqDiv = 0;
-
-  char armFirmwareVersion[9];
-  char fpgaFirmwareVersion[9];
+  // Misc
+  int littlePacketStatus;
+  uint8_t receiveFreqDivStatus;
 };
 
 #endif // _IDSO1070_H_
