@@ -71,8 +71,7 @@ private:
   void receive();
   void transmit();
 
-  // void initLoadDeviceData();
-  // void initStage2();
+  void initStage2(ProgressHandler progressHandler);
 };
 
 #endif // _PROTOCOL_H_
