@@ -20,7 +20,8 @@ class Protocol
 public:
   static const int MaxCommandRetries = 3;
 
-  typedef std::function<void(float)> ProgressHandler;
+  typedef function<void(float)> ProgressHandler;
+  typedef function<void(void)> BatchFinishedHandler;
 
   Protocol();
   ~Protocol();
@@ -33,17 +34,10 @@ public:
   IDSO1070 &getDevice();
 
   void sendCommand(Command *cmd);
+  void sendCommandBatch(deque<Command *> cmds, ProgressHandler progressHandler, BatchFinishedHandler finishedHandler);
 
-  void init();
-  void startSampling();
-
-  void setProgressHandler(ProgressHandler handler);
-
-  template <class S, class F>
-  void setProgressHandler(S *self, F &&f)
-  {
-    setProgressHandler(std::bind(f, self, std::placeholders::_1));
-  }
+  void init(ProgressHandler progressHandler, BatchFinishedHandler finishedHandler);
+  void startSampling(Command::ResponseHandler responseHandler);
 
   bool isSampling();
 
@@ -58,11 +52,9 @@ private:
   Connector *connector = NULL;
   string connectError;
 
-  ProgressHandler progressHandler;
-
   // Command dispatching related members
   CommandFactory cmdFactory;
-  std::deque<Command *> commandQueue;
+  deque<Command *> commandQueue;
   int retries = 0;
   Timeout commandTimeout;
   Command *currentCommand = NULL;
@@ -78,6 +70,9 @@ private:
 
   void receive();
   void transmit();
+
+  // void initLoadDeviceData();
+  // void initStage2();
 };
 
 #endif // _PROTOCOL_H_
