@@ -59,13 +59,15 @@ void AppWindow::onButtonConnect()
 
 void AppWindow::onNotificationFromWorker()
 {
-    updateConnectionControls();
-    updateDeviceInfo();
-    updateChannelsInfo();
-    updateTriggerInfo();
+    IDSO1070 &currentDeviceState;
+    worker.getDevice(currentDeviceState);
+    updateConnectionControls(currentDeviceState);
+    updateDeviceInfo(currentDeviceState);
+    updateChannelsInfo(currentDeviceState);
+    updateTriggerInfo(currentDeviceState);
 }
 
-void AppWindow::updateConnectionControls()
+void AppWindow::updateConnectionControls(IDSO1070 &deviceState)
 {
     if (worker.isConnecting())
     {
@@ -89,7 +91,7 @@ void AppWindow::updateConnectionControls()
     }
 }
 
-void AppWindow::updateDeviceInfo()
+void AppWindow::updateDeviceInfo(IDSO1070 &deviceState)
 {
     if (!worker.isConnected())
     {
@@ -106,7 +108,7 @@ void AppWindow::updateDeviceInfo()
     }
 }
 
-void AppWindow::updateChannelsInfo()
+void AppWindow::updateChannelsInfo(IDSO1070 &deviceState)
 {
     if (!worker.isConnected())
     {
@@ -117,7 +119,7 @@ void AppWindow::updateChannelsInfo()
     }
 }
 
-void AppWindow::updateTriggerInfo()
+void AppWindow::updateTriggerInfo(IDSO1070 &deviceState)
 {
     if (!worker.isConnected())
     {

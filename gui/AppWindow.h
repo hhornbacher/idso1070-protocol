@@ -24,10 +24,10 @@ protected:
   void onNotificationFromWorker();
 
   // Internal UI update methods
-  void updateConnectionControls();
-  void updateDeviceInfo();
-  void updateChannelsInfo();
-  void updateTriggerInfo();
+  void updateConnectionControls(IDSO1070 &deviceState);
+  void updateDeviceInfo(IDSO1070 &deviceState);
+  void updateChannelsInfo(IDSO1070 &deviceState);
+  void updateTriggerInfo(IDSO1070 &deviceState);
 
   // Protected Members - Gtk
   Glib::RefPtr<Gtk::Builder> refGlade;

@@ -14,24 +14,49 @@ class ProtocolWorker
 public:
   ProtocolWorker();
 
+  // Thread main loop
   void process(AppWindow *caller);
+
+  // Thread execution control & status
   void stop();
   bool hasStopped() const;
   float getProgress() const;
 
-  void connect(string device);
+  // Connection status
+  bool isConnected() const;
+  bool isConnecting() const;
+  ConnectorType getConnectorType();
+  string getConnectError();
 
+  // Connection control
+  void connect(string device);
+  void disconnect();
+
+  // In-Thread callbacks
   void onUpdateProgress(float progress);
+  void onInitialized();
+
+  // Get copy of current device state
+  void getDevice(IDSO1070 &dev);
 
 protected:
+  // Thread sync mutex
   mutable mutex protocolMutex;
 
+  // Protocol itself
   Protocol protocol;
 
+  // Thread execution control & status members
   bool shallStop;
   bool stopped;
-  bool update;
+
+  // Connection status members
+  bool connected;
+  bool connecting;
   float progress;
+
+  // Notify UI to update
+  bool update;
 };
 
 #endif // _PROTOCOL_WORKER_H_
