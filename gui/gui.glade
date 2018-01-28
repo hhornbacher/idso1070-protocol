@@ -12,6 +12,8 @@
       <object class="GtkExpander" id="expanderConnection">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="expanded">True</property>
+        <property name="label_fill">True</property>
         <child>
           <object class="GtkBox" id="boxConnection">
             <property name="visible">True</property>
@@ -61,6 +63,8 @@
       <object class="GtkExpander" id="expanderDevice">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="expanded">True</property>
+        <property name="label_fill">True</property>
         <child>
           <object class="GtkBox" id="boxDevice">
             <property name="visible">True</property>
@@ -89,6 +93,8 @@
       <object class="GtkExpander" id="expanderChannels">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="expanded">True</property>
+        <property name="label_fill">True</property>
         <child>
           <object class="GtkBox" id="boxChannels">
             <property name="visible">True</property>
@@ -146,6 +152,8 @@
       <object class="GtkExpander" id="expanderTrigger">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="expanded">True</property>
+        <property name="label_fill">True</property>
         <child>
           <object class="GtkBox" id="boxTrigger">
             <property name="visible">True</property>

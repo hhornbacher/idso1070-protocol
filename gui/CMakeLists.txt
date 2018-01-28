@@ -4,13 +4,17 @@ project (idso1070-gui)
 find_package(Gtkmm REQUIRED)
 include_directories(${GTKMM_INCLUDE_DIRS})
 
+# add gtkmm-plplot
+find_package(Gtkmm-PLplot REQUIRED)
+include_directories(${GTKMM_PLPLOT_INCLUDE_DIRS})
+
 # add PThread
 find_package(PThread REQUIRED)
 include_directories(${PTHREAD_INCLUDE_DIRS})
 
 add_executable(idso1070-gui main.cxx ProtocolWorker.cxx GraphWidget.cxx SettingsWidget.cxx AppWindow.cxx)
 
-target_link_libraries (idso1070-gui idso1070 ${GTKMM_LIBRARIES} ${PTHREAD_LIBRARIES})
+target_link_libraries (idso1070-gui idso1070 ${GTKMM_LIBRARIES} ${GTKMM_PLPLOT_LIBRARIES} ${PTHREAD_LIBRARIES})
 
 # Copy glade file to binary dir for local testing
 add_custom_command(
@@ -21,15 +25,5 @@ add_custom_command(
 
 # Install glade file to ${CMAKE_INSTALL_DATAROOTDIR}/idso1070-gui
 install(FILES ${CMAKE_BINARY_DIR}/gui/gui.glade DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/idso1070-gui)
-
-# Copy graph-gtk.css to binary dir for local testing
-add_custom_command(
-        TARGET idso1070-gui POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_SOURCE_DIR}/gui/graph-gtk.css
-                ${CMAKE_BINARY_DIR}/gui/graph-gtk.css)
-
-# Install graph-gtk.css to ${CMAKE_INSTALL_DATAROOTDIR}/idso1070-gui
-install(FILES ${CMAKE_BINARY_DIR}/gui/graph-gtk.css DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/idso1070-gui)
 
 install (TARGETS idso1070-gui DESTINATION ${CMAKE_INSTALL_BINDIR})
