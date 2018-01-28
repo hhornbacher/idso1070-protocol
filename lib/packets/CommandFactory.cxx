@@ -402,7 +402,7 @@ Command *CommandFactory::updateChannel1Level(VoltageDiv channel1VerticalDiv, int
         channel1VerticalPosition,
         8.0f, 248.0f,
         channel1PWM0, channel1PWM1);
-    if (pwm < 0 || pwm > IDSO1070::MaxPWM)
+    if (pwm > IDSO1070::MaxPWM)
         return (Command *)NULL;
     return new Command(CMDCODE_CH1_PWM,
                        (uint8_t)(pwm & 0xff),
@@ -417,7 +417,7 @@ Command *CommandFactory::updateChannel2Level(VoltageDiv channel2VerticalDiv, int
         8.0f, 248.0f,
         channel2PWM0, channel2PWM1);
 
-    if (pwm < 0 || pwm > IDSO1070::MaxPWM)
+    if (pwm > IDSO1070::MaxPWM)
         return (Command *)NULL;
     return new Command(CMDCODE_CH2_PWM,
                        (uint8_t)(pwm & 0xff),
@@ -446,7 +446,7 @@ Command *CommandFactory::updateTriggerLevel(uint16_t triggerLevel, float trigger
 {
     uint16_t pwm = mapValue(triggerLevel, 8.0f, 248.0f, triggerBottomPWM, triggerTopPWM);
 
-    if (pwm < 0 || pwm > IDSO1070::MaxPWM)
+    if (pwm > IDSO1070::MaxPWM)
         return (Command *)NULL;
     return new Command(CMDCODE_TRIGGER_PWM,
                        (uint8_t)(pwm & 0xff),
