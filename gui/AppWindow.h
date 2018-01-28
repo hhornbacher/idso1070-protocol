@@ -3,6 +3,7 @@
 
 #include <iomanip>
 #include <iostream>
+
 #include <gtkmm.h>
 
 #include "GraphWidget.h"

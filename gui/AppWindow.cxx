@@ -13,6 +13,7 @@ AppWindow::AppWindow(const Glib::RefPtr<Gtk::Builder> &refGlade) : refGlade(refG
     boxHorizontal.pack_start(graphWidget, PACK_EXPAND_WIDGET);
 
     refGlade->get_widget_derived("SettingsWidget", pSettingsWidget);
+    pSettingsWidget->setWorker(&worker);
     boxHorizontal.pack_start(*pSettingsWidget, PACK_SHRINK);
 
     show_all_children();
@@ -39,9 +40,7 @@ AppWindow::~AppWindow()
 
 void AppWindow::onNotificationFromWorker()
 {
-    IDSO1070 currentDeviceState;
-    worker.getDevice(currentDeviceState);
-    pSettingsWidget->update(worker, currentDeviceState);
+    pSettingsWidget->update();
 }
 
 void AppWindow::notify()

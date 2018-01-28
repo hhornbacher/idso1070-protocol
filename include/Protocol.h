@@ -42,6 +42,7 @@ public:
   bool isSampling();
 
   string getConnectError();
+
   Connector *getConnector();
 
 private:
@@ -68,9 +69,12 @@ private:
 
   PacketParser packetParser;
 
+
+  // Internal methods (called by process)
   void receive();
   void transmit();
 
+  // Second stage of device initialization
   void initStage2(ProgressHandler progressHandler, BatchFinishedHandler finishedHandler);
 };
 

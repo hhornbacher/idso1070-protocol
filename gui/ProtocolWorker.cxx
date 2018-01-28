@@ -45,6 +45,7 @@ bool ProtocolWorker::hasStopped() const
     lock_guard<mutex> lock(protocolMutex);
     return stopped;
 }
+
 float ProtocolWorker::getProgress() const
 {
     lock_guard<mutex> lock(protocolMutex);
@@ -117,6 +118,8 @@ void ProtocolWorker::disconnect()
 {
     lock_guard<mutex> lock(protocolMutex);
     protocol.disconnect();
+    connecting = false;
+    connected = false;
     update = true;
 }
 
