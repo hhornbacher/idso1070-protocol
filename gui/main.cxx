@@ -31,14 +31,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  AppWindow *pAppWindow = nullptr;
-  refBuilder->get_widget_derived("AppWindowDerived", pAppWindow);
-  if (pAppWindow)
-  {
-    app->run(*pAppWindow);
-  }
+  AppWindow appWindow(refBuilder);
 
-  delete pAppWindow;
-
-  return 0;
+  return app->run(appWindow);
 }
