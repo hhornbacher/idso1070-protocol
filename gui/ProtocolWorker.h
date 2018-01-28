@@ -7,33 +7,31 @@
 #include <thread>
 #include <mutex>
 
-using namespace std;
-
 class AppWindow;
 
 class ProtocolWorker
 {
-  public:
-    ProtocolWorker();
+public:
+  ProtocolWorker();
 
-    void process(AppWindow *caller);
-    void stop();
-    bool hasStopped() const;
-    float getProgress() const;
+  void process(AppWindow *caller);
+  void stop();
+  bool hasStopped() const;
+  float getProgress() const;
 
-    void connect(string device);
+  void connect(string device);
 
-    void onUpdateProgress(float progress);
+  void onUpdateProgress(float progress);
 
-  protected:
-    mutable mutex protocolMutex;
+protected:
+  mutable mutex protocolMutex;
 
-    Protocol protocol;
+  Protocol protocol;
 
-    bool shallStop;
-    bool stopped;
-    bool update;
-    float progress;
+  bool shallStop;
+  bool stopped;
+  bool update;
+  float progress;
 };
 
 #endif // _PROTOCOL_WORKER_H_

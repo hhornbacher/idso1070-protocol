@@ -10,8 +10,6 @@
 #include <termios.h>
 #include <list>
 
-using namespace std;
-
 class USBConnector : public Connector
 {
 public:

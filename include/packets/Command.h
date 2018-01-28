@@ -8,7 +8,7 @@
 class Command
 {
 public:
-  typedef std::function<void(void)> ResponseHandler;
+  typedef function<void(void)> ResponseHandler;
 
   Command(CommandCode cmd, uint8_t param1 = 0, uint8_t param2 = 0);
   Command(uint8_t *payload);
@@ -22,7 +22,7 @@ public:
   template <class S, class F>
   void setResponseHandler(S *self, F &&f)
   {
-    setResponseHandler(std::bind(f, self, std::placeholders::_1));
+    setResponseHandler(bind(f, self, placeholders::_1));
   }
 
 private:

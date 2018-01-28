@@ -10,8 +10,6 @@
 #include <fcntl.h>
 #include <errno.h>
 
-using namespace std;
-
 class TCPConnector : public Connector
 {
 public:

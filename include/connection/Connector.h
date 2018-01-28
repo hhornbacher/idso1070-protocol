@@ -8,8 +8,6 @@
 #include <stdexcept>
 #include <boost/circular_buffer.hpp>
 
-using namespace std;
-
 class Connector
 {
 public:
@@ -34,7 +32,7 @@ protected:
   void grabPacket();
 
   boost::circular_buffer<uint8_t> rawBuffer;
-  std::queue<Response *> responseBuffer;
+  queue<Response *> responseBuffer;
   bool connected = false;
 };
 

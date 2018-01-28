@@ -13,4 +13,6 @@
 
 #include "enums.h"
 
+using namespace std;
+
 #endif // _BASE_H_
