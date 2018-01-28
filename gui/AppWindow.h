@@ -15,19 +15,29 @@ public:
   AppWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade);
   virtual ~AppWindow();
 
+  // Called by WorkerThread to notify the UI, that there's an update to do
   void notify();
 
 protected:
+  // Signal handlers
   void onButtonConnect();
   void onNotificationFromWorker();
 
+  // Internal UI update methods
+  void updateConnectionControls();
+  void updateDeviceInfo();
+  void updateChannelsInfo();
+  void updateTriggerInfo();
+
+  // Protected Members - Gtk
   Glib::RefPtr<Gtk::Builder> refGlade;
   Button *pButtonConnect;
+  ProgressBar *pProgressbarConnection;
   Label *pDeviceInfo;
   Label *pChannelsInfo;
   Label *pTriggerInfo;
-  ProgressBar *pProgressbarConnection;
 
+  // Protected Members - WorkerThread
   Glib::Dispatcher dispatcher;
   ProtocolWorker worker;
   thread *workerThread;
