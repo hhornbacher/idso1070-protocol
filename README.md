@@ -5,15 +5,24 @@ It's possible to communicate with the device over WiFi (TCP) as well as USB.
 
 USB ID: ```0483:5740 [STMicroelectronics STM32F407]```
 
+## Current state of development
+
+**Attention:**  This is not a production ready version, there's still a lot of stuff to do. If you're interested to support this library, just contact me.
+
+### Current features
+
+* Connection to device with WiFi (TCP) or USB
+* Send command packets ([Packet Format](lib/README.md))
+
 ## Dependencies
 
 * GCC
-* CMake: v3.5
-* Boost: v1.58.0
-* gtkmm: v3.18.0
-* [gtkmm-plplot](https://tschoonj.github.io/gtkmm-plplot/installation_instructions.html): v2.2
+* CMake: >= 3.5
+* Boost: >= 1.58.0
+* gtkmm: >= 3.18.0
+* [gtkmm-plplot](https://tschoonj.github.io/gtkmm-plplot/installation_instructions.html): >= 2.2
 
-On Ubuntu/Mint you can run ```apt install libboost-all-dev libpoco-dev cmake gcc``` to install the dependencies.
+On Ubuntu/Mint you can run ```apt install libboost-all-dev libgtkmm-3.0-dev libgtkmm-plplot2-dev cmake gcc``` to install the dependencies. For libgtkmm-plplot2-dev you need to add the repository befor, you can find some instructions at the link above.
 
 ## Build instructions
 
@@ -27,18 +36,16 @@ make
 sudo make install
 ```
 
+To run the GUI without installing, you can execute the ```run.sh```
+
 There is also a preconfigured task for building (CTRL-SHIFT-B) in vscode and a launch.json to debug(F5).
 
 ## Directories
 
-* cmake: Helper scripts for cmake
-* include: Library headers
+* gui: Simple Gtk GUI
 * lib: Implementation of the protocol itself
-* server: Simple tcp server using this library
-
-## Attention
-
-This is not a production ready version, there's still a lot of stuff to do. If you're interested to support this library, just contact me.
+* include: Library headers
+* cmake: Helper scripts for cmake
 
 ## Links
 
