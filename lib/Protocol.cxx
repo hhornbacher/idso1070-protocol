@@ -19,7 +19,7 @@ void Protocol::connect(string serialDevice)
         {
             connector->start();
         }
-        catch (ConnectException &e)
+        catch (ConnectionException &e)
         {
             connectError = e.what();
         }
@@ -36,7 +36,7 @@ void Protocol::connect(string serverHost, int port)
         {
             connector->start();
         }
-        catch (ConnectException &e)
+        catch (ConnectionException &e)
         {
             connectError = e.what();
         }
@@ -260,7 +260,7 @@ void Protocol::process()
             transmit();
             receive();
         }
-        catch (ConnectException &e)
+        catch (ConnectionException &e)
         {
             connectError = e.what();
         }

@@ -38,8 +38,8 @@ public:
   void sendCommandBatch(deque<Command *> cmds, ProgressHandler progressHandler, BatchFinishedHandler finishedHandler);
 
   void init(ProgressHandler progressHandler, BatchFinishedHandler finishedHandler);
-  void startSampling();
-  void stopSampling();
+  void startSampling(Command::ResponseHandler responseHandler);
+  void stopSampling(Command::ResponseHandler responseHandler);
 
   bool isSampling();
 

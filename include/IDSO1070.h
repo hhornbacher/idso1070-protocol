@@ -36,16 +36,20 @@ public:
   };
   struct DeviceSettings
   {
+    // freqDiv an timeBase are related to each other!
     TimeBase timeBase = HDIV_1mS;
-    CaptureMode captureMode = CAPMODE_NORMAL;
-    ScopeMode scopeMode = SCOMODE_ANALOG;
-
     uint32_t freqDiv = 0;
+
+    ScopeMode scopeMode = SCOMODE_ANALOG;
+    CaptureMode captureMode = CAPMODE_NORMAL;
+
     uint8_t batteryLevel = 0;
+
     string armFirmwareVersion;
     string fpgaFirmwareVersion;
     string productName;
     string userName;
+
     uint8_t diffFixData[2][256];
     uint16_t caliLevel[100];
     uint8_t fpgaAlert[40];

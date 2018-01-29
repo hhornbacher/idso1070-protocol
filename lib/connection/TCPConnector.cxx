@@ -14,7 +14,7 @@ void TCPConnector::start()
 {
     if ((socketHandle = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        throw ConnectException("Cannot create socket");
+        throw ConnectionException("Cannot create socket");
     }
 
     serverAddress.sin_family = AF_INET;
@@ -25,12 +25,12 @@ void TCPConnector::start()
                 (struct sockaddr *)&serverAddress,
                 sizeof(serverAddress)) != 0)
     {
-        throw ConnectException("Cannot connect to server");
+        throw ConnectionException("Cannot connect to server");
     }
 
     if (fcntl(socketHandle, F_SETFL, fcntl(socketHandle, F_GETFL) | O_NONBLOCK) < 0)
     {
-        throw ConnectException("Cannot configure socket for non-blocking mode");
+        throw ConnectionException("Cannot configure socket for non-blocking mode");
     }
     connected = true;
 }
@@ -49,10 +49,10 @@ ConnectorType TCPConnector::getType()
 
 void TCPConnector::transmit(uint8_t *data, size_t length)
 {
-    if(send(socketHandle, data, length, 0) < 0)
+    if (send(socketHandle, data, length, 0) < 0)
     {
         stop();
-        throw ConnectException("Connection lost");
+        throw ConnectionException("Connection lost");
     }
 }
 
@@ -63,10 +63,10 @@ size_t TCPConnector::receive()
         size_t size = RawBufferLength - rawBuffer.size();
         uint8_t tmp[size];
         ssize_t result = recv(socketHandle, tmp, size, 0);
-        if(result < 0)
+        if (result < 0)
         {
             stop();
-            throw ConnectException("Connection lost");
+            throw ConnectionException("Connection lost");
         }
         else if (result > 0)
         {

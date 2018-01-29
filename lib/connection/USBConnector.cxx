@@ -60,12 +60,12 @@ void USBConnector::start()
     handle = open(device.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     if (!handle)
     {
-        throw ConnectException("Cannot open device");
+        throw ConnectionException("Cannot open device");
     }
     memset(&tty, 0, sizeof tty);
     if (tcgetattr(handle, &tty) != 0)
     {
-        throw ConnectException("Cannot read serial port configuration");
+        throw ConnectionException("Cannot read serial port configuration");
     }
 
     cfsetospeed(&tty, USBSerialSpeed);
@@ -94,7 +94,7 @@ void USBConnector::start()
 
     if (tcsetattr(handle, TCSANOW, &tty) != 0)
     {
-        throw ConnectException("Cannot set serial port configuration");
+        throw ConnectionException("Cannot set serial port configuration");
     }
 
     connected = true;
@@ -114,10 +114,10 @@ ConnectorType USBConnector::getType()
 
 void USBConnector::transmit(uint8_t *data, size_t length)
 {
-    if(write(handle, data, length) < 0)
+    if (write(handle, data, length) < 0)
     {
         stop();
-        throw ConnectException("Connection lost");
+        throw ConnectionException("Connection lost");
     }
 }
 
@@ -128,10 +128,10 @@ size_t USBConnector::receive()
         size_t size = RawBufferLength - rawBuffer.size();
         uint8_t tmp[size];
         ssize_t result = read(handle, tmp, size);
-        if(result < 0)
+        if (result < 0)
         {
             stop();
-            throw ConnectException("Connection lost");
+            throw ConnectionException("Connection lost");
         }
         else if (result > 0)
         {

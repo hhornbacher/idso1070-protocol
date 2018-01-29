@@ -36,10 +36,10 @@ protected:
   bool connected = false;
 };
 
-class ConnectException : public runtime_error
+class ConnectionException : public runtime_error
 {
 public:
-  ConnectException(string description)
+  ConnectionException(string description)
       : runtime_error("connection failed"), description(description)
   {
   }
