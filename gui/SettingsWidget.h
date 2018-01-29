@@ -23,10 +23,18 @@ public:
 
 protected:
   // Signal handlers
+  void onButtonConnect();
   void onToggleChannel1Enable();
   void onToggleChannel2Enable();
-  void onButtonConnect();
   void onToggleSampling();
+
+  void onTimeBaseSelected();
+  void onScopeModeSelected();
+  void onCaptureModeSelected();
+
+  void onTriggerModeSelected();
+  void onTriggerChannelSelected();
+  void onTriggerSlopeSelected();
 
   // Internal UI update methods
   void updateConnectionControls(IDSO1070 &deviceState);
@@ -36,11 +44,24 @@ protected:
 
   // Protected Members - Gtk
   Glib::RefPtr<Gtk::Builder> refGlade;
+
   Button *pButtonConnect;
-  ToggleButton *pToggleSampling;
   ProgressBar *pProgressbarConnection;
-  CheckButton *pChannel1Enabled;
-  CheckButton *pChannel2Enabled;
+  Label *pConnectionStatus;
+
+  LevelBar *pBatteryLevel;
+  Label *pDeviceInfo;
+  ToggleButton *pToggleSampling;
+  ComboBox *pTimeBase;
+  ComboBox *pScopeMode;
+  ComboBox *pCaptureMode;
+
+  ToggleButton *pChannel1Enabled;
+  ToggleButton *pChannel2Enabled;
+
+  ComboBox *pTriggerMode;
+  ComboBox *pTriggerChannel;
+  ComboBox *pTriggerSlope;
 
   // Protocol worker thread reference
   ProtocolWorker *worker;
