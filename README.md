@@ -9,7 +9,7 @@ USB ID: ```0483:5740 [STMicroelectronics STM32F407]```
 
 **Attention:**  This is not a production ready version, there's still a lot of stuff to do. If you're interested to support this library, just contact me.
 
-### Current features
+### Features
 
 * Connection to device with WiFi (TCP) or USB
 * Send command packets ([Packet Format](lib/README.md#request-command-packet))
