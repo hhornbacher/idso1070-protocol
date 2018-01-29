@@ -25,12 +25,17 @@ public:
   // Connection status
   bool isConnected() const;
   bool isConnecting() const;
+  bool isSampling();
   ConnectorType getConnectorType();
   string getConnectError();
 
   // Connection control
   void connect(string device);
   void disconnect();
+
+  // Sampling control
+  void startSampling();
+  void stopSampling();
 
   // In-Thread callbacks
   void onUpdateProgress(float progress);

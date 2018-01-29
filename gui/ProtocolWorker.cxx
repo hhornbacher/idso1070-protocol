@@ -64,6 +64,12 @@ bool ProtocolWorker::isConnecting() const
     return connecting;
 }
 
+bool ProtocolWorker::isSampling()
+{
+    lock_guard<mutex> lock(protocolMutex);
+    return protocol.isSampling();
+}
+
 ConnectorType ProtocolWorker::getConnectorType()
 {
     lock_guard<mutex> lock(protocolMutex);
@@ -121,6 +127,18 @@ void ProtocolWorker::disconnect()
     connecting = false;
     connected = false;
     update = true;
+}
+
+void ProtocolWorker::startSampling()
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.startSampling();
+}
+
+void ProtocolWorker::stopSampling()
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.stopSampling();
 }
 
 void ProtocolWorker::onUpdateProgress(float progress)
