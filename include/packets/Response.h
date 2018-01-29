@@ -2,7 +2,7 @@
 #define _RESPONSE_H_
 
 #include "base.h"
-#include "device/IDSO1070.h"
+#include "IDSO1070.h"
 #include "Packet.h"
 
 class Response : public Packet

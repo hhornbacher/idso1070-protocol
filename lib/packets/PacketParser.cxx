@@ -1,6 +1,11 @@
 #include "packets/PacketParser.h"
 
-PacketParser::PacketParser(IDSO1070 &device) : device(device)
+PacketParser::PacketParser(
+    IDSO1070 &device,
+    Sample::SampleBuffer &sampleBuffer1,
+    Sample::SampleBuffer &sampleBuffer2) : device(device),
+                                           sampleBuffer1(sampleBuffer1),
+                                           sampleBuffer2(sampleBuffer2)
 {
 }
 
@@ -96,37 +101,28 @@ bool PacketParser::parseEEResponse(Response *packet)
             return parseEEROMPage00(packet);
         case 0x04:
             device.setFPGAAlert(packet->getPayload());
-            // memcpy(device.getEEROMData().fpgaAlert, packet->getPayload(), 40);
             return true;
         case 0x05:
             device.setUserName((char *)packet->getPayload());
             device.setProductName((char *)&packet->getPayload()[12]);
-            // memcpy(device.getEEROMData().userName, packet->getPayload(), 12);
-            // memcpy(device.getEEROMData().productName, &packet->getPayload()[12], 20);
             return true;
         case 0x07:
             device.setDiffFixData(0, 0, packet->getPayload());
-            // memcpy(&device.getEEROMData().diffFixData[0][0], packet->getPayload(), 100);
             return true;
         case 0x08:
             device.setDiffFixData(0, 100, packet->getPayload());
-            // memcpy(&device.getEEROMData().diffFixData[0][100], packet->getPayload(), 100);
             return true;
         case 0x09:
             device.setDiffFixData(0, 200, packet->getPayload());
-            // memcpy(&device.getEEROMData().diffFixData[0][200], packet->getPayload(), 56);
             return true;
         case 0x0a:
             device.setDiffFixData(1, 0, packet->getPayload());
-            // memcpy(&device.getEEROMData().diffFixData[1][0], packet->getPayload(), 100);
             return true;
         case 0x0b:
             device.setDiffFixData(1, 100, packet->getPayload());
-            // memcpy(&device.getEEROMData().diffFixData[1][100], packet->getPayload(), 100);
             return true;
         case 0x0c:
             device.setDiffFixData(1, 200, packet->getPayload());
-            // memcpy(&device.getEEROMData().diffFixData[1][200], packet->getPayload(), 56);
             return true;
         default:
             return false;
@@ -453,7 +449,6 @@ bool PacketParser::parseCoupling(Response *packet)
 bool PacketParser::parseEEROMPage00(Response *packet)
 {
     device.setCaliLevel(packet->getPayload());
-    // memcpy(device.getEEROMData().caliLevel, packet->getPayload(), 200);
     uint16_t *iArr;
     int i = 0;
     int i2 = 0;
@@ -556,19 +551,19 @@ void PacketParser::parseBothChannelsData(Sample *packet, int index)
     {
         if (device.getChannelCoupling(CHANNEL_1) == COUPLING_GND)
         {
-            // device.getChannel1().getSampleBuffer().push_back(device.getChannel1().getVerticalPosition());
+            sampleBuffer1.push_back(device.getChannelVerticalPosition(CHANNEL_1));
         }
         else
         {
-            // device.getChannel1().getSampleBuffer().push_back((int16_t)(packet->getPayload()[1 + (pos * 2)] & 255));
+            sampleBuffer1.push_back((int16_t)(packet->getPayload()[1 + (pos * 2)] & 255));
         }
         if (device.getChannelCoupling(CHANNEL_2) == COUPLING_GND)
         {
-            // device.getChannel2().getSampleBuffer().push_back(device.getChannel2().getVerticalPosition());
+            sampleBuffer2.push_back(device.getChannelVerticalPosition(CHANNEL_2));
         }
         else
         {
-            // device.getChannel2().getSampleBuffer().push_back((int16_t)(packet->getPayload()[1 + (pos * 2) + 1] & 255));
+            sampleBuffer2.push_back((int16_t)(packet->getPayload()[1 + (pos * 2) + 1] & 255));
         }
         //     statisticCh1Max(sampleOffset + pos, this.channel1.getSamples()[sampleOffset + pos]);
         //     statisticCh1Min(sampleOffset + pos, this.channel1.getSamples()[sampleOffset + pos]);
@@ -587,11 +582,11 @@ void PacketParser::parseChannel1Data(Sample *packet, int index)
     {
         if (device.getChannelCoupling(CHANNEL_1) == COUPLING_GND)
         {
-            // device.getChannel1().getSampleBuffer().push_back(device.getChannel1().getVerticalPosition());
+            sampleBuffer1.push_back(device.getChannelVerticalPosition(CHANNEL_1));
         }
         else
         {
-            // device.getChannel1().getSampleBuffer().push_back((int16_t)(packet->getPayload()[1 + pos] & 255));
+            sampleBuffer1.push_back((int16_t)(packet->getPayload()[1 + pos] & 255));
         }
         //     statisticCh2Max(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
         //     statisticCh2Min(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
@@ -608,11 +603,11 @@ void PacketParser::parseChannel2Data(Sample *packet, int index)
     {
         if (device.getChannelCoupling(CHANNEL_2) == COUPLING_GND)
         {
-            // device.getChannel2().getSampleBuffer().push_back(device.getChannel2().getVerticalPosition());
+            sampleBuffer2.push_back(device.getChannelVerticalPosition(CHANNEL_2));
         }
         else
         {
-            // device.getChannel2().getSampleBuffer().push_back((int16_t)(packet->getPayload()[1 + pos] & 255));
+            sampleBuffer2.push_back((int16_t)(packet->getPayload()[1 + pos] & 255));
         }
         //     statisticCh2Max(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
         //     statisticCh2Min(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
@@ -624,87 +619,87 @@ void PacketParser::fixAdDiff()
 {
     if (device.getEnabledChannelsCount() == 1 && device.getDeviceTimeBase() <= HDIV_1uS)
     {
-        // fixCh1AdDiff();
-        // fixCh2AdDiff();
+        fixCh1AdDiff();
+        fixCh2AdDiff();
     }
 }
 
-// void PacketParser::fixCh1AdDiff()
-// {
-//     if (device.getChannel1().isEnabled())
-//     {
-//         int i;
-//         short s;
-//         if ((EeromData.nFpgaAlert[16] == (short)0 ? 1 : 0) == 0)
-//         {
-//             for (i = 0; i < this.channel1.getLength(); i++)
-//             {
-//                 s = (short)(EeromData.adDiffFixData[0][this.channel1.getSamples()[i * 2]] + this.channel1.getSamples()[(i * 2) + 1]);
-//                 if (s > (short)255)
-//                 {
-//                     s = (short)255;
-//                 }
-//                 else if (s < (short)0)
-//                 {
-//                     s = (short)0;
-//                 }
-//                 this.channel1.getSamples()[(i * 2) + 1] = s;
-//             }
-//             return;
-//         }
-//         for (i = 0; i < this.channel1.getLength(); i++)
-//         {
-//             s = (short)(EeromData.adDiffFixData[0][this.channel1.getSamples()[i * 2]] + this.channel1.getSamples()[(i * 2) + 1]);
-//             if (s > (short)255)
-//             {
-//                 s = (short)255;
-//             }
-//             else if (s < (short)0)
-//             {
-//                 s = (short)0;
-//             }
-//             this.channel1.getSamples()[(i * 2) + 1] = this.channel1.getSamples()[i * 2];
-//             this.channel1.getSamples()[i * 2] = s;
-//         }
-//     }
-// }
+void PacketParser::fixCh1AdDiff()
+{
+    //     if (device.getChannel1().isEnabled())
+    //     {
+    //         int i;
+    //         short s;
+    //         if ((EeromData.nFpgaAlert[16] == (short)0 ? 1 : 0) == 0)
+    //         {
+    //             for (i = 0; i < this.channel1.getLength(); i++)
+    //             {
+    //                 s = (short)(EeromData.adDiffFixData[0][this.channel1.getSamples()[i * 2]] + this.channel1.getSamples()[(i * 2) + 1]);
+    //                 if (s > (short)255)
+    //                 {
+    //                     s = (short)255;
+    //                 }
+    //                 else if (s < (short)0)
+    //                 {
+    //                     s = (short)0;
+    //                 }
+    //                 this.channel1.getSamples()[(i * 2) + 1] = s;
+    //             }
+    //             return;
+    //         }
+    //         for (i = 0; i < this.channel1.getLength(); i++)
+    //         {
+    //             s = (short)(EeromData.adDiffFixData[0][this.channel1.getSamples()[i * 2]] + this.channel1.getSamples()[(i * 2) + 1]);
+    //             if (s > (short)255)
+    //             {
+    //                 s = (short)255;
+    //             }
+    //             else if (s < (short)0)
+    //             {
+    //                 s = (short)0;
+    //             }
+    //             this.channel1.getSamples()[(i * 2) + 1] = this.channel1.getSamples()[i * 2];
+    //             this.channel1.getSamples()[i * 2] = s;
+    //         }
+    //     }
+}
 
-// void PacketParser::fixCh2AdDiff()
-// {
-//     int i;
-//     short s;
-//     if ((EeromData.nFpgaAlert[17] == (short)0 ? 1 : 0) == 0)
-//     {
-//         for (i = 0; i < this.channel2.getLength(); i++)
-//         {
-//             s = (short)(EeromData.adDiffFixData[1][this.channel2.getSamples()[(i * 2) + 1]] + this.channel2.getSamples()[i * 2]);
-//             if (s > (short)255)
-//             {
-//                 s = (short)255;
-//             }
-//             else if (s < (short)0)
-//             {
-//                 s = (short)0;
-//             }
-//             this.channel2.getSamples()[i * 2] = this.channel2.getSamples()[(i * 2) + 1];
-//             this.channel2.getSamples()[(i * 2) + 1] = s;
-//         }
-//         return;
-//     }
-//     for (i = 0; i < this.channel2.getLength(); i++)
-//     {
-//         s = (short)(EeromData.adDiffFixData[1][this.channel2.getSamples()[(i * 2) + 1]] + this.channel2.getSamples()[i * 2]);
-//         if (s > (short)255)
-//         {
-//             s = (short)255;
-//         }
-//         else if (s < (short)0)
-//         {
-//             s = (short)0;
-//         }
-//         this.channel2.getSamples()[i * 2] = s;
-//     }
-// }
+void PacketParser::fixCh2AdDiff()
+{
+    //     int i;
+    //     short s;
+    //     if ((EeromData.nFpgaAlert[17] == (short)0 ? 1 : 0) == 0)
+    //     {
+    //         for (i = 0; i < this.channel2.getLength(); i++)
+    //         {
+    //             s = (short)(EeromData.adDiffFixData[1][this.channel2.getSamples()[(i * 2) + 1]] + this.channel2.getSamples()[i * 2]);
+    //             if (s > (short)255)
+    //             {
+    //                 s = (short)255;
+    //             }
+    //             else if (s < (short)0)
+    //             {
+    //                 s = (short)0;
+    //             }
+    //             this.channel2.getSamples()[i * 2] = this.channel2.getSamples()[(i * 2) + 1];
+    //             this.channel2.getSamples()[(i * 2) + 1] = s;
+    //         }
+    //         return;
+    //     }
+    //     for (i = 0; i < this.channel2.getLength(); i++)
+    //     {
+    //         s = (short)(EeromData.adDiffFixData[1][this.channel2.getSamples()[(i * 2) + 1]] + this.channel2.getSamples()[i * 2]);
+    //         if (s > (short)255)
+    //         {
+    //             s = (short)255;
+    //         }
+    //         else if (s < (short)0)
+    //         {
+    //             s = (short)0;
+    //         }
+    //         this.channel2.getSamples()[i * 2] = s;
+    //     }
+}
 
 void PacketParser::interpolateSamples()
 {
@@ -715,14 +710,14 @@ void PacketParser::interpolateSamples()
     }
     if (i != 0)
     {
-        // IDSO1070Native.lerp_update(this.channel1.getInterpolatedSamples(), this.channel2.getInterpolatedSamples(), this.channel1.getSamples(), this.channel2.getSamples(), this.timeBase.ordinal(), channelStatus(), getTrigger().getTriggerChannel().ordinal(), (int)(getTrigger().getTriggerXPosition() * 100.0d), getTrigger().getTriggerLevel(), getTrigger().getTriggerSlope().ordinal(), getMemoryDepth(), this.interpolateType.ordinal());
+        // IDSO1070Native.lerp_update(this.channel1.getInterpolatedSamples(), this.channel2.getInterpolatedSamples(), this.channel1.getSamples(), this.channel2.getSamples(), this.timeBase.ordinal(), channelStatus(), getTrigger().getTriggerChannel().ordinal(), (int)(getTrigger().getTriggerXPosition() * 100.0d), getTrigger().getTriggerLevel(), getTrigger().getTriggerSlope().ordinal(), IDSO1070::MemoryDepth, this.interpolateType.ordinal());
         if (device.isChannelEnabled(CHANNEL_1))
         {
-            // System.arraycopy(this.channel1.getInterpolatedSamples(), 0, this.channel1.getSamples(), 0, getMemoryDepth());
+            // System.arraycopy(this.channel1.getInterpolatedSamples(), 0, this.channel1.getSamples(), 0, IDSO1070::MemoryDepth);
         }
         if (device.isChannelEnabled(CHANNEL_2))
         {
-            // System.arraycopy(this.channel2.getInterpolatedSamples(), 0, this.channel2.getSamples(), 0, getMemoryDepth());
+            // System.arraycopy(this.channel2.getInterpolatedSamples(), 0, this.channel2.getSamples(), 0, IDSO1070::MemoryDepth);
         }
     }
 }

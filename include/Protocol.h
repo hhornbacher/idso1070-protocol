@@ -7,7 +7,7 @@
 #include "connection/TCPConnector.h"
 #include "connection/USBConnector.h"
 
-#include "device/IDSO1070.h"
+#include "IDSO1070.h"
 
 #include "packets/Sample.h"
 #include "packets/Response.h"
@@ -19,9 +19,10 @@ class Protocol
 {
 public:
   static const int MaxCommandRetries = 3;
+  // static const int SampleBufferSize = 512 * 128;
 
-  typedef function<void(float)> ProgressHandler;
   typedef Command::ResponseHandler BatchFinishedHandler;
+  typedef function<void(float)> ProgressHandler;
 
   Protocol();
   ~Protocol();
@@ -37,7 +38,8 @@ public:
   void sendCommandBatch(deque<Command *> cmds, ProgressHandler progressHandler, BatchFinishedHandler finishedHandler);
 
   void init(ProgressHandler progressHandler, BatchFinishedHandler finishedHandler);
-  void startSampling(Command::ResponseHandler responseHandler);
+  void startSampling();
+  void stopSampling();
 
   bool isSampling();
 
@@ -67,8 +69,10 @@ private:
   // Sample parsing related members
   bool sampling = false;
 
+  // Parser and sample data buffers
   PacketParser packetParser;
-
+  Sample::SampleBuffer sampleBuffer1;
+  Sample::SampleBuffer sampleBuffer2;
 
   // Internal methods (called by process)
   void receive();

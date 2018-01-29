@@ -3,7 +3,7 @@
 
 #include "base.h"
 #include "util/mapValue.h"
-#include "device/IDSO1070.h"
+#include "IDSO1070.h"
 #include "Command.h"
 
 class CommandFactory

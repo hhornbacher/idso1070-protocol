@@ -2,13 +2,17 @@
 #define _SAMPLE_H_
 
 #include "base.h"
-#include "device/IDSO1070.h"
+#include "IDSO1070.h"
 #include "Packet.h"
 #include "Response.h"
+
+#include <boost/circular_buffer.hpp>
 
 class Sample : public Packet
 {
 public:
+  typedef boost::circular_buffer<int16_t> SampleBuffer;
+
   Sample(uint8_t *data);
   Sample(Response *response);
 

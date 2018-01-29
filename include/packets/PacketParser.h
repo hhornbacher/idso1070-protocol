@@ -3,20 +3,22 @@
 
 #include "base.h"
 #include "util/mapValue.h"
-#include "device/IDSO1070.h"
+#include "IDSO1070.h"
 #include "Response.h"
 #include "Sample.h"
 
 class PacketParser
 {
 public:
-  PacketParser(IDSO1070 &device);
+  PacketParser(IDSO1070 &device, Sample::SampleBuffer &sampleBuffer1, Sample::SampleBuffer &sampleBuffer2);
 
   bool parse(Response *packet);
   void parse(Sample *packet);
 
 private:
   IDSO1070 &device;
+  Sample::SampleBuffer &sampleBuffer1;
+  Sample::SampleBuffer &sampleBuffer2;
 
   // Response parsing
   bool parseAAResponse(Response *packet);
@@ -42,8 +44,8 @@ private:
   void parseChannel1Data(Sample *packet, int index);
   void parseChannel2Data(Sample *packet, int index);
   void fixAdDiff();
-  // void fixCh1AdDiff();
-  // void fixCh2AdDiff();
+  void fixCh1AdDiff();
+  void fixCh2AdDiff();
   void interpolateSamples();
 };
 

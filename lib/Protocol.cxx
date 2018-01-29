@@ -1,7 +1,7 @@
 #include "Protocol.h"
 
 Protocol::Protocol() : commandTimeout(200),
-                       packetParser(device)
+                       packetParser(device, sampleBuffer1, sampleBuffer2)
 {
 }
 
@@ -145,9 +145,14 @@ void Protocol::initStage2(ProgressHandler progressHandler, BatchFinishedHandler 
     });
 }
 
-void Protocol::startSampling(Command::ResponseHandler responseHandler)
+void Protocol::startSampling()
 {
     sendCommand(cmdFactory.startSampling());
+}
+
+void Protocol::stopSampling()
+{
+    // TODO: Find command to stop sampling...
 }
 
 void Protocol::receive()
