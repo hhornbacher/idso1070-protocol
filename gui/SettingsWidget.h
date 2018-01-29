@@ -3,7 +3,7 @@
 
 #include <gtkmm.h>
 
-#include <device/IDSO1070.h>
+#include <IDSO1070.h>
 
 #include "ProtocolWorker.h"
 
@@ -13,7 +13,7 @@ using namespace Glib;
 class SettingsWidget : public Box
 {
 public:
-  SettingsWidget(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &refGlade);
+  SettingsWidget(BaseObjectType *cobject, const RefPtr<Builder> &refGlade);
   virtual ~SettingsWidget();
 
   void setWorker(ProtocolWorker *worker);
@@ -26,6 +26,7 @@ protected:
   void onToggleChannel1Enable();
   void onToggleChannel2Enable();
   void onButtonConnect();
+  void onToggleSampling();
 
   // Internal UI update methods
   void updateConnectionControls(IDSO1070 &deviceState);
@@ -36,6 +37,7 @@ protected:
   // Protected Members - Gtk
   Glib::RefPtr<Gtk::Builder> refGlade;
   Button *pButtonConnect;
+  ToggleButton *pToggleSampling;
   ProgressBar *pProgressbarConnection;
   CheckButton *pChannel1Enabled;
   CheckButton *pChannel2Enabled;

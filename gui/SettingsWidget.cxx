@@ -1,9 +1,10 @@
 #include "SettingsWidget.h"
 
-SettingsWidget::SettingsWidget(BaseObjectType *cobject, const Glib::RefPtr<Builder> &refGlade)
+SettingsWidget::SettingsWidget(BaseObjectType *cobject, const RefPtr<Builder> &refGlade)
     : Box(cobject),
       refGlade(refGlade),
       pButtonConnect(nullptr),
+      pToggleSampling(nullptr),
       pProgressbarConnection(nullptr),
       pChannel1Enabled(nullptr),
       pChannel2Enabled(nullptr),
@@ -12,6 +13,9 @@ SettingsWidget::SettingsWidget(BaseObjectType *cobject, const Glib::RefPtr<Build
     // Get references to widgets from glade file
     refGlade->get_widget("buttonConnect", pButtonConnect);
     pButtonConnect->signal_clicked().connect(sigc::mem_fun(*this, &SettingsWidget::onButtonConnect));
+
+    refGlade->get_widget("toggleSampling", pToggleSampling);
+    pToggleSampling->signal_toggled().connect(sigc::mem_fun(*this, &SettingsWidget::onToggleSampling));
 
     refGlade->get_widget("checkbuttonChannel1Enabled", pChannel1Enabled);
     pChannel1Enabled->signal_toggled().connect(sigc::mem_fun(*this, &SettingsWidget::onToggleChannel1Enable));
@@ -33,10 +37,16 @@ void SettingsWidget::setWorker(ProtocolWorker *worker)
 
 void SettingsWidget::onToggleChannel1Enable()
 {
+    if (worker->isConnected())
+    {
+    }
 }
 
 void SettingsWidget::onToggleChannel2Enable()
 {
+    if (worker->isConnected())
+    {
+    }
 }
 
 void SettingsWidget::onButtonConnect()
@@ -48,6 +58,17 @@ void SettingsWidget::onButtonConnect()
     else
     {
         worker->connect("/dev/ttyACM0");
+    }
+}
+
+void SettingsWidget::onToggleSampling()
+{
+    if (worker->isConnected())
+    {
+        if (!worker->isSampling())
+            worker->startSampling();
+        else
+            worker->stopSampling();
     }
 }
 
@@ -87,11 +108,22 @@ void SettingsWidget::updateConnectionControls(IDSO1070 &deviceState)
 
 void SettingsWidget::updateDeviceInfo(IDSO1070 &deviceState)
 {
-    if (!worker->isConnected())
+    if (!worker->isConnected() || worker->isConnecting())
     {
+        pToggleSampling->set_sensitive(false);
+        pToggleSampling->set_label("Start sampling");
     }
     else
     {
+        pToggleSampling->set_sensitive(true);
+        if (!worker->isSampling())
+        {
+            pToggleSampling->set_label("Start sampling");
+        }
+        else
+        {
+            pToggleSampling->set_label("Stop sampling");
+        }
     }
 }
 
