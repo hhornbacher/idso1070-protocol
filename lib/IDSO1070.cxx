@@ -1,4 +1,4 @@
-#include "device/IDSO1070.h"
+#include "IDSO1070.h"
 
 IDSO1070::IDSO1070() : selectedChannel(CHANNEL_1), littlePacketStatus(0), receiveFreqDivStatus(0)
 {

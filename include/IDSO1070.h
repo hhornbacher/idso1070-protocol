@@ -3,8 +3,6 @@
 
 #include "base.h"
 
-#include <boost/circular_buffer.hpp>
-
 class IDSO1070
 {
 public:
@@ -12,9 +10,6 @@ public:
   static const int MemoryDepth = 2000;
   static const int SamplesCountPerPacket = 500;
   static const int MaxSample = 248;
-  static const int SampleBufferSize = 512 * 128;
-
-  // typedef boost::circular_buffer<int16_t> SampleBuffer;
 
   struct ChannelSettings
   {
