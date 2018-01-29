@@ -12,7 +12,21 @@ USB ID: ```0483:5740 [STMicroelectronics STM32F407]```
 ### Current features
 
 * Connection to device with WiFi (TCP) or USB
-* Send command packets ([Packet Format](lib/README.md))
+* Send command packets ([Packet Format](lib/README.md#request-command-packet))
+* Receive and parse command response and sample data packets ([Packet Format](lib/README.md#response-packet))
+
+### Next steps
+
+#### Library
+
+* Handling for interrupted connections
+* Better overall exception handling
+
+#### GUI
+
+* Implement sample streaming and visualization
+* Add controls for device settings
+* Add controls to display device infos
 
 ## Dependencies
 
@@ -22,7 +36,7 @@ USB ID: ```0483:5740 [STMicroelectronics STM32F407]```
 * gtkmm: >= 3.18.0
 * [gtkmm-plplot](https://tschoonj.github.io/gtkmm-plplot/installation_instructions.html): >= 2.2
 
-On Ubuntu/Mint you can run ```apt install libboost-all-dev libgtkmm-3.0-dev libgtkmm-plplot2-dev cmake gcc``` to install the dependencies. For libgtkmm-plplot2-dev you need to add the repository befor, you can find some instructions at the link above.
+On Ubuntu/Mint you can run ```apt install libboost-all-dev libgtkmm-3.0-dev libgtkmm-plplot2-dev cmake gcc``` to install the dependencies. For libgtkmm-plplot2-dev you need to add the repository before, you can find some instructions at the link above.
 
 ## Build instructions
 
@@ -38,7 +52,7 @@ sudo make install
 
 To run the GUI without installing, you can execute the ```run.sh```
 
-There is also a preconfigured task for building (CTRL-SHIFT-B) in vscode and a launch.json to debug(F5).
+There is also a pre configured task for building (CTRL-SHIFT-B) in vscode and a launch.json to debug(F5).
 
 ## Directories
 
