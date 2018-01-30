@@ -3,14 +3,40 @@
 
 #include "base.h"
 
+class Protocol;
+class PacketParser;
+
 class IDSO1070
 {
+  friend class Protocol;
+  friend class PacketParser;
+
 public:
   static const int MaxPWM = 4095;
   static const int MemoryDepth = 2000;
   static const int SamplesCountPerPacket = 500;
   static const int MaxSample = 248;
 
+  struct DeviceSettings
+  {
+    // freqDiv an timeBase are related to each other!
+    TimeBase timeBase = HDIV_1mS;
+    uint32_t freqDiv = 0;
+
+    ScopeMode scopeMode = SCOMODE_ANALOG;
+    CaptureMode captureMode = CAPMODE_NORMAL;
+
+    uint8_t batteryLevel = 0;
+
+    string armFirmwareVersion;
+    string fpgaFirmwareVersion;
+    string productName;
+    string userName;
+
+    uint8_t diffFixData[2][256];
+    uint16_t caliLevel[100];
+    uint8_t fpgaAlert[40];
+  };
   struct ChannelSettings
   {
     bool enabled = true;
@@ -33,26 +59,6 @@ public:
     double xPosition = 0.5;
     uint16_t innerPWM[4];
     uint16_t outerPWM[2];
-  };
-  struct DeviceSettings
-  {
-    // freqDiv an timeBase are related to each other!
-    TimeBase timeBase = HDIV_1mS;
-    uint32_t freqDiv = 0;
-
-    ScopeMode scopeMode = SCOMODE_ANALOG;
-    CaptureMode captureMode = CAPMODE_NORMAL;
-
-    uint8_t batteryLevel = 0;
-
-    string armFirmwareVersion;
-    string fpgaFirmwareVersion;
-    string productName;
-    string userName;
-
-    uint8_t diffFixData[2][256];
-    uint16_t caliLevel[100];
-    uint8_t fpgaAlert[40];
   };
 
   IDSO1070();
@@ -100,56 +106,39 @@ public:
   uint32_t getFreqDiv();
 
   // Channel data access methods
-  void setSelectedChannel(ChannelSelector channel);
   ChannelSelector getSelectedChannel();
 
-  void enableChannel(ChannelSelector channel);
-  void disableChannel(ChannelSelector channel);
   bool isChannelEnabled(ChannelSelector channel);
 
-  void setChannelVerticalDiv(ChannelSelector channel, VoltageDiv verticalDiv);
   VoltageDiv getChannelVerticalDiv(ChannelSelector channel);
 
-  void setChannelCoupling(ChannelSelector channel, InputCoupling coupling);
   InputCoupling getChannelCoupling(ChannelSelector channel);
 
-  void setChannelVerticalPosition(ChannelSelector channel, int16_t verticalPosition);
   int16_t getChannelVerticalPosition(ChannelSelector channel);
 
-  void setChannelPWM(ChannelSelector channel, uint16_t pwm, uint8_t a, uint8_t b);
   uint16_t getChannelPWM(ChannelSelector channel, uint8_t a, uint8_t b);
   uint16_t *getChannelPWM(ChannelSelector channel, uint8_t a);
 
-  void setChannelVoltage125(ChannelSelector channel, double voltage);
   double getChannelVoltage125(ChannelSelector channel);
 
-  void setChannelVoltageRL1(ChannelSelector channel, double voltage);
   double getChannelVoltageRL1(ChannelSelector channel);
 
-  void setChannelVoltageRL2(ChannelSelector channel, double voltage);
   double getChannelVoltageRL2(ChannelSelector channel);
 
   // Trigger data access methods
-  void setTriggerLevel(uint16_t i);
   uint16_t getTriggerLevel();
 
-  void setTriggerChannel(TriggerChannel channel);
   TriggerChannel getTriggerChannel();
 
-  void setTriggerSlope(TriggerSlope slope);
   TriggerSlope getTriggerSlope();
 
-  void setTriggerMode(TriggerMode mode);
   TriggerMode getTriggerMode();
 
   double getTriggerXPosition();
-  void setTriggerXPosition(double xPosition);
 
-  void setTriggerInnerPWM(uint8_t index, uint16_t pwm);
   uint16_t getTriggerInnerPWM(uint8_t index);
   uint16_t *getTriggerInnerPWM();
 
-  void setTriggerOuterPWM(uint8_t index, uint16_t pwm);
   uint16_t getTriggerOuterPWM(uint8_t index);
   uint16_t *getTriggerOuterPWM();
 
@@ -157,10 +146,8 @@ public:
   uint16_t getTriggerTopPWM();
 
   // Misc
-  void setLittlePacketStatus(int littlePacketStatus);
   int getLittlePacketStatus();
 
-  void setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus);
   uint8_t getReceiveFreqDivStatus();
 
   bool isSampleRate200Mor250M();
@@ -171,7 +158,28 @@ public:
   uint8_t getEnabledChannelsCount();
   uint8_t getPacketsNumber();
 
-private:
+protected:
+  // All setters are protected!
+  void setSelectedChannel(ChannelSelector channel);
+  void enableChannel(ChannelSelector channel);
+  void disableChannel(ChannelSelector channel);
+  void setChannelVerticalDiv(ChannelSelector channel, VoltageDiv verticalDiv);
+  void setChannelCoupling(ChannelSelector channel, InputCoupling coupling);
+  void setChannelVerticalPosition(ChannelSelector channel, int16_t verticalPosition);
+  void setChannelPWM(ChannelSelector channel, uint16_t pwm, uint8_t a, uint8_t b);
+  void setChannelVoltage125(ChannelSelector channel, double voltage);
+  void setChannelVoltageRL1(ChannelSelector channel, double voltage);
+  void setChannelVoltageRL2(ChannelSelector channel, double voltage);
+  void setTriggerLevel(uint16_t i);
+  void setTriggerChannel(TriggerChannel channel);
+  void setTriggerSlope(TriggerSlope slope);
+  void setTriggerMode(TriggerMode mode);
+  void setTriggerXPosition(double xPosition);
+  void setTriggerInnerPWM(uint8_t index, uint16_t pwm);
+  void setTriggerOuterPWM(uint8_t index, uint16_t pwm);
+  void setLittlePacketStatus(int littlePacketStatus);
+  void setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus);
+
   // Device members
   DeviceSettings deviceSettings;
 

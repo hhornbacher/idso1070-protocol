@@ -1,7 +1,6 @@
 #include "Protocol.h"
 
-Protocol::Protocol() : commandTimeout(200),
-                       packetParser(device, sampleBuffer1, sampleBuffer2)
+Protocol::Protocol() : packetParser(device, sampleBuffer1, sampleBuffer2)
 {
 }
 
@@ -65,7 +64,7 @@ void Protocol::sendCommand(Command *cmd)
     commandQueue.push_back(cmd);
 }
 
-void Protocol::sendCommandBatch(deque<Command *> cmds, ProgressHandler progressHandler, BatchFinishedHandler finishedHandler)
+void Protocol::sendCommandBatch(deque<Command *> cmds, Command::ResponseHandler finishedHandler)
 {
     int i = 0;
     int total = cmds.size();
@@ -77,9 +76,13 @@ void Protocol::sendCommandBatch(deque<Command *> cmds, ProgressHandler progressH
             float progress = ((float)i + 1.0f) / (float)total;
             if ((i + 1) < total)
             {
-                cmd->setResponseHandler([progressHandler, progress] {
-                    progressHandler(progress);
-                });
+                if (progressHandler)
+                {
+                    ProgressHandler progressHandlerRef = progressHandler;
+                    cmd->setResponseHandler([progressHandlerRef, progress] {
+                        progressHandlerRef(progress);
+                    });
+                }
             }
             else
             {
@@ -91,7 +94,7 @@ void Protocol::sendCommandBatch(deque<Command *> cmds, ProgressHandler progressH
     }
 }
 
-void Protocol::init(ProgressHandler progressHandler, BatchFinishedHandler finishedHandler)
+void Protocol::init(Command::ResponseHandler finishedHandler)
 {
     deque<Command *> initLoadDataCmds;
 
@@ -107,15 +110,17 @@ void Protocol::init(ProgressHandler progressHandler, BatchFinishedHandler finish
     initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x0b));
     initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x0c));
 
-    auto stage2 = bind(&Protocol::initStage2, this, placeholders::_1, placeholders::_2);
+    auto stage2 = bind(&Protocol::initStage2, this, placeholders::_1);
 
-    sendCommandBatch(initLoadDataCmds, progressHandler, [stage2, progressHandler, finishedHandler] {
-        progressHandler(100.0f);
-        stage2(progressHandler, finishedHandler);
+    ProgressHandler progressHandlerRef = progressHandler;
+    sendCommandBatch(initLoadDataCmds, [stage2, progressHandlerRef, finishedHandler] {
+        if (progressHandlerRef)
+            progressHandlerRef(100.0f);
+        stage2(finishedHandler);
     });
 }
 
-void Protocol::initStage2(ProgressHandler progressHandler, BatchFinishedHandler finishedHandler)
+void Protocol::initStage2(Command::ResponseHandler finishedHandler)
 {
     deque<Command *> initDeviceCmds;
     initDeviceCmds.push_back(cmdFactory.updateSampleRate(device.getDeviceTimeBase(), device.getEnabledChannelsCount()));
@@ -141,17 +146,26 @@ void Protocol::initStage2(ProgressHandler progressHandler, BatchFinishedHandler 
     initDeviceCmds.push_back(cmdFactory.updateChannel1Coupling(device.getChannelCoupling(CHANNEL_1)));
     initDeviceCmds.push_back(cmdFactory.updateChannel2Coupling(device.getChannelCoupling(CHANNEL_2)));
 
-    sendCommandBatch(initDeviceCmds, progressHandler, [progressHandler, finishedHandler] {
-        progressHandler(100.0f);
+    ProgressHandler progressHandlerRef = progressHandler;
+    sendCommandBatch(initDeviceCmds, [progressHandlerRef, finishedHandler] {
+        if (progressHandlerRef)
+            progressHandlerRef(100.0f);
         finishedHandler();
     });
 }
 
+void Protocol::readBatteryLevel(Command::ResponseHandler responseHandler)
+{
+    Command *cmd = cmdFactory.readBatteryLevel();
+    cmd->setResponseHandler(responseHandler);
+    sendCommand(cmd);
+}
+
 void Protocol::startSampling(Command::ResponseHandler responseHandler)
 {
-    Command *startSamplingCmd = cmdFactory.startSampling();
-    startSamplingCmd->setResponseHandler(responseHandler);
-    sendCommand(startSamplingCmd);
+    Command *cmd = cmdFactory.startSampling();
+    cmd->setResponseHandler(responseHandler);
+    sendCommand(cmd);
 }
 
 void Protocol::stopSampling(Command::ResponseHandler responseHandler)
@@ -162,6 +176,11 @@ void Protocol::stopSampling(Command::ResponseHandler responseHandler)
 void Protocol::setConnectionLostHandler(ConnectionLostHandler connectionLostHandler)
 {
     this->connectionLostHandler = connectionLostHandler;
+}
+
+void Protocol::setProgressHandler(ProgressHandler progressHandler)
+{
+    this->progressHandler = progressHandler;
 }
 
 void Protocol::receive()
@@ -246,17 +265,14 @@ void Protocol::receive()
 
 void Protocol::transmit()
 {
-    // Check if there are any commands and command limiting timeout
-    if (commandQueue.size() > 0 && commandTimeout.isTimedOut())
+    // Check if there are any commands
+    if (commandQueue.size() > 0)
     {
         // Get current command from queue
         currentCommand = *(commandQueue.begin());
 
         // Transmit current command
         connector->transmit(currentCommand->getPayload(), 4);
-
-        // Reset command limiting timout
-        commandTimeout.reset();
     }
 }
 
