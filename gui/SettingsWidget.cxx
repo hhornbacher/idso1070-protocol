@@ -100,26 +100,44 @@ void SettingsWidget::onToggleSampling()
 
 void SettingsWidget::onTimeBaseSelected()
 {
+    if (worker->isConnected())
+    {
+    }
 }
 
 void SettingsWidget::onScopeModeSelected()
 {
+    if (worker->isConnected())
+    {
+    }
 }
 
 void SettingsWidget::onCaptureModeSelected()
 {
+    if (worker->isConnected())
+    {
+    }
 }
 
 void SettingsWidget::onTriggerModeSelected()
 {
+    if (worker->isConnected())
+    {
+    }
 }
 
 void SettingsWidget::onTriggerChannelSelected()
 {
+    if (worker->isConnected())
+    {
+    }
 }
 
 void SettingsWidget::onTriggerSlopeSelected()
 {
+    if (worker->isConnected())
+    {
+    }
 }
 
 void SettingsWidget::update()
@@ -137,19 +155,28 @@ void SettingsWidget::updateConnectionControls(IDSO1070 &deviceState)
     if (worker->isConnecting())
     {
         pProgressbarConnection->set_fraction((double)worker->getProgress());
-        pButtonConnect->set_label("Connecting...");
         pButtonConnect->set_sensitive(false);
+        pConnectionStatus->set_label("Status: Connecting...");
     }
     else
     {
         pButtonConnect->set_sensitive(true);
         if (worker->isConnected())
         {
+            pConnectionStatus->set_label("Status: Connected to USB @ /dev/ttyACM0");
             pButtonConnect->set_label("Disconnect");
             pProgressbarConnection->set_fraction(1.0);
         }
         else
         {
+            if (worker->isConnectionLost())
+            {
+                string label = "Error: ";
+                label += worker->getConnectionLostReason();
+                pConnectionStatus->set_label(label);
+            }
+            else
+                pConnectionStatus->set_label("Status: Not connected");
             pButtonConnect->set_label("Connect");
             pProgressbarConnection->set_fraction(0.0);
         }

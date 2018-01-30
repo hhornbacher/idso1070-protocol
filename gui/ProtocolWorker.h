@@ -25,12 +25,14 @@ public:
   // Connection status
   bool isConnected() const;
   bool isConnecting() const;
+  bool isConnectionLost() const;
   bool isSampling();
   ConnectorType getConnectorType();
-  string getConnectError();
+  string getConnectionLostReason() const;
 
   // Connection control
   void connect(string device);
+  void connect(string server, int port);
   void disconnect();
 
   // Sampling control
@@ -38,8 +40,11 @@ public:
   void stopSampling();
 
   // In-Thread callbacks
+  void onConnectionLost(ConnectionException &e);
   void onUpdateProgress(float progress);
   void onInitialized();
+  void onSamplingStarted();
+  void onSamplingStopped();
 
   // Get copy of current device state
   void getDevice(IDSO1070 &dev);
@@ -56,6 +61,8 @@ protected:
   bool stopped;
 
   // Connection status members
+  string connectionLostReason;
+  bool connectionLost;
   bool connected;
   bool connecting;
   float progress;
