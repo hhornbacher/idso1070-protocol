@@ -102,6 +102,11 @@ void SettingsWidget::onTimeBaseSelected()
 {
     if (worker->isConnected())
     {
+        ListStore::iterator iter = pTimeBase->get_active();
+        if (iter)
+        {
+            ustring selected = (*iter)[textComboColumns.value];
+        }
     }
 }
 
@@ -109,6 +114,11 @@ void SettingsWidget::onScopeModeSelected()
 {
     if (worker->isConnected())
     {
+        ListStore::iterator iter = pTimeBase->get_active();
+        if (iter)
+        {
+            ustring selected = (*iter)[textComboColumns.value];
+        }
     }
 }
 
@@ -116,6 +126,11 @@ void SettingsWidget::onCaptureModeSelected()
 {
     if (worker->isConnected())
     {
+        ListStore::iterator iter = pTimeBase->get_active();
+        if (iter)
+        {
+            ustring selected = (*iter)[textComboColumns.value];
+        }
     }
 }
 
@@ -123,6 +138,11 @@ void SettingsWidget::onTriggerModeSelected()
 {
     if (worker->isConnected())
     {
+        ListStore::iterator iter = pTimeBase->get_active();
+        if (iter)
+        {
+            ustring selected = (*iter)[textComboColumns.value];
+        }
     }
 }
 
@@ -130,6 +150,11 @@ void SettingsWidget::onTriggerChannelSelected()
 {
     if (worker->isConnected())
     {
+        ListStore::iterator iter = pTriggerChannel->get_active();
+        if (iter)
+        {
+            ustring selected = (*iter)[textComboColumns.value];
+        }
     }
 }
 
@@ -137,6 +162,11 @@ void SettingsWidget::onTriggerSlopeSelected()
 {
     if (worker->isConnected())
     {
+        ListStore::iterator iter = pTriggerSlope->get_active();
+        if (iter)
+        {
+            ustring selected = (*iter)[textComboColumns.value];
+        }
     }
 }
 

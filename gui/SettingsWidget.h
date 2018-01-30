@@ -10,6 +10,19 @@
 using namespace Gtk;
 using namespace Glib;
 
+class TextComboColumns : public TreeModel::ColumnRecord
+{
+public:
+  TextComboColumns()
+  {
+    // This order must match the column order in the .glade file
+    this->add(this->value);
+  }
+
+  // These types must match those for the model in the .glade file
+  Gtk::TreeModelColumn<Glib::ustring> value;
+};
+
 class SettingsWidget : public Box
 {
 public:
@@ -62,6 +75,8 @@ protected:
   ComboBox *pTriggerMode;
   ComboBox *pTriggerChannel;
   ComboBox *pTriggerSlope;
+
+  TextComboColumns textComboColumns;
 
   // Protocol worker thread reference
   ProtocolWorker *worker;
