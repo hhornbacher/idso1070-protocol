@@ -23,6 +23,7 @@ public:
 
   typedef Command::ResponseHandler BatchFinishedHandler;
   typedef function<void(float)> ProgressHandler;
+  typedef function<void(ConnectionException &)> ConnectionLostHandler;
 
   Protocol();
   ~Protocol();
@@ -41,9 +42,9 @@ public:
   void startSampling(Command::ResponseHandler responseHandler);
   void stopSampling(Command::ResponseHandler responseHandler);
 
-  bool isSampling();
+  void setConnectionLostHandler(ConnectionLostHandler connectionLostHandler);
 
-  string getConnectError();
+  bool isSampling();
 
   Connector *getConnector();
 
@@ -53,7 +54,7 @@ private:
 
   // Connector abstraction for USB/TCP communication
   Connector *connector = NULL;
-  string connectError;
+  ConnectionLostHandler connectionLostHandler;
 
   // Command dispatching related members
   CommandFactory cmdFactory;

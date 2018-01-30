@@ -21,7 +21,8 @@ void Protocol::connect(string serialDevice)
         }
         catch (ConnectionException &e)
         {
-            connectError = e.what();
+            if (connectionLostHandler)
+                connectionLostHandler(e);
         }
     }
 }
@@ -38,7 +39,8 @@ void Protocol::connect(string serverHost, int port)
         }
         catch (ConnectionException &e)
         {
-            connectError = e.what();
+            if (connectionLostHandler)
+                connectionLostHandler(e);
         }
     }
 }
@@ -145,14 +147,21 @@ void Protocol::initStage2(ProgressHandler progressHandler, BatchFinishedHandler 
     });
 }
 
-void Protocol::startSampling()
+void Protocol::startSampling(Command::ResponseHandler responseHandler)
 {
-    sendCommand(cmdFactory.startSampling());
+    Command *startSamplingCmd = cmdFactory.startSampling();
+    startSamplingCmd->setResponseHandler(responseHandler);
+    sendCommand(startSamplingCmd);
 }
 
-void Protocol::stopSampling()
+void Protocol::stopSampling(Command::ResponseHandler responseHandler)
 {
     // TODO: Find command to stop sampling...
+}
+
+void Protocol::setConnectionLostHandler(ConnectionLostHandler connectionLostHandler)
+{
+    this->connectionLostHandler = connectionLostHandler;
 }
 
 void Protocol::receive()
@@ -262,7 +271,8 @@ void Protocol::process()
         }
         catch (ConnectionException &e)
         {
-            connectError = e.what();
+            if (connectionLostHandler)
+                connectionLostHandler(e);
         }
     }
 }
@@ -270,11 +280,6 @@ void Protocol::process()
 bool Protocol::isSampling()
 {
     return sampling;
-}
-
-string Protocol::getConnectError()
-{
-    return connectError;
 }
 
 Connector *Protocol::getConnector()
