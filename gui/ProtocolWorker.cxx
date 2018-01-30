@@ -7,6 +7,7 @@ ProtocolWorker::ProtocolWorker() : protocolMutex(), shallStop(false),
                                    connectionLost(false)
 {
     protocol.setConnectionLostHandler(bind(&ProtocolWorker::onConnectionLost, this, placeholders::_1));
+    protocol.setProgressHandler(bind(&ProtocolWorker::onUpdateProgress, this, placeholders::_1));
 }
 
 void ProtocolWorker::process(AppWindow *caller)
@@ -58,17 +59,12 @@ void ProtocolWorker::connect(string device)
     {
         lock_guard<mutex> lock(protocolMutex);
         Connector *connector = protocol.getConnector();
-        connected = (connector && connector->isConnected());
         update = true;
     }
-    if (connected)
+    Command::ResponseHandler initializedHandler = bind(&ProtocolWorker::onInitialized, this);
     {
-        Protocol::ProgressHandler progressHandler = bind(&ProtocolWorker::onUpdateProgress, this, placeholders::_1);
-        Protocol::BatchFinishedHandler initializedHandler = bind(&ProtocolWorker::onInitialized, this);
-        {
-            lock_guard<mutex> lock(protocolMutex);
-            protocol.init(progressHandler, initializedHandler);
-        }
+        lock_guard<mutex> lock(protocolMutex);
+        protocol.init(initializedHandler);
     }
 }
 
@@ -86,17 +82,12 @@ void ProtocolWorker::connect(string server, int port)
     {
         lock_guard<mutex> lock(protocolMutex);
         Connector *connector = protocol.getConnector();
-        connected = (connector && connector->isConnected());
         update = true;
     }
-    if (connected)
+    Command::ResponseHandler initializedHandler = bind(&ProtocolWorker::onInitialized, this);
     {
-        Protocol::ProgressHandler progressHandler = bind(&ProtocolWorker::onUpdateProgress, this, placeholders::_1);
-        Protocol::BatchFinishedHandler initializedHandler = bind(&ProtocolWorker::onInitialized, this);
-        {
-            lock_guard<mutex> lock(protocolMutex);
-            protocol.init(progressHandler, initializedHandler);
-        }
+        lock_guard<mutex> lock(protocolMutex);
+        protocol.init(initializedHandler);
     }
 }
 
@@ -112,13 +103,85 @@ void ProtocolWorker::disconnect()
 void ProtocolWorker::startSampling()
 {
     lock_guard<mutex> lock(protocolMutex);
-    protocol.startSampling(bind(&ProtocolWorker::onSamplingStarted, this));
+    protocol.startSampling(bind(&ProtocolWorker::onUpdateUI, this));
 }
 
 void ProtocolWorker::stopSampling()
 {
     lock_guard<mutex> lock(protocolMutex);
-    protocol.stopSampling(bind(&ProtocolWorker::onSamplingStopped, this));
+    protocol.stopSampling(bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::readBatteryLevel()
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.readBatteryLevel(bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::setTimeBase(TimeBase timeBase)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.setTimeBase(timeBase, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::setScopeMode(ScopeMode scopeMode)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.setScopeMode(scopeMode, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::enableChannel(ChannelSelector channel)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.enableChannel(channel, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::disableChannel(ChannelSelector channel)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.disableChannel(channel, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::setChannelVerticalDiv(ChannelSelector channel, VoltageDiv div)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.setChannelVerticalDiv(channel, div, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::setChannelCoupling(ChannelSelector channel, InputCoupling coupling)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.setChannelCoupling(channel, coupling, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::setChannelVerticalPosition(ChannelSelector channel, uint16_t pos)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.setChannelVerticalPosition(channel, pos, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::setTriggerMode(TriggerMode mode)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.setTriggerMode(mode, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::setTriggerChannel(TriggerChannel channel)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.setTriggerChannel(channel, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::setTriggerSlope(TriggerSlope slope)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.setTriggerSlope(slope, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
+void ProtocolWorker::setTriggerLevel(uint16_t level)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.setTriggerLevel(level, bind(&ProtocolWorker::onUpdateUI, this));
 }
 
 void ProtocolWorker::onConnectionLost(ConnectionException &e)
@@ -128,6 +191,12 @@ void ProtocolWorker::onConnectionLost(ConnectionException &e)
     connectionLost = true;
     connected = false;
     connecting = false;
+    update = true;
+}
+
+void ProtocolWorker::onUpdateUI()
+{
+    lock_guard<mutex> lock(protocolMutex);
     update = true;
 }
 
@@ -144,20 +213,7 @@ void ProtocolWorker::onInitialized()
 {
     lock_guard<mutex> lock(protocolMutex);
     connecting = false;
-    update = true;
-}
-
-void ProtocolWorker::onSamplingStarted()
-{
-    lock_guard<mutex> lock(protocolMutex);
-    // connecting = false;
-    update = true;
-}
-
-void ProtocolWorker::onSamplingStopped()
-{
-    lock_guard<mutex> lock(protocolMutex);
-    // connecting = false;
+    connected = true;
     update = true;
 }
 

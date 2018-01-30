@@ -25,6 +25,7 @@ public:
 protected:
   // Signal handlers
   void onNotificationFromWorker();
+  bool onUpdateBatteryLevel();
 
   // Protected Members - Gtk
   Glib::RefPtr<Gtk::Builder> refGlade;
@@ -33,6 +34,9 @@ protected:
   Glib::Dispatcher dispatcher;
   ProtocolWorker worker;
   thread *workerThread;
+
+  // Protected Members - Timers
+  sigc::connection updateBatteryTimer;
 
   // Protected Members - Child widgets
   Box boxHorizontal;

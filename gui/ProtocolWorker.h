@@ -39,12 +39,30 @@ public:
   void startSampling();
   void stopSampling();
 
+  // Device control
+  void init();
+  void readBatteryLevel();
+  void setTimeBase(TimeBase timeBase);
+  void setScopeMode(ScopeMode scopeMode);
+
+  // Channel control
+  void enableChannel(ChannelSelector channel);
+  void disableChannel(ChannelSelector channel);
+  void setChannelVerticalDiv(ChannelSelector channel, VoltageDiv div);
+  void setChannelCoupling(ChannelSelector channel, InputCoupling coupling);
+  void setChannelVerticalPosition(ChannelSelector channel, uint16_t pos);
+
+  // Trigger control
+  void setTriggerMode(TriggerMode mode);
+  void setTriggerChannel(TriggerChannel channel);
+  void setTriggerSlope(TriggerSlope slope);
+  void setTriggerLevel(uint16_t level);
+
   // In-Thread callbacks
   void onConnectionLost(ConnectionException &e);
+  void onUpdateUI();
   void onUpdateProgress(float progress);
   void onInitialized();
-  void onSamplingStarted();
-  void onSamplingStopped();
 
   // Get copy of current device state
   void getDevice(IDSO1070 &dev);

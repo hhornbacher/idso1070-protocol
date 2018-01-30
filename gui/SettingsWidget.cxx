@@ -229,6 +229,7 @@ void SettingsWidget::updateDeviceInfo(IDSO1070 &deviceState)
         pScopeMode->set_sensitive(true);
         pCaptureMode->set_sensitive(true);
         pToggleSampling->set_sensitive(true);
+        pBatteryLevel->set_value((double)deviceState.getBatteryLevel() / 100);
         if (!worker->isSampling())
         {
             pToggleSampling->set_label("Start sampling");
