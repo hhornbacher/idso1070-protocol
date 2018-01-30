@@ -122,32 +122,32 @@ void Protocol::init(Command::ResponseHandler finishedHandler)
 
 void Protocol::initStage2(Command::ResponseHandler finishedHandler)
 {
-    deque<Command *> initDeviceCmds;
-    initDeviceCmds.push_back(cmdFactory.updateSampleRate(device.getDeviceTimeBase(), device.getEnabledChannelsCount()));
-    initDeviceCmds.push_back(cmdFactory.updateFreqDivLowBytes(device.getDeviceTimeBaseFromFreqDiv()));
-    initDeviceCmds.push_back(cmdFactory.updateFreqDivHighBytes(device.getDeviceTimeBaseFromFreqDiv()));
-    initDeviceCmds.push_back(cmdFactory.updateChannelSelection(device.isChannelEnabled(CHANNEL_1), device.isChannelEnabled(CHANNEL_2), device.isSampleRate200Mor250M()));
-    initDeviceCmds.push_back(cmdFactory.updateTriggerSourceAndSlope(device.getTriggerChannel(), device.getDeviceScopeMode(), device.getTriggerSlope()));
-    initDeviceCmds.push_back(cmdFactory.updateTriggerLevel(device.getTriggerLevel(), device.getTriggerTopPWM(), device.getTriggerBottomPWM()));
-    initDeviceCmds.push_back(cmdFactory.updatePreTriggerLength(device.getSamplesNumberOfOneFrame(), device.getTriggerXPosition()));
-    initDeviceCmds.push_back(cmdFactory.updatePostTriggerLength(device.getSamplesNumberOfOneFrame(), device.getTriggerXPosition()));
-    initDeviceCmds.push_back(cmdFactory.readRamCount(device.getEnabledChannelsCount(), device.getSamplesNumberOfOneFrame(), device.isSampleRate200Mor250M(), device.getTriggerXPosition(), device.getPacketsNumber()));
-    initDeviceCmds.push_back(cmdFactory.updateRAMChannelSelection(device.isChannelEnabled(CHANNEL_1), device.isChannelEnabled(CHANNEL_2)));
-    initDeviceCmds.push_back(cmdFactory.updateChannelVolts125(device.getChannelVerticalDiv(CHANNEL_1), device.getChannelVerticalDiv(CHANNEL_2)));
-    initDeviceCmds.push_back(cmdFactory.updateRelay1(device.getChannelVerticalDiv(CHANNEL_1)));
-    initDeviceCmds.push_back(cmdFactory.updateRelay2(device.getChannelVerticalDiv(CHANNEL_1)));
-    initDeviceCmds.push_back(cmdFactory.updateRelay3(device.getChannelVerticalDiv(CHANNEL_2)));
-    initDeviceCmds.push_back(cmdFactory.updateRelay4(device.getChannelVerticalDiv(CHANNEL_2)));
-    initDeviceCmds.push_back(cmdFactory.updateChannel1Level(device.getChannelVerticalDiv(CHANNEL_1), device.getChannelVerticalPosition(CHANNEL_1), device.getChannelPWM(CHANNEL_1, (uint8_t)device.getChannelVerticalDiv(CHANNEL_1), 0), device.getChannelPWM(CHANNEL_1, (uint8_t)device.getChannelVerticalDiv(CHANNEL_1), 1)));
-    initDeviceCmds.push_back(cmdFactory.updateChannel2Level(device.getChannelVerticalDiv(CHANNEL_2), device.getChannelVerticalPosition(CHANNEL_2), device.getChannelPWM(CHANNEL_2, (uint8_t)device.getChannelVerticalDiv(CHANNEL_2), 0), device.getChannelPWM(CHANNEL_2, (uint8_t)device.getChannelVerticalDiv(CHANNEL_2), 1)));
-    initDeviceCmds.push_back(cmdFactory.updateChannelVolts125(device.getChannelVerticalDiv(CHANNEL_1), device.getChannelVerticalDiv(CHANNEL_2)));
-    initDeviceCmds.push_back(cmdFactory.updateTriggerMode(device.getDeviceCaptureMode(), device.getTriggerMode(), device.getDeviceScopeMode()));
-    initDeviceCmds.push_back(cmdFactory.updateTriggerLevel(device.getTriggerLevel(), device.getTriggerTopPWM(), device.getTriggerBottomPWM()));
-    initDeviceCmds.push_back(cmdFactory.updateChannel1Coupling(device.getChannelCoupling(CHANNEL_1)));
-    initDeviceCmds.push_back(cmdFactory.updateChannel2Coupling(device.getChannelCoupling(CHANNEL_2)));
+    deque<Command *> cmds;
+    cmds.push_back(cmdFactory.updateSampleRate(device.getDeviceTimeBase(), device.getEnabledChannelsCount()));
+    cmds.push_back(cmdFactory.updateFreqDivLowBytes(device.getDeviceTimeBaseFromFreqDiv()));
+    cmds.push_back(cmdFactory.updateFreqDivHighBytes(device.getDeviceTimeBaseFromFreqDiv()));
+    cmds.push_back(cmdFactory.updateChannelSelection(device.isChannelEnabled(CHANNEL_1), device.isChannelEnabled(CHANNEL_2), device.isSampleRate200Mor250M()));
+    cmds.push_back(cmdFactory.updateTriggerSourceAndSlope(device.getTriggerChannel(), device.getDeviceScopeMode(), device.getTriggerSlope()));
+    cmds.push_back(cmdFactory.updateTriggerLevel(device.getTriggerLevel(), device.getTriggerTopPWM(), device.getTriggerBottomPWM()));
+    cmds.push_back(cmdFactory.updatePreTriggerLength(device.getSamplesNumberOfOneFrame(), device.getTriggerXPosition()));
+    cmds.push_back(cmdFactory.updatePostTriggerLength(device.getSamplesNumberOfOneFrame(), device.getTriggerXPosition()));
+    cmds.push_back(cmdFactory.readRamCount(device.getEnabledChannelsCount(), device.getSamplesNumberOfOneFrame(), device.isSampleRate200Mor250M(), device.getTriggerXPosition(), device.getPacketsNumber()));
+    cmds.push_back(cmdFactory.updateRAMChannelSelection(device.isChannelEnabled(CHANNEL_1), device.isChannelEnabled(CHANNEL_2)));
+    cmds.push_back(cmdFactory.updateChannelVolts125(device.getChannelVerticalDiv(CHANNEL_1), device.getChannelVerticalDiv(CHANNEL_2)));
+    cmds.push_back(cmdFactory.updateRelay1(device.getChannelVerticalDiv(CHANNEL_1)));
+    cmds.push_back(cmdFactory.updateRelay2(device.getChannelVerticalDiv(CHANNEL_1)));
+    cmds.push_back(cmdFactory.updateRelay3(device.getChannelVerticalDiv(CHANNEL_2)));
+    cmds.push_back(cmdFactory.updateRelay4(device.getChannelVerticalDiv(CHANNEL_2)));
+    cmds.push_back(cmdFactory.updateChannel1Level(device.getChannelVerticalDiv(CHANNEL_1), device.getChannelVerticalPosition(CHANNEL_1), device.getChannelPWM(CHANNEL_1, (uint8_t)device.getChannelVerticalDiv(CHANNEL_1), 0), device.getChannelPWM(CHANNEL_1, (uint8_t)device.getChannelVerticalDiv(CHANNEL_1), 1)));
+    cmds.push_back(cmdFactory.updateChannel2Level(device.getChannelVerticalDiv(CHANNEL_2), device.getChannelVerticalPosition(CHANNEL_2), device.getChannelPWM(CHANNEL_2, (uint8_t)device.getChannelVerticalDiv(CHANNEL_2), 0), device.getChannelPWM(CHANNEL_2, (uint8_t)device.getChannelVerticalDiv(CHANNEL_2), 1)));
+    cmds.push_back(cmdFactory.updateChannelVolts125(device.getChannelVerticalDiv(CHANNEL_1), device.getChannelVerticalDiv(CHANNEL_2)));
+    cmds.push_back(cmdFactory.updateTriggerMode(device.getDeviceCaptureMode(), device.getTriggerMode(), device.getDeviceScopeMode()));
+    cmds.push_back(cmdFactory.updateTriggerLevel(device.getTriggerLevel(), device.getTriggerTopPWM(), device.getTriggerBottomPWM()));
+    cmds.push_back(cmdFactory.updateChannel1Coupling(device.getChannelCoupling(CHANNEL_1)));
+    cmds.push_back(cmdFactory.updateChannel2Coupling(device.getChannelCoupling(CHANNEL_2)));
 
     ProgressHandler progressHandlerRef = progressHandler;
-    sendCommandBatch(initDeviceCmds, [progressHandlerRef, finishedHandler] {
+    sendCommandBatch(cmds, [progressHandlerRef, finishedHandler] {
         if (progressHandlerRef)
             progressHandlerRef(100.0f);
         finishedHandler();
@@ -157,6 +157,81 @@ void Protocol::initStage2(Command::ResponseHandler finishedHandler)
 void Protocol::readBatteryLevel(Command::ResponseHandler responseHandler)
 {
     Command *cmd = cmdFactory.readBatteryLevel();
+    cmd->setResponseHandler(responseHandler);
+    sendCommand(cmd);
+}
+
+void Protocol::setTimeBase(TimeBase timeBase, Command::ResponseHandler responseHandler)
+{
+    deque<Command *> cmds;
+    cmds.push_back(cmdFactory.updateSampleRate(timeBase, device.getEnabledChannelsCount()));
+    cmds.push_back(cmdFactory.updateFreqDivLowBytes(device.getDeviceTimeBaseFromFreqDiv()));
+    cmds.push_back(cmdFactory.updateFreqDivHighBytes(device.getDeviceTimeBaseFromFreqDiv()));
+    ProgressHandler progressHandlerRef = progressHandler;
+    sendCommandBatch(cmds, [progressHandlerRef, responseHandler] {
+        if (progressHandlerRef)
+            progressHandlerRef(100.0f);
+        responseHandler();
+    });
+}
+
+void Protocol::setScopeMode(ScopeMode scopeMode, Command::ResponseHandler responseHandler)
+{
+    deque<Command *> cmds;
+    cmds.push_back(cmdFactory.updateTriggerSourceAndSlope(device.getTriggerChannel(), scopeMode, device.getTriggerSlope()));
+    cmds.push_back(cmdFactory.updateTriggerMode(device.getDeviceCaptureMode(), device.getTriggerMode(), scopeMode));
+    ProgressHandler progressHandlerRef = progressHandler;
+    sendCommandBatch(cmds, [progressHandlerRef, responseHandler] {
+        if (progressHandlerRef)
+            progressHandlerRef(100.0f);
+        responseHandler();
+    });
+}
+
+void Protocol::enableChannel(ChannelSelector channel, Command::ResponseHandler responseHandler)
+{
+}
+
+void Protocol::disableChannel(ChannelSelector channel, Command::ResponseHandler responseHandler)
+{
+}
+
+void Protocol::setChannelVerticalDiv(ChannelSelector channel, VoltageDiv div, Command::ResponseHandler responseHandler)
+{
+}
+
+void Protocol::setChannelCoupling(ChannelSelector channel, InputCoupling coupling, Command::ResponseHandler responseHandler)
+{
+}
+
+void Protocol::setChannelVerticalPosition(ChannelSelector channel, uint16_t pos, Command::ResponseHandler responseHandler)
+{
+}
+
+void Protocol::setTriggerMode(TriggerMode mode, Command::ResponseHandler responseHandler)
+{
+    Command *cmd = cmdFactory.updateTriggerMode(device.getDeviceCaptureMode(), mode, device.getDeviceScopeMode());
+    cmd->setResponseHandler(responseHandler);
+    sendCommand(cmd);
+}
+
+void Protocol::setTriggerChannel(TriggerChannel channel, Command::ResponseHandler responseHandler)
+{
+    Command *cmd = cmdFactory.updateTriggerSourceAndSlope(channel, device.getDeviceScopeMode(), device.getTriggerSlope());
+    cmd->setResponseHandler(responseHandler);
+    sendCommand(cmd);
+}
+
+void Protocol::setTriggerSlope(TriggerSlope slope, Command::ResponseHandler responseHandler)
+{
+    Command *cmd = cmdFactory.updateTriggerSourceAndSlope(device.getTriggerChannel(), device.getDeviceScopeMode(), slope);
+    cmd->setResponseHandler(responseHandler);
+    sendCommand(cmd);
+}
+
+void Protocol::setTriggerLevel(uint16_t level, Command::ResponseHandler responseHandler)
+{
+    Command *cmd = cmdFactory.updateTriggerLevel(level, device.getTriggerTopPWM(), device.getTriggerBottomPWM());
     cmd->setResponseHandler(responseHandler);
     sendCommand(cmd);
 }

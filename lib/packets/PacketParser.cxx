@@ -190,7 +190,6 @@ bool PacketParser::parseFreqDivLowBytes(Response *packet)
     {
         device.setReceiveFreqDivStatus(0);
         device.setFreqDiv(i + device.getFreqDiv());
-        device.getDeviceTimeBaseFromFreqDiv();
     }
 }
 
@@ -208,7 +207,6 @@ bool PacketParser::parseFreqDivHighBytes(Response *packet)
     {
         device.setReceiveFreqDivStatus(0);
         device.setFreqDiv((i << 16) + device.getFreqDiv());
-        device.getDeviceTimeBaseFromFreqDiv();
     }
 }
 

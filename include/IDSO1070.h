@@ -180,6 +180,8 @@ protected:
   void setLittlePacketStatus(int littlePacketStatus);
   void setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus);
 
+
+private:
   // Device members
   DeviceSettings deviceSettings;
 
