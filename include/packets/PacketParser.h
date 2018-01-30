@@ -2,7 +2,7 @@
 #define _RESPONSE_PARSER_H_
 
 #include "base.h"
-#include "util/mapValue.h"
+#include "util.h"
 #include "IDSO1070.h"
 #include "Response.h"
 #include "Sample.h"
