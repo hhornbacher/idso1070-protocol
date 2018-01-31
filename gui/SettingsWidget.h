@@ -68,6 +68,9 @@ protected:
   ComboBox *pTimeBase;
   ComboBox *pScopeMode;
   ComboBox *pCaptureMode;
+  RefPtr<ListStore> pTimeBaseStore;
+  RefPtr<ListStore> pScopeModeStore;
+  RefPtr<ListStore> pCaptureModeStore;
 
   ToggleButton *pChannel1Enabled;
   ToggleButton *pChannel2Enabled;
@@ -75,6 +78,9 @@ protected:
   ComboBox *pTriggerMode;
   ComboBox *pTriggerChannel;
   ComboBox *pTriggerSlope;
+  RefPtr<ListStore> pTriggerModeStore;
+  RefPtr<ListStore> pTriggerChannelStore;
+  RefPtr<ListStore> pTriggerSlopeStore;
 
   TextComboColumns textComboColumns;
 

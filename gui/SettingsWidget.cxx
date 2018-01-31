@@ -1,5 +1,4 @@
 #include "SettingsWidget.h"
-#include <map>
 
 SettingsWidget::SettingsWidget(BaseObjectType *cobject, const RefPtr<Builder> &refGlade)
     : Box(cobject),
@@ -13,11 +12,17 @@ SettingsWidget::SettingsWidget(BaseObjectType *cobject, const RefPtr<Builder> &r
       pTimeBase(nullptr),
       pScopeMode(nullptr),
       pCaptureMode(nullptr),
+      pTimeBaseStore(nullptr),
+      pScopeModeStore(nullptr),
+      pCaptureModeStore(nullptr),
       pChannel1Enabled(nullptr),
       pChannel2Enabled(nullptr),
       pTriggerMode(nullptr),
       pTriggerChannel(nullptr),
       pTriggerSlope(nullptr),
+      pTriggerModeStore(nullptr),
+      pTriggerChannelStore(nullptr),
+      pTriggerSlopeStore(nullptr),
       worker(nullptr)
 {
     // Get references to widgets from glade file
@@ -30,11 +35,17 @@ SettingsWidget::SettingsWidget(BaseObjectType *cobject, const RefPtr<Builder> &r
     refGlade->get_widget("comboTimeBase", pTimeBase);
     refGlade->get_widget("comboScopeMode", pScopeMode);
     refGlade->get_widget("comboCaptureMode", pCaptureMode);
+    pTimeBaseStore = RefPtr<ListStore>::cast_dynamic(refGlade->get_object("TimeBase"));
+    pScopeModeStore = RefPtr<ListStore>::cast_dynamic(refGlade->get_object("ScopeMode"));
+    pCaptureModeStore = RefPtr<ListStore>::cast_dynamic(refGlade->get_object("CaptureMode"));
     refGlade->get_widget("toggleChannel1Enabled", pChannel1Enabled);
     refGlade->get_widget("toggleChannel2Enabled", pChannel2Enabled);
     refGlade->get_widget("comboTriggerMode", pTriggerMode);
     refGlade->get_widget("comboTriggerChannel", pTriggerChannel);
     refGlade->get_widget("comboTriggerSlope", pTriggerSlope);
+    pTriggerModeStore = RefPtr<ListStore>::cast_dynamic(refGlade->get_object("TriggerMode"));
+    pTriggerChannelStore = RefPtr<ListStore>::cast_dynamic(refGlade->get_object("TriggerChannel"));
+    pTriggerSlopeStore = RefPtr<ListStore>::cast_dynamic(refGlade->get_object("TriggerSlope"));
 
     // Connect signals with handlers
     pButtonConnect->signal_clicked().connect(sigc::mem_fun(*this, &SettingsWidget::onButtonConnect));
@@ -221,6 +232,7 @@ void SettingsWidget::updateDeviceInfo(IDSO1070 &deviceState)
         pScopeMode->set_sensitive(false);
         pCaptureMode->set_sensitive(false);
         pToggleSampling->set_sensitive(false);
+
         pToggleSampling->set_label("Start sampling");
     }
     else
@@ -229,7 +241,13 @@ void SettingsWidget::updateDeviceInfo(IDSO1070 &deviceState)
         pScopeMode->set_sensitive(true);
         pCaptureMode->set_sensitive(true);
         pToggleSampling->set_sensitive(true);
+
+        pTimeBase->set_active(pTimeBaseStore->children()[(int)deviceState.getDeviceTimeBase()]);
+        pScopeMode->set_active(pScopeModeStore->children()[(int)deviceState.getDeviceScopeMode()]);
+        pCaptureMode->set_active(pCaptureModeStore->children()[(int)deviceState.getDeviceCaptureMode()]);
+
         pBatteryLevel->set_value((double)deviceState.getBatteryLevel() / 100);
+
         if (!worker->isSampling())
         {
             pToggleSampling->set_label("Start sampling");
@@ -252,8 +270,26 @@ void SettingsWidget::updateChannelsInfo(IDSO1070 &deviceState)
     {
         pChannel1Enabled->set_sensitive(true);
         pChannel2Enabled->set_sensitive(true);
-        pChannel1Enabled->set_active(deviceState.isChannelEnabled(CHANNEL_1));
-        pChannel2Enabled->set_active(deviceState.isChannelEnabled(CHANNEL_2));
+        if (deviceState.isChannelEnabled(CHANNEL_1))
+        {
+            pChannel1Enabled->set_active(true);
+            pChannel1Enabled->set_label("Disable");
+        }
+        else
+        {
+            pChannel1Enabled->set_active(false);
+            pChannel1Enabled->set_label("Enable");
+        }
+        if (deviceState.isChannelEnabled(CHANNEL_2))
+        {
+            pChannel2Enabled->set_active(true);
+            pChannel2Enabled->set_label("Disable");
+        }
+        else
+        {
+            pChannel2Enabled->set_active(false);
+            pChannel2Enabled->set_label("Enable");
+        }
     }
 }
 
@@ -270,5 +306,9 @@ void SettingsWidget::updateTriggerInfo(IDSO1070 &deviceState)
         pTriggerMode->set_sensitive(true);
         pTriggerChannel->set_sensitive(true);
         pTriggerSlope->set_sensitive(true);
+
+        pTriggerMode->set_active(pTriggerModeStore->children()[(int)deviceState.getTriggerMode()]);
+        pTriggerChannel->set_active(pTriggerChannelStore->children()[(int)deviceState.getTriggerChannel()]);
+        pTriggerSlope->set_active(pTriggerSlopeStore->children()[(int)deviceState.getTriggerSlope()]);
     }
 }
