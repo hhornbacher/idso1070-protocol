@@ -55,6 +55,8 @@ void USBConnector::enumerateDevices(USBDeviceList &list)
 
 void USBConnector::start()
 {
+    if (handle != -1)
+        return;
 
     termios tty;
     handle = open(device.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
@@ -102,7 +104,8 @@ void USBConnector::start()
 
 void USBConnector::stop()
 {
-    close(handle);
+    if (handle != -1)
+        close(handle);
     connected = false;
     handle = -1;
 }
@@ -114,6 +117,8 @@ ConnectorType USBConnector::getType()
 
 void USBConnector::transmit(uint8_t *data, size_t length)
 {
+    if (handle == -1)
+        return;
     if (write(handle, data, length) < 0)
     {
         stop();
@@ -127,6 +132,8 @@ size_t USBConnector::receive()
     {
         size_t size = RawBufferLength - rawBuffer.size();
         uint8_t tmp[size];
+        if (handle == -1)
+            return;
         ssize_t result = read(handle, tmp, size);
         if (result < 0)
         {

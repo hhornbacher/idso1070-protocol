@@ -12,6 +12,8 @@ TCPConnector::~TCPConnector()
 
 void TCPConnector::start()
 {
+    if (socketHandle != -1)
+        return;
     if ((socketHandle = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         throw ConnectionException("Cannot create socket");
@@ -37,7 +39,8 @@ void TCPConnector::start()
 
 void TCPConnector::stop()
 {
-    close(socketHandle);
+    if (socketHandle != -1)
+        close(socketHandle);
     connected = false;
     socketHandle = -1;
 }
@@ -49,6 +52,8 @@ ConnectorType TCPConnector::getType()
 
 void TCPConnector::transmit(uint8_t *data, size_t length)
 {
+    if (socketHandle == -1)
+        return;
     if (send(socketHandle, data, length, 0) < 0)
     {
         stop();
@@ -62,6 +67,8 @@ size_t TCPConnector::receive()
     {
         size_t size = RawBufferLength - rawBuffer.size();
         uint8_t tmp[size];
+        if (socketHandle == -1)
+            return;
         ssize_t result = recv(socketHandle, tmp, size, 0);
         if (result < 0)
         {
