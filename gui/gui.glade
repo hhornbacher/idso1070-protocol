@@ -19,6 +19,31 @@
       </row>
     </data>
   </object>
+  <object class="GtkBox" id="ChannelSettingsWidget">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkToggleButton" id="toggleChannelEnabled">
+        <property name="label" translatable="yes">Enable</property>
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+  </object>
   <object class="GtkListStore" id="ScopeMode">
     <columns>
       <!-- column-name CaptureMode -->
@@ -40,7 +65,106 @@
     </columns>
     <data>
       <row>
-        <col id="0" translatable="yes">HDIV_5nS</col>
+        <col id="0" translatable="yes">5 ns</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">10 ns</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">20 ns</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">50 ns</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">100 ns</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">200 ns</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">500 ns</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1 µs</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">2 µs</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">5 µs</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">10 µs</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">20 µs</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">50 µs</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">100 µs</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">200 µs</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">500 µs</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1 ms</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">2 ms</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">5 ms</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">10 ms</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">20 ms</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">50 ms</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">100 ms</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">200 ms</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">500 ms</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1 s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">2 s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">5 s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">10 s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">20 s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">50 s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">100 s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">200 s</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">500 s</col>
       </row>
     </data>
   </object>
@@ -555,6 +679,37 @@
         <property name="expand">False</property>
         <property name="fill">False</property>
         <property name="position">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButtonBox" id="buttonboxTools">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="layout_style">expand</property>
+        <child>
+          <object class="GtkButton" id="buttonCommandTester">
+            <property name="label" translatable="yes">Command Tester</property>
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="pack_type">end</property>
+        <property name="position">4</property>
       </packing>
     </child>
   </object>
