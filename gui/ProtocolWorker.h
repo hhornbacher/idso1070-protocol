@@ -59,7 +59,7 @@ public:
   void setTriggerLevel(uint16_t level);
 
   // In-Thread callbacks
-  void onConnectionLost(ConnectionException &e);
+  void onConnectionLost(Connector::Exception &e);
   void onUpdateUI();
   void onUpdateProgress(float progress);
   void onInitialized();

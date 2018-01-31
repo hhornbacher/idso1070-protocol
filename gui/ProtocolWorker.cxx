@@ -58,13 +58,7 @@ void ProtocolWorker::connect(string device)
     protocol.connect(device);
     {
         lock_guard<mutex> lock(protocolMutex);
-        Connector *connector = protocol.getConnector();
-        update = true;
-    }
-    Command::ResponseHandler initializedHandler = bind(&ProtocolWorker::onInitialized, this);
-    {
-        lock_guard<mutex> lock(protocolMutex);
-        protocol.init(initializedHandler);
+        protocol.init(bind(&ProtocolWorker::onInitialized, this));
     }
 }
 
@@ -184,7 +178,7 @@ void ProtocolWorker::setTriggerLevel(uint16_t level)
     protocol.setTriggerLevel(level, bind(&ProtocolWorker::onUpdateUI, this));
 }
 
-void ProtocolWorker::onConnectionLost(ConnectionException &e)
+void ProtocolWorker::onConnectionLost(Connector::Exception &e)
 {
     lock_guard<mutex> lock(protocolMutex);
     connectionLostReason = e.what();
