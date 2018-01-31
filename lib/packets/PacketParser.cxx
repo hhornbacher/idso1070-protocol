@@ -9,20 +9,24 @@ PacketParser::PacketParser(
 {
 }
 
-bool PacketParser::parse(Response *packet)
+void PacketParser::parse(Response *packet)
 {
     switch (packet->getCommandType())
     {
     case TYPE_CONTROL:
-        return parseAAResponse(packet);
+        parseAAResponse(packet);
+        return;
     case TYPE_EEROM:
-        return parseEEResponse(packet);
+        parseEEResponse(packet);
+        return;
     case TYPE_FPGA:
-        return parseFPGAResponse(packet);
+        parseFPGAResponse(packet);
+        return;
     case TYPE_STATE:
-        return parseStateResponse(packet);
+        parseStateResponse(packet);
+        return;
     default:
-        return false;
+        return;
     }
 }
 
@@ -72,7 +76,7 @@ void PacketParser::parse(Sample *packet)
     }
 }
 
-bool PacketParser::parseAAResponse(Response *packet)
+void PacketParser::parseAAResponse(Response *packet)
 {
     switch (packet->getCommandCode())
     {
@@ -85,99 +89,141 @@ bool PacketParser::parseAAResponse(Response *packet)
         }
         version[8] = 0;
         device.setFPGAFirmwareVersion(version);
-        return true;
+        return;
+    case 0x04:
+        // Parse sample
+        parse((Sample *)packet);
+        return;
     default:
-        return false;
+        return;
     }
 }
 
-bool PacketParser::parseEEResponse(Response *packet)
+void PacketParser::parseEEResponse(Response *packet)
 {
     if (packet->getCommandCode() == 0xaa)
     {
         switch (packet->getHeader()[5])
         {
         case 0x00:
-            return parseEEROMPage00(packet);
+            parseEEROMPage00(packet);
+            return;
         case 0x04:
             device.setFPGAAlert(packet->getPayload());
-            return true;
+            return;
         case 0x05:
             device.setUserName((char *)packet->getPayload());
             device.setProductName((char *)&packet->getPayload()[12]);
-            return true;
+            return;
         case 0x07:
             device.setDiffFixData(0, 0, packet->getPayload());
-            return true;
+            return;
         case 0x08:
             device.setDiffFixData(0, 100, packet->getPayload());
-            return true;
+            return;
         case 0x09:
             device.setDiffFixData(0, 200, packet->getPayload());
-            return true;
+            return;
         case 0x0a:
             device.setDiffFixData(1, 0, packet->getPayload());
-            return true;
+            return;
         case 0x0b:
             device.setDiffFixData(1, 100, packet->getPayload());
-            return true;
+            return;
         case 0x0c:
             device.setDiffFixData(1, 200, packet->getPayload());
-            return true;
+            return;
         default:
-            return false;
+            return;
         }
     }
 }
 
-bool PacketParser::parseFPGAResponse(Response *packet)
+void PacketParser::parseFPGAResponse(Response *packet)
 {
     switch (packet->getCommandCode())
     {
-    case 0x02:
-        return parseTriggerMode(packet);
-    case 0x03:
-        return parseRelay(packet);
-    case 0x05:
-        return parseTriggerSourceAndSlope(packet);
-    case 0x06:
-        return parseVoltsDiv125(packet);
-    case 0x0b:
-        return parseCh1ZeroLevel(packet);
-    case 0x0c:
-        return parseCh2ZeroLevel(packet);
-    case 0x0d:
-        return parseTriggerLevel(packet);
-    case 0x12:
-        return parseFreqDivLowBytes(packet);
-    case 0x13:
-        return parseFreqDivHighBytes(packet);
-    case 0x15:
-        return parseRamChannelSelection(packet);
+    case CMDCODE_FORCE_TRIGGER:
+        return;
+    case CMDCODE_TRIGGER_MODE:
+        parseTriggerMode(packet);
+        return;
+    case CMDCODE_SET_RELAY:
+        parseRelay(packet);
+        return;
+    case CMDCODE_CHANNEL_SELECTION:
+        return;
+    case CMDCODE_TRIGGER_SOURCE:
+        parseTriggerSourceAndSlope(packet);
+        return;
+    case CMDCODE_CHANNEL_VOLTS_DIV_125:
+        parseVoltsDiv125(packet);
+        return;
+    case CMDCODE_PRE_TRIGGER_LENGTH:
+        return;
+    case CMDCODE_POST_TRIGGER_LENGTH:
+        return;
+    case CMDCODE_RAM_START_POSITION:
+        return;
+    case CMDCODE_RESERVED_DATA_OUTPUT:
+        return;
+    case CMDCODE_CH1_PWM:
+        parseCh1ZeroLevel(packet);
+        return;
+    case CMDCODE_CH2_PWM:
+        parseCh2ZeroLevel(packet);
+        return;
+    case CMDCODE_TRIGGER_PWM:
+        parseTriggerLevel(packet);
+        return;
+    case CMDCODE_LOGIC_ANALYZER_1:
+        return;
+    case CMDCODE_LOGIC_ANALYZER_2:
+        return;
+    case CMDCODE_LOGIC_ANALYZER_3:
+        return;
+    case CMDCODE_SAMPLE_RATE:
+        return;
+    case CMDCODE_FREQ_DIV_LOW:
+        parseFreqDivLowBytes(packet);
+        return;
+    case CMDCODE_FREQ_DIV_HIGH:
+        parseFreqDivHighBytes(packet);
+        return;
+    case CMDCODE_SERIAL_BAUD_RATE:
+        // Serial baud rate
+        return;
+    case CMDCODE_RAM_CHANNEL_SELECTION:
+        parseRamChannelSelection(packet);
+        return;
+    case CMDCODE_READ_RAM_COUNT:
+        return;
     default:
-        return false;
+        return;
     }
 }
 
-bool PacketParser::parseStateResponse(Response *packet)
+void PacketParser::parseStateResponse(Response *packet)
 {
     switch (packet->getCommandCode())
     {
     case 0x03:
+        // Battery level response
         device.setBatteryLevel(packet->getPayload()[0]);
-        return true;
+        return;
     case 0x04:
+        // Firmware version response
         char version[9];
         memcpy(version, packet->getPayload(), 8);
         version[8] = 0;
         device.setARMFirmwareVersion(version);
-        return true;
+        return;
     default:
-        return false;
+        return;
     }
 }
 
-bool PacketParser::parseFreqDivLowBytes(Response *packet)
+void PacketParser::parseFreqDivLowBytes(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 255) << 8) + (packet->getHeader()[5] & 255);
     if (device.getReceiveFreqDivStatus() == 0)
@@ -193,7 +239,7 @@ bool PacketParser::parseFreqDivLowBytes(Response *packet)
     }
 }
 
-bool PacketParser::parseFreqDivHighBytes(Response *packet)
+void PacketParser::parseFreqDivHighBytes(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 0xff) << 8) + (packet->getHeader()[5] & 0xff);
 
@@ -210,7 +256,7 @@ bool PacketParser::parseFreqDivHighBytes(Response *packet)
     }
 }
 
-bool PacketParser::parseRamChannelSelection(Response *packet)
+void PacketParser::parseRamChannelSelection(Response *packet)
 {
     switch (packet->getHeader()[5])
     {
@@ -235,7 +281,7 @@ bool PacketParser::parseRamChannelSelection(Response *packet)
     }
 }
 
-bool PacketParser::parseRelay(Response *packet)
+void PacketParser::parseRelay(Response *packet)
 {
     switch (packet->getHeader()[5])
     {
@@ -297,7 +343,7 @@ bool PacketParser::parseRelay(Response *packet)
     // }
 }
 
-bool PacketParser::parseCh1ZeroLevel(Response *packet)
+void PacketParser::parseCh1ZeroLevel(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
     int ordinal = (int)device.getChannelVerticalDiv(CHANNEL_1);
@@ -305,7 +351,7 @@ bool PacketParser::parseCh1ZeroLevel(Response *packet)
     device.setChannelVerticalPosition(CHANNEL_1, i);
 }
 
-bool PacketParser::parseCh2ZeroLevel(Response *packet)
+void PacketParser::parseCh2ZeroLevel(Response *packet)
 {
     int i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
     int ordinal = (int)device.getChannelVerticalDiv(CHANNEL_2);
@@ -313,7 +359,7 @@ bool PacketParser::parseCh2ZeroLevel(Response *packet)
     device.setChannelVerticalPosition(CHANNEL_2, i);
 }
 
-bool PacketParser::parseVoltsDiv125(Response *packet)
+void PacketParser::parseVoltsDiv125(Response *packet)
 {
     switch (packet->getHeader()[5] & 3)
     {
@@ -343,14 +389,14 @@ bool PacketParser::parseVoltsDiv125(Response *packet)
     // updateCh2VoltsDivStatusAfterReceived125();
 }
 
-bool PacketParser::parseTriggerLevel(Response *packet)
+void PacketParser::parseTriggerLevel(Response *packet)
 {
     uint16_t i = ((packet->getHeader()[6] & 0x0f) << 8) + (packet->getHeader()[5] & 0xff);
     i = (uint16_t)roundf(mapValue(i, (float)device.getTriggerBottomPWM(), (float)device.getTriggerTopPWM(), 8.0f, 248.0f));
     device.setTriggerLevel(i);
 }
 
-bool PacketParser::parseTriggerSourceAndSlope(Response *packet)
+void PacketParser::parseTriggerSourceAndSlope(Response *packet)
 {
     uint8_t i = packet->getHeader()[5] & 3;
 
@@ -384,7 +430,7 @@ bool PacketParser::parseTriggerSourceAndSlope(Response *packet)
     }
 }
 
-bool PacketParser::parseTriggerMode(Response *packet)
+void PacketParser::parseTriggerMode(Response *packet)
 {
     device.setLittlePacketStatus(0);
 
@@ -415,7 +461,7 @@ bool PacketParser::parseTriggerMode(Response *packet)
     }
 }
 
-bool PacketParser::parseCoupling(Response *packet)
+void PacketParser::parseCoupling(Response *packet)
 {
     switch (packet->getHeader()[5])
     {
@@ -444,7 +490,7 @@ bool PacketParser::parseCoupling(Response *packet)
     }
 }
 
-bool PacketParser::parseEEROMPage00(Response *packet)
+void PacketParser::parseEEROMPage00(Response *packet)
 {
     device.setCaliLevel(packet->getPayload());
     uint16_t *iArr;
@@ -520,7 +566,7 @@ bool PacketParser::parseEEROMPage00(Response *packet)
     {
         device.setTriggerInnerPWM(3, device.getTriggerInnerPWM(1));
     }
-    return true;
+    return;
 }
 
 void PacketParser::parseSamplePacket(Sample *packet, int index)

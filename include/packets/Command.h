@@ -8,10 +8,14 @@
 class Command
 {
 public:
+  static const size_t CommandSize = 4;
   typedef function<void(void)> ResponseHandler;
 
   Command(CommandCode cmd, uint8_t param1 = 0, uint8_t param2 = 0);
   Command(uint8_t *payload);
+
+  // Copy assignment operator
+  Command &operator=(Command obj);
 
   uint8_t *getPayload();
 
@@ -26,7 +30,7 @@ public:
   }
 
 private:
-  uint8_t payload[4];
+  uint8_t payload[CommandSize];
 
   ResponseHandler responseHandler;
 };

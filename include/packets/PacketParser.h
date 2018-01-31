@@ -12,7 +12,7 @@ class PacketParser
 public:
   PacketParser(IDSO1070 &device, Sample::SampleBuffer &sampleBuffer1, Sample::SampleBuffer &sampleBuffer2);
 
-  bool parse(Response *packet);
+  void parse(Response *packet);
   void parse(Sample *packet);
 
 private:
@@ -21,22 +21,22 @@ private:
   Sample::SampleBuffer &sampleBuffer2;
 
   // Response parsing
-  bool parseAAResponse(Response *packet);
-  bool parseEEResponse(Response *packet);
-  bool parseFPGAResponse(Response *packet);
-  bool parseStateResponse(Response *packet);
-  bool parseFreqDivLowBytes(Response *packet);
-  bool parseFreqDivHighBytes(Response *packet);
-  bool parseRamChannelSelection(Response *packet);
-  bool parseCh1ZeroLevel(Response *packet);
-  bool parseCh2ZeroLevel(Response *packet);
-  bool parseRelay(Response *packet);
-  bool parseVoltsDiv125(Response *packet);
-  bool parseTriggerLevel(Response *packet);
-  bool parseTriggerSourceAndSlope(Response *packet);
-  bool parseTriggerMode(Response *packet);
-  bool parseEEROMPage00(Response *packet);
-  bool parseCoupling(Response *packet);
+  void parseAAResponse(Response *packet);
+  void parseEEResponse(Response *packet);
+  void parseFPGAResponse(Response *packet);
+  void parseStateResponse(Response *packet);
+  void parseFreqDivLowBytes(Response *packet);
+  void parseFreqDivHighBytes(Response *packet);
+  void parseRamChannelSelection(Response *packet);
+  void parseCh1ZeroLevel(Response *packet);
+  void parseCh2ZeroLevel(Response *packet);
+  void parseRelay(Response *packet);
+  void parseVoltsDiv125(Response *packet);
+  void parseTriggerLevel(Response *packet);
+  void parseTriggerSourceAndSlope(Response *packet);
+  void parseTriggerMode(Response *packet);
+  void parseEEROMPage00(Response *packet);
+  void parseCoupling(Response *packet);
 
   // Sample parsing
   void parseSamplePacket(Sample *packet, int index);

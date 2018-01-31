@@ -6,6 +6,9 @@ Protocol::Protocol() : packetParser(device, sampleBuffer1, sampleBuffer2)
 
 Protocol::~Protocol()
 {
+    disconnect();
+    clearTransmissionLog();
+    clearCommandQueue();
 }
 
 void Protocol::connect(string serialDevice)
@@ -48,15 +51,11 @@ void Protocol::disconnect()
 {
     if (connector)
     {
+        clearCommandQueue();
         connector->stop();
         delete connector;
         connector = NULL;
     }
-}
-
-IDSO1070 &Protocol::getDevice()
-{
-    return device;
 }
 
 void Protocol::sendCommand(Command *cmd)
@@ -188,6 +187,13 @@ void Protocol::setScopeMode(ScopeMode scopeMode, Command::ResponseHandler respon
     });
 }
 
+void Protocol::setCaptureMode(CaptureMode captureMode, Command::ResponseHandler responseHandler)
+{
+    Command *cmd = cmdFactory.updateTriggerMode(captureMode, device.getTriggerMode(), device.getDeviceScopeMode());
+    cmd->setResponseHandler(responseHandler);
+    sendCommand(cmd);
+}
+
 void Protocol::enableChannel(ChannelSelector channel, Command::ResponseHandler responseHandler)
 {
 }
@@ -248,93 +254,80 @@ void Protocol::stopSampling(Command::ResponseHandler responseHandler)
     // TODO: Find command to stop sampling...
 }
 
-void Protocol::setConnectionLostHandler(ConnectionLostHandler connectionLostHandler)
-{
-    this->connectionLostHandler = connectionLostHandler;
-}
-
-void Protocol::setProgressHandler(ProgressHandler progressHandler)
-{
-    this->progressHandler = progressHandler;
-}
-
 void Protocol::receive()
 {
     connector->receive();
     while (connector->getResponseBufferSize() > 0)
     {
-        // This is only for some packets in wifi mode, drops current packet
-        if (ignoreNextResponse)
-        {
-            currentResponse = connector->getLatestResponse();
-            delete currentResponse;
-            currentResponse = NULL;
-            ignoreNextResponse = false;
-        }
-        // Default message handling
+        // // This is only for some packets in wifi mode, drops current packet
+        // if (ignoreNextResponse)
+        // {
+        //     currentResponse = connector->getLatestResponse();
+        //     delete currentResponse;
+        //     currentResponse = NULL;
+        //     ignoreNextResponse = false;
+        // }
+        // // Default message handling
+        // else
+        // {
+        currentResponse = connector->getLatestResponse();
+
+        // if (currentCommand)
+        // {
+        //     // Check for sample data packet
+        //     if (currentResponse->getCommandCode() == 0x04 && currentResponse->getCommandType() == TYPE_CONTROL)
+        //     {
+        //         // Enable sampling mode
+        //         sampling = true;
+
+        //         // Create and pare sample
+        //         Sample *sample = new Sample(currentResponse);
+        //         packetParser.parse(sample);
+
+        //         // Remove sample packet
+        //         delete sample;
+
+        //         currentCommand->callResponseHandler();
+
+        //         // Remove current command
+        //         commandQueue.pop_front();
+        //         delete currentCommand;
+        //         currentCommand = NULL;
+        //         retries = 0;
+        //     }
+        //     else
+        //     {
+
+        // Check if received packet is response to sent command
+        bool match = currentCommand->getPayload()[0] == currentResponse->getCommandType() &&
+                     currentCommand->getPayload()[1] == currentResponse->getCommandCode();
+
+        packetParser.parse(currentResponse);
+
+        //     // If it's a wifi connector, then we get two responses per command
+        //     if (match && connector->getType() == CONNECTOR_WIFI)
+        //         ignoreNextResponse = true;
+
+        // Call handler of current command
+        if (!match && retries < MaxCommandRetries)
+            retries++;
         else
         {
-            currentResponse = connector->getLatestResponse();
+            currentCommand->callResponseHandler();
 
-            if (currentCommand)
-            {
-                // Check for sample data packet
-                if (currentResponse->getCommandCode() == 0x04 && currentResponse->getCommandType() == TYPE_CONTROL)
-                {
-                    // Enable sampling mode
-                    sampling = true;
+            // Put transmission into log
+            transmissionLog.push_back(new Transmission(*currentCommand, *currentResponse));
 
-                    // Create and pare sample
-                    Sample *sample = new Sample(currentResponse);
-                    packetParser.parse(sample);
-
-                    // Remove sample packet
-                    delete sample;
-
-                    currentCommand->callResponseHandler();
-
-                    // Remove current command
-                    commandQueue.pop_front();
-                    delete currentCommand;
-                    currentCommand = NULL;
-                    retries = 0;
-                }
-                else
-                {
-                    // Check & parse received packet
-                    bool success = currentCommand->getPayload()[0] == currentResponse->getCommandType() &&
-                                   currentCommand->getPayload()[1] == currentResponse->getCommandCode() &&
-                                   packetParser.parse(currentResponse);
-
-                    // If it's a wifi connector, then we get two responses per command
-                    if (success && connector->getType() == CONNECTOR_WIFI)
-                        ignoreNextResponse = true;
-
-                    // Call handler of current command
-                    if (!success && retries < MaxCommandRetries)
-                        retries++;
-                    else
-                    {
-                        currentCommand->callResponseHandler();
-
-                        // Remove current command
-                        commandQueue.pop_front();
-                        delete currentCommand;
-                        currentCommand = NULL;
-                        retries = 0;
-                    }
-                }
-            }
-            // If we have no current command and sampling is enabled, this packet is probably a sample
-            else if (sampling)
-            {
-                Sample *sample = new Sample(currentResponse->getHeader());
-                packetParser.parse(sample);
-                delete sample;
-            }
-            delete currentResponse;
-            currentResponse = NULL;
+            // Remove current command
+            commandQueue.pop_front();
+            delete currentCommand;
+            currentCommand = NULL;
+            retries = 0;
         }
+        // }
+        // }
+        delete currentResponse;
+        currentResponse = NULL;
     }
 }
 
@@ -368,6 +361,16 @@ void Protocol::process()
     }
 }
 
+void Protocol::setConnectionLostHandler(ConnectionLostHandler connectionLostHandler)
+{
+    this->connectionLostHandler = connectionLostHandler;
+}
+
+void Protocol::setProgressHandler(ProgressHandler progressHandler)
+{
+    this->progressHandler = progressHandler;
+}
+
 bool Protocol::isSampling()
 {
     return sampling;
@@ -376,4 +379,32 @@ bool Protocol::isSampling()
 Connector *Protocol::getConnector()
 {
     return connector;
+}
+
+IDSO1070 &Protocol::getDevice()
+{
+    return device;
+}
+
+Protocol::TransmissionLog &Protocol::getTransmissionLog()
+{
+    return transmissionLog;
+}
+
+void Protocol::clearTransmissionLog()
+{
+    for (auto transmission : transmissionLog)
+    {
+        delete transmission;
+    }
+    transmissionLog.clear();
+}
+
+void Protocol::clearCommandQueue()
+{
+    for (auto command : commandQueue)
+    {
+        delete command;
+    }
+    commandQueue.clear();
 }

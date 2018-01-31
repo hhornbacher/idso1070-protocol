@@ -21,6 +21,15 @@ public:
   typedef function<void(float)> ProgressHandler;
   typedef function<void(Connector::Exception &)> ConnectionLostHandler;
 
+  struct Transmission
+  {
+    Command command;
+    Response response;
+
+    Transmission(Command &command, Response &response) : command(command), response(response) {}
+  };
+  typedef vector<Transmission *> TransmissionLog;
+
   Protocol();
   ~Protocol();
 
@@ -40,6 +49,7 @@ public:
   void readBatteryLevel(Command::ResponseHandler responseHandler);
   void setTimeBase(TimeBase timeBase, Command::ResponseHandler responseHandler);
   void setScopeMode(ScopeMode scopeMode, Command::ResponseHandler responseHandler);
+  void setCaptureMode(CaptureMode captureMode, Command::ResponseHandler responseHandler);
 
   // Channel control
   void enableChannel(ChannelSelector channel, Command::ResponseHandler responseHandler);
@@ -65,6 +75,10 @@ public:
   bool isSampling();
   IDSO1070 &getDevice();
   Connector *getConnector();
+
+  TransmissionLog &getTransmissionLog();
+  void clearTransmissionLog();
+  void clearCommandQueue();
 
 private:
   static const int MaxCommandRetries = 3;
@@ -95,6 +109,7 @@ private:
   PacketParser packetParser;
   Sample::SampleBuffer sampleBuffer1;
   Sample::SampleBuffer sampleBuffer2;
+  TransmissionLog transmissionLog;
 
   // Internal methods (called by process)
   void receive();

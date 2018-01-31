@@ -10,6 +10,9 @@ class Response : public Packet
 public:
   Response(uint8_t *data);
 
+  // Copy assignment operator
+  Response &operator=(Response obj);
+
   uint8_t getCommandCode();
   CommandType getCommandType();
 
