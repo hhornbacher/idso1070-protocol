@@ -1,6 +1,6 @@
 #include "connection/USBConnector.h"
 
-USBConnector::USBConnector(string device) : device(device)
+USBConnector::USBConnector(string device) : device(device), handle(-1)
 {
 }
 
@@ -62,12 +62,13 @@ void USBConnector::start()
     handle = open(device.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     if (!handle)
     {
-        throw ConnectionException("Cannot open device");
+        throw Exception("Cannot open device");
     }
     memset(&tty, 0, sizeof tty);
-    if (tcgetattr(handle, &tty) != 0)
+    int res = 0;
+    if ((res = tcgetattr(handle, &tty)) != 0)
     {
-        throw ConnectionException("Cannot read serial port configuration");
+        throw Exception("Cannot read serial port configuration");
     }
 
     cfsetospeed(&tty, USBSerialSpeed);
@@ -94,9 +95,9 @@ void USBConnector::start()
     tty.c_cc[VMIN] = 0;  // Set non-blocking
     tty.c_cc[VTIME] = 5; // 0.5 seconds read timeout
 
-    if (tcsetattr(handle, TCSANOW, &tty) != 0)
+    if ((res = tcsetattr(handle, TCSANOW, &tty)) != 0)
     {
-        throw ConnectionException("Cannot set serial port configuration");
+        throw Exception("Cannot set serial port configuration");
     }
 
     connected = true;
@@ -119,33 +120,35 @@ void USBConnector::transmit(uint8_t *data, size_t length)
 {
     if (handle == -1)
         return;
-    if (write(handle, data, length) < 0)
+    int res = 0;
+    if ((res = write(handle, data, length)) < 0)
     {
         stop();
-        throw ConnectionException("Connection lost");
+        throw Exception(strerror(res));
+        // throw Exception("Connection lost");
     }
 }
 
-size_t USBConnector::receive()
+void USBConnector::receive()
 {
     if (!rawBuffer.full())
     {
         size_t size = RawBufferLength - rawBuffer.size();
-        uint8_t tmp[size];
+        uint8_t localBuffer[size];
         if (handle == -1)
             return;
-        ssize_t result = read(handle, tmp, size);
-        if (result < 0)
+        ssize_t receivedSize = read(handle, localBuffer, size);
+        if (receivedSize < 0)
         {
             stop();
-            throw ConnectionException("Connection lost");
+            throw Exception(strerror(receivedSize));
+            // throw Exception("Connection lost");
         }
-        else if (result > 0)
+        else if (receivedSize > 0)
         {
-            for (ssize_t i = 0; i < result; i++)
-                rawBuffer.push_back(tmp[i]);
+            for (ssize_t i = 0; i < receivedSize; i++)
+                rawBuffer.push_back(localBuffer[i]);
         }
     }
     grabPacket();
-    return rawBuffer.size();
 }

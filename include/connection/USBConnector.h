@@ -21,7 +21,7 @@ public:
   ~USBConnector();
 
   void transmit(uint8_t *data, size_t length);
-  size_t receive();
+  void receive();
 
   static void enumerateDevices(USBDeviceList &list);
 

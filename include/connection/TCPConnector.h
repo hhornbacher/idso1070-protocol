@@ -17,7 +17,7 @@ public:
   ~TCPConnector();
 
   void transmit(uint8_t *data, size_t length);
-  size_t receive();
+  void receive();
 
   void start();
   void stop();

@@ -1,6 +1,6 @@
 #include "connection/TCPConnector.h"
 
-TCPConnector::TCPConnector(string host, int port) : host(host), port(port)
+TCPConnector::TCPConnector(string host, int port) : host(host), port(port), socketHandle(-1)
 {
 }
 
@@ -16,23 +16,24 @@ void TCPConnector::start()
         return;
     if ((socketHandle = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        throw ConnectionException("Cannot create socket");
+        throw Exception("Cannot create socket");
     }
 
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);
     serverAddress.sin_addr.s_addr = inet_addr(host.c_str());
 
-    if (connect(socketHandle,
-                (struct sockaddr *)&serverAddress,
-                sizeof(serverAddress)) != 0)
+    int res = 0;
+    if ((res = connect(socketHandle,
+                       (struct sockaddr *)&serverAddress,
+                       sizeof(serverAddress))) != 0)
     {
-        throw ConnectionException("Cannot connect to server");
+        throw Exception(strerror(res));
     }
 
-    if (fcntl(socketHandle, F_SETFL, fcntl(socketHandle, F_GETFL) | O_NONBLOCK) < 0)
+    if ((res = fcntl(socketHandle, F_SETFL, fcntl(socketHandle, F_GETFL) | O_NONBLOCK)) < 0)
     {
-        throw ConnectionException("Cannot configure socket for non-blocking mode");
+        throw Exception("Unabled to put socket in non-blocking mode");
     }
     connected = true;
 }
@@ -54,33 +55,35 @@ void TCPConnector::transmit(uint8_t *data, size_t length)
 {
     if (socketHandle == -1)
         return;
-    if (send(socketHandle, data, length, 0) < 0)
+    int res = 0;
+    if ((res = send(socketHandle, data, length, 0)) < 0)
     {
         stop();
-        throw ConnectionException("Connection lost");
+        throw Exception(strerror(res));
+        // throw Exception("Connection lost");
     }
 }
 
-size_t TCPConnector::receive()
+void TCPConnector::receive()
 {
     if (!rawBuffer.full())
     {
         size_t size = RawBufferLength - rawBuffer.size();
-        uint8_t tmp[size];
+        uint8_t localBuffer[size];
         if (socketHandle == -1)
             return;
-        ssize_t result = recv(socketHandle, tmp, size, 0);
-        if (result < 0)
+        ssize_t receivedSize = recv(socketHandle, localBuffer, size, 0);
+        if (receivedSize < 0)
         {
             stop();
-            throw ConnectionException("Connection lost");
+            throw Exception(strerror(receivedSize));
+            // throw Exception("Connection lost");
         }
-        else if (result > 0)
+        else if (receivedSize > 0)
         {
-            for (ssize_t i = 0; i < result; i++)
-                rawBuffer.push_back(tmp[i]);
+            for (ssize_t i = 0; i < receivedSize; i++)
+                rawBuffer.push_back(localBuffer[i]);
         }
     }
     grabPacket();
-    return rawBuffer.size();
 }

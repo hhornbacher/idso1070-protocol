@@ -13,13 +13,30 @@ class Connector
 public:
   static const int RawBufferLength = 1024 * 64;
 
+  class Exception : public runtime_error
+  {
+  public:
+    Exception(string reason)
+        : runtime_error("connection error"), reason(reason)
+    {
+    }
+
+    virtual const char *what() const throw()
+    {
+      return reason.c_str();
+    }
+
+  private:
+    string reason;
+  };
+
   Connector();
 
   Response *getLatestResponse();
   size_t getResponseBufferSize();
 
   virtual void transmit(uint8_t *data, size_t length) = 0;
-  virtual size_t receive() = 0;
+  virtual void receive() = 0;
 
   virtual void start() = 0;
   virtual void stop() = 0;
@@ -34,23 +51,6 @@ protected:
   boost::circular_buffer<uint8_t> rawBuffer;
   queue<Response *> responseBuffer;
   bool connected = false;
-};
-
-class ConnectionException : public runtime_error
-{
-public:
-  ConnectionException(string description)
-      : runtime_error("connection failed"), description(description)
-  {
-  }
-
-  virtual const char *what() const throw()
-  {
-    return description.c_str();
-  }
-
-private:
-  string description;
 };
 
 #endif // _CONNECTOR_H_
