@@ -10,37 +10,37 @@ Protocol::~Protocol()
 
 void Protocol::connect(string serialDevice)
 {
-    if (!connector)
-    {
-        connector = new USBConnector(serialDevice);
+    if (connector)
+        disconnect();
 
-        try
-        {
-            connector->start();
-        }
-        catch (ConnectionException &e)
-        {
-            if (connectionLostHandler)
-                connectionLostHandler(e);
-        }
+    connector = new USBConnector(serialDevice);
+
+    try
+    {
+        connector->start();
+    }
+    catch (Connector::Exception &e)
+    {
+        if (connectionLostHandler)
+            connectionLostHandler(e);
     }
 }
 
 void Protocol::connect(string serverHost, int port)
 {
-    if (!connector)
-    {
-        connector = new TCPConnector(serverHost, port);
+    if (connector)
+        disconnect();
 
-        try
-        {
-            connector->start();
-        }
-        catch (ConnectionException &e)
-        {
-            if (connectionLostHandler)
-                connectionLostHandler(e);
-        }
+    connector = new TCPConnector(serverHost, port);
+
+    try
+    {
+        connector->start();
+    }
+    catch (Connector::Exception &e)
+    {
+        if (connectionLostHandler)
+            connectionLostHandler(e);
     }
 }
 
@@ -360,7 +360,7 @@ void Protocol::process()
             transmit();
             receive();
         }
-        catch (ConnectionException &e)
+        catch (Connector::Exception &e)
         {
             if (connectionLostHandler)
                 connectionLostHandler(e);

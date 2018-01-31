@@ -19,7 +19,7 @@ class Protocol
 public:
   // Definition of event handler types
   typedef function<void(float)> ProgressHandler;
-  typedef function<void(ConnectionException &)> ConnectionLostHandler;
+  typedef function<void(Connector::Exception &)> ConnectionLostHandler;
 
   Protocol();
   ~Protocol();
