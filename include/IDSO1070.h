@@ -70,96 +70,66 @@ public:
   IDSO1070 &operator=(IDSO1070 obj);
 
   // General device settings
-  void setDeviceTimeBase(TimeBase timeBase);
   TimeBase getDeviceTimeBase();
-
-  void setDeviceCaptureMode(CaptureMode captureMode);
   CaptureMode getDeviceCaptureMode();
-
-  void setDeviceScopeMode(ScopeMode scopeMode);
   ScopeMode getDeviceScopeMode();
-
-  void setARMFirmwareVersion(string version);
   string getARMFirmwareVersion();
-
-  void setFPGAFirmwareVersion(string version);
   string getFPGAFirmwareVersion();
-
-  void setProductName(string productName);
   string getProductName();
-
-  void setUserName(string userName);
   string getUserName();
-
-  void setCaliLevel(uint8_t *data);
   uint16_t *getCaliLevel();
-
-  void setFPGAAlert(uint8_t *data);
   uint8_t *getFPGAAlert();
-
-  void setDiffFixData(size_t channel, size_t offset, uint8_t *data);
-
-  void setBatteryLevel(uint8_t batteryLevel);
   uint8_t getBatteryLevel();
-
-  void setFreqDiv(uint32_t freqDiv);
   uint32_t getFreqDiv();
 
   // Channel data access methods
   ChannelSelector getSelectedChannel();
-
   bool isChannelEnabled(ChannelSelector channel);
-
   VoltageDiv getChannelVerticalDiv(ChannelSelector channel);
-
   InputCoupling getChannelCoupling(ChannelSelector channel);
-
   int16_t getChannelVerticalPosition(ChannelSelector channel);
-
   uint16_t getChannelPWM(ChannelSelector channel, uint8_t a, uint8_t b);
   uint16_t *getChannelPWM(ChannelSelector channel, uint8_t a);
-
   double getChannelVoltage125(ChannelSelector channel);
-
   double getChannelVoltageRL1(ChannelSelector channel);
-
   double getChannelVoltageRL2(ChannelSelector channel);
 
   // Trigger data access methods
   uint16_t getTriggerLevel();
-
   TriggerChannel getTriggerChannel();
-
   TriggerSlope getTriggerSlope();
-
   TriggerMode getTriggerMode();
-
   double getTriggerXPosition();
-
   uint16_t getTriggerInnerPWM(uint8_t index);
   uint16_t *getTriggerInnerPWM();
-
   uint16_t getTriggerOuterPWM(uint8_t index);
   uint16_t *getTriggerOuterPWM();
-
   uint16_t getTriggerBottomPWM();
   uint16_t getTriggerTopPWM();
 
   // Misc
   int getLittlePacketStatus();
-
   uint8_t getReceiveFreqDivStatus();
-
   bool isSampleRate200Mor250M();
-
   TimeBase getDeviceTimeBaseFromFreqDiv();
-
   size_t getSamplesNumberOfOneFrame();
   uint8_t getEnabledChannelsCount();
   uint8_t getPacketsNumber();
 
 protected:
   // All setters are protected!
+  void setDeviceTimeBase(TimeBase timeBase);
+  void setDeviceCaptureMode(CaptureMode captureMode);
+  void setDeviceScopeMode(ScopeMode scopeMode);
+  void setARMFirmwareVersion(string version);
+  void setFPGAFirmwareVersion(string version);
+  void setProductName(string productName);
+  void setUserName(string userName);
+  void setCaliLevel(uint8_t *data);
+  void setFPGAAlert(uint8_t *data);
+  void setDiffFixData(size_t channel, size_t offset, uint8_t *data);
+  void setBatteryLevel(uint8_t batteryLevel);
+  void setFreqDiv(uint32_t freqDiv);
   void setSelectedChannel(ChannelSelector channel);
   void enableChannel(ChannelSelector channel);
   void disableChannel(ChannelSelector channel);
@@ -179,7 +149,6 @@ protected:
   void setTriggerOuterPWM(uint8_t index, uint16_t pwm);
   void setLittlePacketStatus(int littlePacketStatus);
   void setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus);
-
 
 private:
   // Device members
