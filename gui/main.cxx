@@ -2,18 +2,24 @@
 
 #include "AppWindow.h"
 
+extern char _binary_glade_data_start[];
+extern char _binary_glade_data_size[];
+
 int main(int argc, char *argv[])
 {
   auto app =
       Gtk::Application::create(argc, argv,
                                "org.hhornbacher.idso1070.gui");
 
+  char *data_start = _binary_glade_data_start;
+  size_t data_size = (size_t)_binary_glade_data_size;
+  ustring gladeDate = data_start;
+
   // Load the GtkBuilder file and instantiate its widgets:
   auto refBuilder = Gtk::Builder::create();
   try
   {
-    refBuilder->add_from_file("./gui.glade");
-    // refBuilder->add_from_file("/usr/local/share/idso1070-gui/gui.glade");
+    refBuilder->add_from_string(gladeDate);
   }
   catch (const Glib::FileError &ex)
   {
