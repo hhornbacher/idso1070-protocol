@@ -6,22 +6,10 @@
 #include <IDSO1070.h>
 
 #include "ProtocolWorker.h"
+#include "TransmissionLogDialog.h"
 
 using namespace Gtk;
 using namespace Glib;
-
-class TextComboColumns : public TreeModel::ColumnRecord
-{
-public:
-  TextComboColumns()
-  {
-    // This order must match the column order in the .glade file
-    this->add(this->value);
-  }
-
-  // These types must match those for the model in the .glade file
-  Gtk::TreeModelColumn<Glib::ustring> value;
-};
 
 class SettingsWidget : public Box
 {
@@ -36,6 +24,7 @@ public:
 
 protected:
   // Signal handlers
+  void onButtonTransmissionLog();
   void onButtonConnect();
   void onToggleChannel1Enable();
   void onToggleChannel2Enable();
@@ -56,8 +45,10 @@ protected:
   void updateTriggerInfo(IDSO1070 &deviceState);
 
   // Protected Members - Gtk
-  Glib::RefPtr<Gtk::Builder> refGlade;
+  RefPtr<Builder> refGlade;
 
+  TransmissionLogDialog *pTransmissionLogDialog;
+  Button *pButtonTransmissionLog;
   Button *pButtonConnect;
   ProgressBar *pProgressbarConnection;
   Label *pConnectionStatus;
@@ -82,10 +73,26 @@ protected:
   RefPtr<ListStore> pTriggerChannelStore;
   RefPtr<ListStore> pTriggerSlopeStore;
 
-  TextComboColumns textComboColumns;
-
   // Protocol worker thread reference
   ProtocolWorker *worker;
+
+private:
+  class TextComboColumns : public TreeModel::ColumnRecord
+  {
+  public:
+    TextComboColumns()
+    {
+      // This order must match the column order in the .glade file
+      this->add(this->title);
+      this->add(this->value);
+    }
+
+    // These types must match those for the model in the .glade file
+    Gtk::TreeModelColumn<Glib::ustring> title;
+    Gtk::TreeModelColumn<int> value;
+  };
+
+  TextComboColumns textComboColumns;
 };
 
 #endif // _SETTINGS_WIDGET_H_

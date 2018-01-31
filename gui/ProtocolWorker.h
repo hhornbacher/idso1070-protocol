@@ -44,6 +44,7 @@ public:
   void readBatteryLevel();
   void setTimeBase(TimeBase timeBase);
   void setScopeMode(ScopeMode scopeMode);
+  void setCaptureMode(CaptureMode captureMode);
 
   // Channel control
   void enableChannel(ChannelSelector channel);
@@ -66,6 +67,9 @@ public:
 
   // Get copy of current device state
   void getDevice(IDSO1070 &dev);
+
+  // Get copy of the transmission log
+  void getTransmissionLog(Protocol::TransmissionLog &log);
 
 protected:
   // Thread sync mutex

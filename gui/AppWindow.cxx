@@ -28,8 +28,8 @@ AppWindow::AppWindow(const Glib::RefPtr<Gtk::Builder> &refGlade) : refGlade(refG
         });
 
     // Create battery level update timer
-    sigc::slot<bool> my_slot = sigc::mem_fun(*this, &AppWindow::onUpdateBatteryLevel);
-    updateBatteryTimer = Glib::signal_timeout().connect(my_slot, 5000);
+    // sigc::slot<bool> my_slot = sigc::mem_fun(*this, &AppWindow::onUpdateBatteryLevel);
+    // updateBatteryTimer = Glib::signal_timeout().connect(my_slot, 5000);
 }
 
 AppWindow::~AppWindow()

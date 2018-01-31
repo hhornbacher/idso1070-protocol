@@ -124,6 +124,12 @@ void ProtocolWorker::setScopeMode(ScopeMode scopeMode)
     protocol.setScopeMode(scopeMode, bind(&ProtocolWorker::onUpdateUI, this));
 }
 
+void ProtocolWorker::setCaptureMode(CaptureMode captureMode)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.setCaptureMode(captureMode, bind(&ProtocolWorker::onUpdateUI, this));
+}
+
 void ProtocolWorker::enableChannel(ChannelSelector channel)
 {
     lock_guard<mutex> lock(protocolMutex);
@@ -266,4 +272,10 @@ void ProtocolWorker::getDevice(IDSO1070 &dev)
 {
     lock_guard<mutex> lock(protocolMutex);
     dev = protocol.getDevice();
+}
+
+void ProtocolWorker::getTransmissionLog(Protocol::TransmissionLog &log)
+{
+    lock_guard<mutex> lock(protocolMutex);
+    log = protocol.getTransmissionLog();
 }

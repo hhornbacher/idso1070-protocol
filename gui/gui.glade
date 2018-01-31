@@ -213,10 +213,33 @@
       </row>
     </data>
   </object>
+  <object class="GtkTextBuffer" id="TransmissionLogBuffer"/>
   <object class="GtkWindow" id="TransmissionLogDialog">
+    <property name="width_request">1000</property>
+    <property name="height_request">800</property>
     <property name="can_focus">False</property>
     <child>
-      <placeholder/>
+      <object class="GtkScrolledWindow" id="scrolledwindow1">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="hscrollbar_policy">never</property>
+        <property name="vscrollbar_policy">always</property>
+        <property name="shadow_type">in</property>
+        <child>
+          <object class="GtkTextView" id="textTransmissionLog">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="editable">False</property>
+            <property name="left_margin">15</property>
+            <property name="right_margin">15</property>
+            <property name="top_margin">15</property>
+            <property name="bottom_margin">15</property>
+            <property name="indent">5</property>
+            <property name="buffer">TransmissionLogBuffer</property>
+            <property name="monospace">True</property>
+          </object>
+        </child>
+      </object>
     </child>
   </object>
   <object class="GtkListStore" id="TriggerChannel">
@@ -758,7 +781,6 @@
           <object class="GtkButton" id="buttonTransmissionLog">
             <property name="label" translatable="yes">Show log</property>
             <property name="visible">True</property>
-            <property name="sensitive">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
           </object>

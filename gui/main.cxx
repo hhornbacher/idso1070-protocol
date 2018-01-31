@@ -1,6 +1,6 @@
-#include <iostream>
-
 #include "AppWindow.h"
+
+#include <iostream>
 
 extern char _binary_glade_data_start[];
 extern char _binary_glade_data_size[];

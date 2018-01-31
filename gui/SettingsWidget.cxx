@@ -3,6 +3,8 @@
 SettingsWidget::SettingsWidget(BaseObjectType *cobject, const RefPtr<Builder> &refGlade)
     : Box(cobject),
       refGlade(refGlade),
+      pTransmissionLogDialog(nullptr),
+      pButtonTransmissionLog(nullptr),
       pButtonConnect(nullptr),
       pProgressbarConnection(nullptr),
       pConnectionStatus(nullptr),
@@ -26,6 +28,8 @@ SettingsWidget::SettingsWidget(BaseObjectType *cobject, const RefPtr<Builder> &r
       worker(nullptr)
 {
     // Get references to widgets from glade file
+    refGlade->get_widget_derived("TransmissionLogDialog", pTransmissionLogDialog);
+    refGlade->get_widget("buttonTransmissionLog", pButtonTransmissionLog);
     refGlade->get_widget("buttonConnect", pButtonConnect);
     refGlade->get_widget("progressConnection", pProgressbarConnection);
     refGlade->get_widget("labelConnectionStatus", pConnectionStatus);
@@ -48,6 +52,7 @@ SettingsWidget::SettingsWidget(BaseObjectType *cobject, const RefPtr<Builder> &r
     pTriggerSlopeStore = RefPtr<ListStore>::cast_dynamic(refGlade->get_object("TriggerSlope"));
 
     // Connect signals with handlers
+    pButtonTransmissionLog->signal_clicked().connect(sigc::mem_fun(*this, &SettingsWidget::onButtonTransmissionLog));
     pButtonConnect->signal_clicked().connect(sigc::mem_fun(*this, &SettingsWidget::onButtonConnect));
 
     pToggleSampling->signal_toggled().connect(sigc::mem_fun(*this, &SettingsWidget::onToggleSampling));
@@ -86,6 +91,11 @@ void SettingsWidget::onToggleChannel2Enable()
     }
 }
 
+void SettingsWidget::onButtonTransmissionLog()
+{
+    pTransmissionLogDialog->show();
+}
+
 void SettingsWidget::onButtonConnect()
 {
     if (worker->isConnected())
@@ -116,7 +126,8 @@ void SettingsWidget::onTimeBaseSelected()
         ListStore::iterator iter = pTimeBase->get_active();
         if (iter)
         {
-            ustring selected = (*iter)[textComboColumns.value];
+            TimeBase selected = (TimeBase)((int)(*iter)[textComboColumns.value]);
+            worker->setTimeBase(selected);
         }
     }
 }
@@ -128,7 +139,8 @@ void SettingsWidget::onScopeModeSelected()
         ListStore::iterator iter = pTimeBase->get_active();
         if (iter)
         {
-            ustring selected = (*iter)[textComboColumns.value];
+            ScopeMode selected = (ScopeMode)((int)(*iter)[textComboColumns.value]);
+            worker->setScopeMode(selected);
         }
     }
 }
@@ -140,7 +152,8 @@ void SettingsWidget::onCaptureModeSelected()
         ListStore::iterator iter = pTimeBase->get_active();
         if (iter)
         {
-            ustring selected = (*iter)[textComboColumns.value];
+            CaptureMode selected = (CaptureMode)((int)(*iter)[textComboColumns.value]);
+            worker->setCaptureMode(selected);
         }
     }
 }
@@ -152,7 +165,8 @@ void SettingsWidget::onTriggerModeSelected()
         ListStore::iterator iter = pTimeBase->get_active();
         if (iter)
         {
-            ustring selected = (*iter)[textComboColumns.value];
+            TriggerMode selected = (TriggerMode)((int)(*iter)[textComboColumns.value]);
+            worker->setTriggerMode(selected);
         }
     }
 }
@@ -164,7 +178,8 @@ void SettingsWidget::onTriggerChannelSelected()
         ListStore::iterator iter = pTriggerChannel->get_active();
         if (iter)
         {
-            ustring selected = (*iter)[textComboColumns.value];
+            TriggerChannel selected = (TriggerChannel)((int)(*iter)[textComboColumns.value]);
+            worker->setTriggerChannel(selected);
         }
     }
 }
@@ -176,7 +191,8 @@ void SettingsWidget::onTriggerSlopeSelected()
         ListStore::iterator iter = pTriggerSlope->get_active();
         if (iter)
         {
-            ustring selected = (*iter)[textComboColumns.value];
+            TriggerSlope selected = (TriggerSlope)((int)(*iter)[textComboColumns.value]);
+            worker->setTriggerSlope(selected);
         }
     }
 }
@@ -189,6 +205,9 @@ void SettingsWidget::update()
     updateDeviceInfo(currentDeviceState);
     updateChannelsInfo(currentDeviceState);
     updateTriggerInfo(currentDeviceState);
+    Protocol::TransmissionLog log;
+    worker->getTransmissionLog(log);
+    pTransmissionLogDialog->updateLog(log);
 }
 
 void SettingsWidget::updateConnectionControls(IDSO1070 &deviceState)
