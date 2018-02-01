@@ -11,7 +11,7 @@
 class Sample : public Packet
 {
 public:
-  typedef boost::circular_buffer<int16_t> SampleBuffer;
+  typedef boost::circular_buffer<int8_t> SampleBuffer;
 
   Sample(uint8_t *data);
   Sample(Response *response);

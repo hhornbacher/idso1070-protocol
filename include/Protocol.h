@@ -75,9 +75,10 @@ public:
   bool isSampling();
   IDSO1070 &getDevice();
   Connector *getConnector();
+  void fetchChannelSamples(ChannelSelector channel, Sample::SampleBuffer &buffer);
 
   TransmissionLog &getTransmissionLog();
-  void clearTransmissionLog();
+  void clearTransmissionLog(bool deleteObjects = true);
   void clearCommandQueue();
 
 private:

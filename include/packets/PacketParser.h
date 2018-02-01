@@ -35,7 +35,7 @@ private:
   void parseTriggerLevel(Response *packet);
   void parseTriggerSourceAndSlope(Response *packet);
   void parseTriggerMode(Response *packet);
-  void parseEEROMPage00(Response *packet);
+  void parseEEPROMPage00(Response *packet);
   void parseCoupling(Response *packet);
 
   // Sample parsing

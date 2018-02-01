@@ -9,7 +9,7 @@
 class CommandFactory
 {
 public:
-  Command *readEEROMPage(uint8_t address);
+  Command *readEEPROMPage(uint8_t address);
   Command *readARMVersion();
   Command *readFPGAVersion();
   Command *readBatteryLevel();

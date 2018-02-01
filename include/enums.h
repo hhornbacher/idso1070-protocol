@@ -30,7 +30,7 @@ enum CommandCode
 enum CommandType
 {
     TYPE_CONTROL = 0xaa,
-    TYPE_EEROM = 0xee,
+    TYPE_EEPROM = 0xee,
     TYPE_FPGA = 0x55,
     TYPE_STATE = 0x57
 };

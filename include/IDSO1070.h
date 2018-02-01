@@ -16,6 +16,7 @@ public:
   static const int MemoryDepth = 2000;
   static const int SamplesCountPerPacket = 500;
   static const int MaxSample = 248;
+  static const int DeviceMemoryDepth = 6 * 1024;
 
   struct DeviceSettings
   {
@@ -42,7 +43,7 @@ public:
     bool enabled = true;
     VoltageDiv verticalDiv = VDIV_1V;
     InputCoupling coupling = COUPLING_AC;
-    int16_t verticalPosition;
+    int8_t verticalPosition;
     uint16_t pwmArray[9][2];
 
     double voltage125;
@@ -87,7 +88,7 @@ public:
   bool isChannelEnabled(ChannelSelector channel);
   VoltageDiv getChannelVerticalDiv(ChannelSelector channel);
   InputCoupling getChannelCoupling(ChannelSelector channel);
-  int16_t getChannelVerticalPosition(ChannelSelector channel);
+  int8_t getChannelVerticalPosition(ChannelSelector channel);
   uint16_t getChannelPWM(ChannelSelector channel, uint8_t a, uint8_t b);
   uint16_t *getChannelPWM(ChannelSelector channel, uint8_t a);
   double getChannelVoltage125(ChannelSelector channel);

@@ -396,7 +396,7 @@ void IDSO1070::setChannelVerticalPosition(ChannelSelector channel, int16_t verti
     channels[channel].verticalPosition = verticalPosition;
 }
 
-int16_t IDSO1070::getChannelVerticalPosition(ChannelSelector channel)
+int8_t IDSO1070::getChannelVerticalPosition(ChannelSelector channel)
 {
     return channels[channel].verticalPosition;
 }

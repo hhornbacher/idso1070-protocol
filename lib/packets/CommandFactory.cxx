@@ -1,8 +1,8 @@
 #include "packets/CommandFactory.h"
 
-Command *CommandFactory::readEEROMPage(uint8_t address)
+Command *CommandFactory::readEEPROMPage(uint8_t address)
 {
-    uint8_t cmdBuffer[4] = {TYPE_EEROM, 0xaa, address, 0x00};
+    uint8_t cmdBuffer[4] = {TYPE_EEPROM, 0xaa, address, 0x00};
     Command *cmd = new Command(cmdBuffer);
     return cmd;
 }

@@ -16,7 +16,7 @@ void PacketParser::parse(Response *packet)
     case TYPE_CONTROL:
         parseAAResponse(packet);
         return;
-    case TYPE_EEROM:
+    case TYPE_EEPROM:
         parseEEResponse(packet);
         return;
     case TYPE_FPGA:
@@ -106,7 +106,7 @@ void PacketParser::parseEEResponse(Response *packet)
         switch (packet->getHeader()[5])
         {
         case 0x00:
-            parseEEROMPage00(packet);
+            parseEEPROMPage00(packet);
             return;
         case 0x04:
             device.setFPGAAlert(packet->getPayload());
@@ -490,7 +490,7 @@ void PacketParser::parseCoupling(Response *packet)
     }
 }
 
-void PacketParser::parseEEROMPage00(Response *packet)
+void PacketParser::parseEEPROMPage00(Response *packet)
 {
     device.setCaliLevel(packet->getPayload());
     uint16_t *iArr;
@@ -599,7 +599,7 @@ void PacketParser::parseBothChannelsData(Sample *packet, int index)
         }
         else
         {
-            sampleBuffer1.push_back((int16_t)(packet->getPayload()[1 + (pos * 2)] & 255));
+            sampleBuffer1.push_back((int8_t)(packet->getPayload()[1 + (pos * 2)] & 255));
         }
         if (device.getChannelCoupling(CHANNEL_2) == COUPLING_GND)
         {
@@ -607,7 +607,7 @@ void PacketParser::parseBothChannelsData(Sample *packet, int index)
         }
         else
         {
-            sampleBuffer2.push_back((int16_t)(packet->getPayload()[1 + (pos * 2) + 1] & 255));
+            sampleBuffer2.push_back((int8_t)(packet->getPayload()[1 + (pos * 2) + 1] & 255));
         }
         //     statisticCh1Max(sampleOffset + pos, this.channel1.getSamples()[sampleOffset + pos]);
         //     statisticCh1Min(sampleOffset + pos, this.channel1.getSamples()[sampleOffset + pos]);
@@ -630,7 +630,7 @@ void PacketParser::parseChannel1Data(Sample *packet, int index)
         }
         else
         {
-            sampleBuffer1.push_back((int16_t)(packet->getPayload()[1 + pos] & 255));
+            sampleBuffer1.push_back((int8_t)(packet->getPayload()[1 + pos] & 255));
         }
         //     statisticCh2Max(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
         //     statisticCh2Min(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
@@ -651,7 +651,7 @@ void PacketParser::parseChannel2Data(Sample *packet, int index)
         }
         else
         {
-            sampleBuffer2.push_back((int16_t)(packet->getPayload()[1 + pos] & 255));
+            sampleBuffer2.push_back((int8_t)(packet->getPayload()[1 + pos] & 255));
         }
         //     statisticCh2Max(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
         //     statisticCh2Min(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
@@ -674,11 +674,11 @@ void PacketParser::fixCh1AdDiff()
     //     {
     //         int i;
     //         short s;
-    //         if ((EeromData.nFpgaAlert[16] == (short)0 ? 1 : 0) == 0)
+    //         if ((EepromData.nFpgaAlert[16] == (short)0 ? 1 : 0) == 0)
     //         {
     //             for (i = 0; i < this.channel1.getLength(); i++)
     //             {
-    //                 s = (short)(EeromData.adDiffFixData[0][this.channel1.getSamples()[i * 2]] + this.channel1.getSamples()[(i * 2) + 1]);
+    //                 s = (short)(EepromData.adDiffFixData[0][this.channel1.getSamples()[i * 2]] + this.channel1.getSamples()[(i * 2) + 1]);
     //                 if (s > (short)255)
     //                 {
     //                     s = (short)255;
@@ -693,7 +693,7 @@ void PacketParser::fixCh1AdDiff()
     //         }
     //         for (i = 0; i < this.channel1.getLength(); i++)
     //         {
-    //             s = (short)(EeromData.adDiffFixData[0][this.channel1.getSamples()[i * 2]] + this.channel1.getSamples()[(i * 2) + 1]);
+    //             s = (short)(EepromData.adDiffFixData[0][this.channel1.getSamples()[i * 2]] + this.channel1.getSamples()[(i * 2) + 1]);
     //             if (s > (short)255)
     //             {
     //                 s = (short)255;
@@ -712,11 +712,11 @@ void PacketParser::fixCh2AdDiff()
 {
     //     int i;
     //     short s;
-    //     if ((EeromData.nFpgaAlert[17] == (short)0 ? 1 : 0) == 0)
+    //     if ((EepromData.nFpgaAlert[17] == (short)0 ? 1 : 0) == 0)
     //     {
     //         for (i = 0; i < this.channel2.getLength(); i++)
     //         {
-    //             s = (short)(EeromData.adDiffFixData[1][this.channel2.getSamples()[(i * 2) + 1]] + this.channel2.getSamples()[i * 2]);
+    //             s = (short)(EepromData.adDiffFixData[1][this.channel2.getSamples()[(i * 2) + 1]] + this.channel2.getSamples()[i * 2]);
     //             if (s > (short)255)
     //             {
     //                 s = (short)255;
@@ -732,7 +732,7 @@ void PacketParser::fixCh2AdDiff()
     //     }
     //     for (i = 0; i < this.channel2.getLength(); i++)
     //     {
-    //         s = (short)(EeromData.adDiffFixData[1][this.channel2.getSamples()[(i * 2) + 1]] + this.channel2.getSamples()[i * 2]);
+    //         s = (short)(EepromData.adDiffFixData[1][this.channel2.getSamples()[(i * 2) + 1]] + this.channel2.getSamples()[i * 2]);
     //         if (s > (short)255)
     //         {
     //             s = (short)255;

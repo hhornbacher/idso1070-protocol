@@ -25,7 +25,7 @@ STATE|`0x57`|Read battery level|`0x03`|`0000`
 STATE|`0x57`|Read ARM firmware version|`0x04`|`0000`
 CONTROL|`0xaa`|Read FPGA firmware version|`0x02`|`0000`
 CONTROL|`0xaa`|Start sampling|`0x04`|`0000`
-EEROM|`0xee`|Read EEROM page|`0xaa`|first byte: 8bit address of the page to read; second byte: `00`
+EEPROM|`0xee`|Read EEPROM page|`0xaa`|first byte: 8bit address of the page to read; second byte: `00`
 FPGA|`0x55`|Force trigger|`0x01`|*TBD*
 FPGA|`0x55`|Trigger mode|`0x02`|*TBD*
 FPGA|`0x55`|Set relay|`0x03`|*TBD*

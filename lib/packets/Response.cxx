@@ -6,11 +6,21 @@ Response::Response(uint8_t *data) : Packet(data)
 }
 size_t Response::getPayloadLength()
 {
+    switch (getCommandType())
+    {
+    case TYPE_CONTROL:
+        return 0x0e;
+    case TYPE_EEPROM:
+        return 0x64;
+    case TYPE_FPGA:
+        return 0x0e;
+    case TYPE_STATE:
+        break;
+    default:
+        return 0;
+    }
     size_t pos = PayloadSize - 2;
-    uint8_t filter = 0x5a;
-
-    if (getCommandType() == TYPE_STATE)
-        filter = 0x00;
+    uint8_t filter = 0x00;
     while (getPayload()[pos] == filter)
     {
         pos--;

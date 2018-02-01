@@ -99,15 +99,15 @@ void Protocol::init(Command::ResponseHandler finishedHandler)
 
     initLoadDataCmds.push_back(cmdFactory.readARMVersion());
     initLoadDataCmds.push_back(cmdFactory.readFPGAVersion());
-    initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x00));
-    initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x04));
-    initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x05));
-    initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x07));
-    initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x08));
-    initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x09));
-    initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x0a));
-    initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x0b));
-    initLoadDataCmds.push_back(cmdFactory.readEEROMPage(0x0c));
+    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x00));
+    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x04));
+    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x05));
+    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x07));
+    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x08));
+    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x09));
+    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x0a));
+    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x0b));
+    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x0c));
 
     auto stage2 = bind(&Protocol::initStage2, this, placeholders::_1);
 
@@ -376,6 +376,15 @@ bool Protocol::isSampling()
     return sampling;
 }
 
+void Protocol::fetchChannelSamples(ChannelSelector channel, Sample::SampleBuffer &buffer)
+{
+    if (channel == CHANNEL_2)
+    {
+        buffer = sampleBuffer2;
+    }
+    buffer = sampleBuffer1;
+}
+
 Connector *Protocol::getConnector()
 {
     return connector;
@@ -391,11 +400,14 @@ Protocol::TransmissionLog &Protocol::getTransmissionLog()
     return transmissionLog;
 }
 
-void Protocol::clearTransmissionLog()
+void Protocol::clearTransmissionLog(bool deleteObjects)
 {
-    for (auto transmission : transmissionLog)
+    if (deleteObjects)
     {
-        delete transmission;
+        for (auto transmission : transmissionLog)
+        {
+            delete transmission;
+        }
     }
     transmissionLog.clear();
 }
