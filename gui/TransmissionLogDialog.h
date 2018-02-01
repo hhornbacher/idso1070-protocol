@@ -24,12 +24,14 @@ protected:
   // Protected Members - Gtk
   Glib::RefPtr<Gtk::Builder> refGlade;
 
+  TextView *pTransmissionLogView;
   RefPtr<TextBuffer> pTransmissionLogBuffer;
 
 private:
   ustring hexdump(uint8_t *data, size_t length, int cols = 32);
 
   Protocol::TransmissionLog transmissionLog;
+  int transmissionCounter;
 };
 
 #endif // _TRANSMISSION_LOG_DIALOG_H_

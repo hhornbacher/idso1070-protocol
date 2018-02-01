@@ -278,4 +278,5 @@ void ProtocolWorker::getTransmissionLog(Protocol::TransmissionLog &log)
 {
     lock_guard<mutex> lock(protocolMutex);
     log = protocol.getTransmissionLog();
+    protocol.clearTransmissionLog(false);
 }
