@@ -6,11 +6,11 @@ AppWindow::AppWindow(const Glib::RefPtr<Gtk::Builder> &refGlade) : refGlade(refG
 {
     // Create main window
     set_title("IDSO1070 GUI");
-    set_default_size(1000, 800);
+    set_default_size(1800, 1000);
 
     add(boxHorizontal);
 
-    boxHorizontal.pack_start(graphWidget, PACK_EXPAND_WIDGET);
+    boxHorizontal.pack_start(scopeWidget, PACK_EXPAND_WIDGET);
 
     refGlade->get_widget_derived("SettingsWidget", pSettingsWidget);
     pSettingsWidget->setWorker(&worker);
@@ -28,18 +28,20 @@ AppWindow::AppWindow(const Glib::RefPtr<Gtk::Builder> &refGlade) : refGlade(refG
         });
 
     // Create battery level update timer
-    // sigc::slot<bool> my_slot = sigc::mem_fun(*this, &AppWindow::onUpdateBatteryLevel);
-    // updateBatteryTimer = Glib::signal_timeout().connect(my_slot, 5000);
+    updateBatteryTimer = signal_timeout().connect(sigc::mem_fun(*this, &AppWindow::onUpdateBatteryLevel), 5000);
+
+    // Create graph update timer
+    updateScopeTimer = signal_timeout().connect(sigc::mem_fun(*this, &AppWindow::onUpdateScope), 100);
 }
 
 AppWindow::~AppWindow()
 {
-    if (!workerThread)
-    {
-        worker.stop();
-        if (workerThread->joinable())
-            workerThread->join();
-    }
+    worker.stop();
+    if (workerThread->joinable())
+        workerThread->join();
+    updateBatteryTimer.disconnect();
+    updateScopeTimer.disconnect();
+    delete workerThread;
 }
 
 void AppWindow::onNotificationFromWorker()
@@ -52,6 +54,14 @@ bool AppWindow::onUpdateBatteryLevel()
     if (worker.isConnected())
     {
         worker.readBatteryLevel();
+    }
+    return true;
+}
+
+bool AppWindow::onUpdateScope()
+{
+    if (worker.isConnected())
+    {
     }
     return true;
 }

@@ -34,9 +34,8 @@ USB ID: ```0483:5740 [STMicroelectronics STM32F407]```
 * CMake: >= 3.5
 * Boost: >= 1.58.0
 * gtkmm: >= 3.18.0
-* [gtkmm-plplot](https://tschoonj.github.io/gtkmm-plplot/installation_instructions.html): >= 2.2
 
-On Ubuntu/Mint you can run ```apt install libboost-all-dev libgtkmm-3.0-dev libgtkmm-plplot2-dev cmake gcc``` to install the dependencies. For libgtkmm-plplot2-dev you need to add the repository before, you can find some instructions at the link above.
+On Ubuntu/Mint you can run ```apt install libboost-all-dev libgtkmm-3.0-dev cmake gcc``` to install the dependencies
 
 ## Build instructions
 

@@ -6,7 +6,7 @@
 
 #include <gtkmm.h>
 
-#include "GraphWidget.h"
+#include "ScopeWidget.h"
 #include "SettingsWidget.h"
 #include "ProtocolWorker.h"
 
@@ -26,6 +26,7 @@ protected:
   // Signal handlers
   void onNotificationFromWorker();
   bool onUpdateBatteryLevel();
+  bool onUpdateScope();
 
   // Protected Members - Gtk
   Glib::RefPtr<Gtk::Builder> refGlade;
@@ -37,10 +38,11 @@ protected:
 
   // Protected Members - Timers
   sigc::connection updateBatteryTimer;
+  sigc::connection updateScopeTimer;
 
   // Protected Members - Child widgets
   Box boxHorizontal;
-  GraphWidget graphWidget;
+  ScopeWidget scopeWidget;
   SettingsWidget *pSettingsWidget;
 };
 
