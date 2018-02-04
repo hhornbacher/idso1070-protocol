@@ -4,126 +4,44 @@
 #include <iostream>
 #include <cstring>
 
-extern char _binary_scope_css_start[];
-extern char _binary_scope_css_size[];
+using namespace std;
 
 ScopeWidget::ScopeWidget() : Glib::ObjectBase("scopewidget"),
-                             Gtk::Widget(),
-                             //Install a style property so that an aspect of this widget may be themed
-                             //via a CSS style sheet file:
-                             m_scale_prop(*this, "example_scale", 500),
-                             m_scale(1000)
+                             Gtk::Widget()
 {
-  char *data_start = _binary_scope_css_start;
-  Glib::ustring scopeCSS = data_start;
-
   set_has_window(true);
   set_name("scope-widget");
-
-  m_refCssProvider = Gtk::CssProvider::create();
-  auto refStyleContext = get_style_context();
-  refStyleContext->add_provider(m_refCssProvider,
-                                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-  m_refCssProvider->signal_parsing_error().connect(
-      sigc::mem_fun(*this, &ScopeWidget::on_parsing_error));
-
-  try
-  {
-    m_refCssProvider->load_from_data(scopeCSS);
-  }
-  catch (const Gtk::CssProviderError &ex)
-  {
-    std::cerr << "CssProviderError, Gtk::CssProvider::load_from_path() failed: "
-              << ex.what() << std::endl;
-  }
-  catch (const Glib::Error &ex)
-  {
-    std::cerr << "Error, Gtk::CssProvider::load_from_path() failed: "
-              << ex.what() << std::endl;
-  }
 }
 
 ScopeWidget::~ScopeWidget()
 {
 }
 
-Gtk::SizeRequestMode ScopeWidget::get_request_mode_vfunc() const
-{
-  //Accept the default value supplied by the base class.
-  return Gtk::Widget::get_request_mode_vfunc();
-}
-
-//Discover the total amount of minimum space and natural space needed by
-//this widget.
-//Let's make this simple example widget always need minimum 60 by 50 and
-//natural 100 by 70.
-void ScopeWidget::get_preferred_width_vfunc(int &minimum_width, int &natural_width) const
-{
-  minimum_width = 60;
-  natural_width = 100;
-}
-
-void ScopeWidget::get_preferred_height_for_width_vfunc(int /* width */,
-                                                       int &minimum_height, int &natural_height) const
-{
-  minimum_height = 50;
-  natural_height = 70;
-}
-
-void ScopeWidget::get_preferred_height_vfunc(int &minimum_height, int &natural_height) const
-{
-  minimum_height = 50;
-  natural_height = 70;
-}
-
-void ScopeWidget::get_preferred_width_for_height_vfunc(int /* height */,
-                                                       int &minimum_width, int &natural_width) const
-{
-  minimum_width = 60;
-  natural_width = 100;
-}
-
 void ScopeWidget::on_size_allocate(Gtk::Allocation &allocation)
 {
   set_allocation(allocation);
 
-  if (m_refGdkWindow)
+  if (refGdkWindow)
   {
-    m_refGdkWindow->move_resize(allocation.get_x(), allocation.get_y(),
-                                allocation.get_width(), allocation.get_height());
+    refGdkWindow->move_resize(allocation.get_x(), allocation.get_y(),
+                              allocation.get_width(), allocation.get_height());
   }
-}
-
-void ScopeWidget::on_map()
-{
-  Gtk::Widget::on_map();
-}
-
-void ScopeWidget::on_unmap()
-{
-  Gtk::Widget::on_unmap();
 }
 
 void ScopeWidget::on_realize()
 {
-  //Do not call base class Gtk::Widget::on_realize().
-  //It's intended only for widgets that set_has_window(false).
-
   set_realized();
 
-  //Get the themed style from the CSS file:
-  m_scale = m_scale_prop.get_value();
-
-  if (!m_refGdkWindow)
+  // If there is no reference to a GdkWindow, then create one
+  if (!refGdkWindow)
   {
-    //Create the GdkWindow:
 
     GdkWindowAttr attributes;
     memset(&attributes, 0, sizeof(attributes));
 
     Gtk::Allocation allocation = get_allocation();
 
-    //Set initial position and size of the Gdk::Window:
+    // Set initial position and size of the Gdk::Window:
     attributes.x = allocation.get_x();
     attributes.y = allocation.get_y();
     attributes.width = allocation.get_width();
@@ -133,75 +51,127 @@ void ScopeWidget::on_realize()
     attributes.window_type = GDK_WINDOW_CHILD;
     attributes.wclass = GDK_INPUT_OUTPUT;
 
-    m_refGdkWindow = Gdk::Window::create(get_parent_window(), &attributes,
-                                         GDK_WA_X | GDK_WA_Y);
-    set_window(m_refGdkWindow);
+    refGdkWindow = Gdk::Window::create(get_parent_window(), &attributes,
+                                       GDK_WA_X | GDK_WA_Y);
+    set_window(refGdkWindow);
 
-    //make the widget receive expose events
-    m_refGdkWindow->set_user_data(gobj());
+    // Make the widget receive expose events
+    refGdkWindow->set_user_data(gobj());
   }
 }
 
 void ScopeWidget::on_unrealize()
 {
-  m_refGdkWindow.reset();
+  refGdkWindow.reset();
 
-  //Call base class:
   Gtk::Widget::on_unrealize();
 }
 
 bool ScopeWidget::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
   const Gtk::Allocation allocation = get_allocation();
-  const double scale_x = (double)allocation.get_width() / m_scale;
-  const double scale_y = (double)allocation.get_height() / m_scale;
-  auto refStyleContext = get_style_context();
+  double width = (double)(allocation.get_width() - (ScopePadding * 2));
+  double height = (double)(allocation.get_height() - (ScopePadding * 2));
 
-  // paint the background
-  refStyleContext->render_background(cr,
-                                     allocation.get_x(), allocation.get_y(),
-                                     allocation.get_width(), allocation.get_height());
+  double xScale = (width - (double)((int)width % DivColumns)) / (double)DivColumns;
+  double yScale = (height - (double)((int)height % DivRows)) / (double)DivRows;
 
-  // draw the foreground
-  const auto state = refStyleContext->get_state();
-  Gdk::Cairo::set_source_rgba(cr, refStyleContext->get_color(state));
-  cr->move_to(155. * scale_x, 165. * scale_y);
-  cr->line_to(155. * scale_x, 838. * scale_y);
-  cr->line_to(265. * scale_x, 900. * scale_y);
-  cr->line_to(849. * scale_x, 564. * scale_y);
-  cr->line_to(849. * scale_x, 438. * scale_y);
-  cr->line_to(265. * scale_x, 100. * scale_y);
-  cr->line_to(155. * scale_x, 165. * scale_y);
-  cr->move_to(265. * scale_x, 100. * scale_y);
-  cr->line_to(265. * scale_x, 652. * scale_y);
-  cr->line_to(526. * scale_x, 502. * scale_y);
-  cr->move_to(369. * scale_x, 411. * scale_y);
-  cr->line_to(633. * scale_x, 564. * scale_y);
-  cr->move_to(369. * scale_x, 286. * scale_y);
-  cr->line_to(369. * scale_x, 592. * scale_y);
-  cr->move_to(369. * scale_x, 286. * scale_y);
-  cr->line_to(849. * scale_x, 564. * scale_y);
-  cr->move_to(633. * scale_x, 564. * scale_y);
-  cr->line_to(155. * scale_x, 838. * scale_y);
-  cr->stroke();
+  double xTranslate;
+  double yTranslate;
+
+  if (xScale > yScale)
+  {
+    xTranslate = ((width - yScale * DivColumns) / 2) + (double)ScopePadding;
+    yTranslate = ((height - yScale * DivRows) / 2) + (double)ScopePadding;
+    cr->translate(xTranslate, yTranslate);
+    cr->scale(yScale, yScale);
+    cr->set_line_width(1.0 / yScale);
+  }
+  else if (yScale > xScale)
+  {
+    xTranslate = ((width - xScale * DivColumns) / 2) + (double)ScopePadding;
+    yTranslate = ((height - xScale * DivRows) / 2) + (double)ScopePadding;
+    cr->translate(xTranslate, yTranslate);
+    cr->scale(xScale, xScale);
+    cr->set_line_width(1.0 / xScale);
+  }
+  else
+  {
+    xTranslate = ((width - yScale * DivColumns) / 2) + (double)ScopePadding;
+    yTranslate = ((height - yScale * DivRows) / 2) + (double)ScopePadding;
+    cr->translate(xTranslate, yTranslate);
+    cr->scale(yScale, yScale);
+    cr->set_line_width(1.0 / yScale);
+  }
+
+  Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(0, 0, 0)"));
+  cr->paint();
+
+  drawGrid(cr);
+  drawChannel1(cr);
+  drawChannel2(cr);
 
   return true;
 }
 
-void ScopeWidget::on_parsing_error(const Glib::RefPtr<const Gtk::CssSection> &section, const Glib::Error &error)
+void ScopeWidget::drawGrid(const Cairo::RefPtr<Cairo::Context> &cr)
 {
-  std::cerr << "on_parsing_error(): " << error.what() << std::endl;
-  if (section)
-  {
-    const auto file = section->get_file();
-    if (file)
-    {
-      std::cerr << "  URI = " << file->get_uri() << std::endl;
-    }
+  const double width = (double)DivColumns;
+  const double height = (double)DivRows;
 
-    std::cerr << "  start_line = " << section->get_start_line() + 1
-              << ", end_line = " << section->get_end_line() + 1 << std::endl;
-    std::cerr << "  start_position = " << section->get_start_position()
-              << ", end_position = " << section->get_end_position() << std::endl;
+  // draw scope background
+  Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(71, 71, 71)"));
+  cr->rectangle(0.0, 0.0, width, height);
+  cr->fill();
+
+  // draw column divs
+  Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(50, 50, 50)"));
+  for (int c = 0; c < (DivColumns - 1); c++)
+  {
+    if ((c + 1) != (DivColumns / 2))
+    {
+      double xOffset = (width / (double)DivColumns) * ((double)c + 1);
+      cr->move_to(xOffset, 0.0);
+      cr->line_to(xOffset, height);
+      cr->stroke();
+    }
   }
+
+  // draw row divs
+  for (int r = 0; r < (DivRows - 1); r++)
+  {
+    if ((r + 1) != (DivRows / 2))
+    {
+      double yOffset = (height / (double)DivRows) * ((double)r + 1);
+      cr->move_to(0.0, yOffset);
+      cr->line_to(width, yOffset);
+      cr->stroke();
+      cr->stroke();
+    }
+  }
+
+  // draw center cross
+  Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(200, 200, 200)"));
+  cr->move_to(width / 2, 0.0);
+  cr->line_to(width / 2, height);
+  cr->move_to(0.0, height / 2);
+  cr->line_to(width, height / 2);
+  cr->stroke();
+
+  // draw frame
+  Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(200, 200, 200)"));
+  cr->move_to(0.0, 0.0);
+  cr->line_to(width, 0.0);
+  cr->line_to(width, height);
+  cr->line_to(0.0, height);
+  cr->line_to(0.0, 0.0);
+  cr->stroke();
+}
+
+void ScopeWidget::drawChannel1(const Cairo::RefPtr<Cairo::Context> &cr)
+{
+}
+
+void ScopeWidget::drawChannel2(const Cairo::RefPtr<Cairo::Context> &cr)
+{
 }

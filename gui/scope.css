@@ -1,9 +1,0 @@
-* {
-    /* -<widget class name>-<style property canonical name>: <value>; */
-    -gtkmm__CustomObject_scopewidget-example-scale: 920;
-}
-
-#scope-widget {
-    background-color: rgb(255, 0, 0);
-    color: rgb(0, 0, 255);
-}
