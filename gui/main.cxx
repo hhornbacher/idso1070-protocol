@@ -12,7 +12,6 @@ int main(int argc, char *argv[])
                                "org.hhornbacher.idso1070.gui");
 
   char *data_start = _binary_glade_data_start;
-  size_t data_size = (size_t)_binary_glade_data_size;
   ustring gladeDate = data_start;
 
   // Load the GtkBuilder file and instantiate its widgets:
