@@ -1,11 +1,27 @@
 #include "IDSO1070.h"
 
-IDSO1070::IDSO1070() : selectedChannel(CHANNEL_1), littlePacketStatus(0), receiveFreqDivStatus(0)
+IDSO1070::IDSO1070() : selectedChannel(CHANNEL_1), littlePacketStatus(0)
 {
+    setFreqDiv(4);
+    setTimeBase(HDIV_10uS);
+    setScopeMode(SCOMODE_ANALOG);
+    setCaptureMode(CAPMODE_NORMAL);
+    setBatteryLevel(0);
+
+    enableChannel(CHANNEL_1);
+    enableChannel(CHANNEL_2);
+    setChannelVerticalDiv(CHANNEL_1, VDIV_1V);
+    setChannelVerticalDiv(CHANNEL_2, VDIV_1V);
+    setChannelCoupling(CHANNEL_1, COUPLING_AC);
+    setChannelCoupling(CHANNEL_2, COUPLING_AC);
     setChannelVerticalPosition(CHANNEL_1, 188);
     setChannelVerticalPosition(CHANNEL_2, 68);
-    // this.channel1.setAttenuationFactor(AttenuationFactor.X1);
-    // this.channel2.setAttenuationFactor(AttenuationFactor.X1);
+
+    setTriggerMode(TRIGMODE_AUTO);
+    setTriggerChannel(TRIGCHAN_CH1);
+    setTriggerSlope(TRIGSLOPE_RISING);
+    setTriggerLevel(0);
+    setTriggerXPosition(0.5);
 }
 
 IDSO1070 &IDSO1070::operator=(IDSO1070 obj)
@@ -17,7 +33,6 @@ IDSO1070 &IDSO1070::operator=(IDSO1070 obj)
 
     selectedChannel = obj.selectedChannel;
     littlePacketStatus = obj.littlePacketStatus;
-    receiveFreqDivStatus = obj.receiveFreqDivStatus;
     return *this;
 }
 
@@ -25,7 +40,7 @@ TimeBase IDSO1070::getDeviceTimeBase()
 {
     return deviceSettings.timeBase;
 }
-void IDSO1070::setDeviceTimeBase(TimeBase timeBase)
+void IDSO1070::setTimeBase(TimeBase timeBase)
 {
     deviceSettings.timeBase = timeBase;
 }
@@ -34,7 +49,7 @@ CaptureMode IDSO1070::getDeviceCaptureMode()
 {
     return deviceSettings.captureMode;
 }
-void IDSO1070::setDeviceCaptureMode(CaptureMode captureMode)
+void IDSO1070::setCaptureMode(CaptureMode captureMode)
 {
     deviceSettings.captureMode = captureMode;
 }
@@ -43,7 +58,7 @@ ScopeMode IDSO1070::getDeviceScopeMode()
 {
     return deviceSettings.scopeMode;
 }
-void IDSO1070::setDeviceScopeMode(ScopeMode scopeMode)
+void IDSO1070::setScopeMode(ScopeMode scopeMode)
 {
     deviceSettings.scopeMode = scopeMode;
 }
@@ -57,6 +72,15 @@ uint8_t IDSO1070::getBatteryLevel()
     return deviceSettings.batteryLevel;
 }
 
+bool IDSO1070::isSampling()
+{
+    return sampling;
+}
+void IDSO1070::setSampling(bool sampling)
+{
+    this->sampling = sampling;
+}
+
 void IDSO1070::setLittlePacketStatus(int littlePacketStatus)
 {
     this->littlePacketStatus = littlePacketStatus;
@@ -66,18 +90,10 @@ int IDSO1070::getLittlePacketStatus()
     return littlePacketStatus;
 }
 
-void IDSO1070::setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus)
-{
-    this->receiveFreqDivStatus = receiveFreqDivStatus;
-}
-uint8_t IDSO1070::getReceiveFreqDivStatus()
-{
-    return receiveFreqDivStatus;
-}
-
 void IDSO1070::setFreqDiv(uint32_t freqDiv)
 {
     deviceSettings.freqDiv = freqDiv;
+    deviceSettings.timeBase = getDeviceTimeBaseFromFreqDiv();
 }
 uint32_t IDSO1070::getFreqDiv()
 {

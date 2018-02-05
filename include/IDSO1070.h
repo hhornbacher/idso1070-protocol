@@ -20,14 +20,14 @@ public:
 
   struct DeviceSettings
   {
-    // freqDiv an timeBase are related to each other!
-    TimeBase timeBase = HDIV_10uS;
-    uint32_t freqDiv = 0;
+    // freqDiv and timeBase are related to each other!
+    TimeBase timeBase;
+    uint32_t freqDiv;
 
-    ScopeMode scopeMode = SCOMODE_ANALOG;
-    CaptureMode captureMode = CAPMODE_NORMAL;
+    ScopeMode scopeMode;
+    CaptureMode captureMode;
 
-    uint8_t batteryLevel = 0;
+    uint8_t batteryLevel;
 
     string armFirmwareVersion;
     string fpgaFirmwareVersion;
@@ -40,9 +40,9 @@ public:
   };
   struct ChannelSettings
   {
-    bool enabled = true;
-    VoltageDiv verticalDiv = VDIV_1V;
-    InputCoupling coupling = COUPLING_AC;
+    bool enabled;
+    VoltageDiv verticalDiv;
+    InputCoupling coupling;
     int8_t verticalPosition;
     uint16_t pwmArray[9][2];
 
@@ -53,19 +53,16 @@ public:
   struct TriggerSettings
   {
     bool isHold = false;
-    TriggerMode mode = TRIGMODE_AUTO;
-    TriggerChannel channel = TRIGCHAN_CH1;
-    TriggerSlope slope = TRIGSLOPE_RISING;
-    uint16_t level = 0;
-    double xPosition = 0.5;
+    TriggerMode mode;
+    TriggerChannel channel;
+    TriggerSlope slope;
+    uint16_t level;
+    double xPosition;
     uint16_t innerPWM[4];
     uint16_t outerPWM[2];
   };
 
   IDSO1070();
-  ~IDSO1070()
-  {
-  }
 
   // Copy assignment operator
   IDSO1070 &operator=(IDSO1070 obj);
@@ -109,8 +106,8 @@ public:
   uint16_t getTriggerTopPWM();
 
   // Misc
+  bool isSampling();
   int getLittlePacketStatus();
-  uint8_t getReceiveFreqDivStatus();
   bool isSampleRate200Mor250M();
   TimeBase getDeviceTimeBaseFromFreqDiv();
   size_t getSamplesNumberOfOneFrame();
@@ -119,9 +116,9 @@ public:
 
 protected:
   // All setters are protected!
-  void setDeviceTimeBase(TimeBase timeBase);
-  void setDeviceCaptureMode(CaptureMode captureMode);
-  void setDeviceScopeMode(ScopeMode scopeMode);
+  void setTimeBase(TimeBase timeBase);
+  void setCaptureMode(CaptureMode captureMode);
+  void setScopeMode(ScopeMode scopeMode);
   void setARMFirmwareVersion(string version);
   void setFPGAFirmwareVersion(string version);
   void setProductName(string productName);
@@ -148,8 +145,8 @@ protected:
   void setTriggerXPosition(double xPosition);
   void setTriggerInnerPWM(uint8_t index, uint16_t pwm);
   void setTriggerOuterPWM(uint8_t index, uint16_t pwm);
+  void setSampling(bool sampling);
   void setLittlePacketStatus(int littlePacketStatus);
-  void setReceiveFreqDivStatus(uint8_t receiveFreqDivStatus);
 
 private:
   // Device members
@@ -164,7 +161,7 @@ private:
 
   // Misc
   int littlePacketStatus;
-  uint8_t receiveFreqDivStatus;
+  bool sampling = false;
 };
 
 #endif // _IDSO1070_H_
