@@ -179,35 +179,14 @@ void PacketParser::parseStateResponse(Response *packet)
 
 void PacketParser::parseFreqDivLowBytes(Response *packet)
 {
-    int i = ((packet->getHeader()[6] & 255) << 8) + (packet->getHeader()[5] & 255);
-    if (device.getReceiveFreqDivStatus() == 0)
-    {
-        device.setReceiveFreqDivStatus(1);
-        device.setFreqDiv(i);
-        // resetRecvFreqStatusAfterDelay();
-    }
-    else if (device.getReceiveFreqDivStatus() == 2)
-    {
-        device.setReceiveFreqDivStatus(0);
-        device.setFreqDiv(i + device.getFreqDiv());
-    }
+    int i = ((packet->getHeader()[6] & 255) << 8) | (packet->getHeader()[5] & 255);
+    device.setFreqDiv(i);
 }
 
 void PacketParser::parseFreqDivHighBytes(Response *packet)
 {
-    int i = ((packet->getHeader()[6] & 0xff) << 8) + (packet->getHeader()[5] & 0xff);
-
-    if (device.getReceiveFreqDivStatus() == 0)
-    {
-        device.setReceiveFreqDivStatus(2);
-        device.setFreqDiv(i << 16);
-        // resetRecvFreqStatusAfterDelay();
-    }
-    else if (device.getReceiveFreqDivStatus() == 1)
-    {
-        device.setReceiveFreqDivStatus(0);
-        device.setFreqDiv((i << 16) + device.getFreqDiv());
-    }
+    int i = ((packet->getHeader()[6] & 0xff) << 8) | (packet->getHeader()[5] & 0xff);
+    device.setFreqDiv((i << 16) | device.getFreqDiv());
 }
 
 void PacketParser::parseRamChannelSelection(Response *packet)
@@ -368,11 +347,11 @@ void PacketParser::parseTriggerSourceAndSlope(Response *packet)
     }
     if (packet->getHeader()[5] & (1 << 4))
     {
-        device.setDeviceScopeMode(SCOMODE_ANALOG);
+        device.setScopeMode(SCOMODE_ANALOG);
     }
     else
     {
-        device.setDeviceScopeMode(SCOMODE_DIGITAL);
+        device.setScopeMode(SCOMODE_DIGITAL);
     }
     if (packet->getHeader()[5] & (1 << 7))
     {
@@ -391,15 +370,15 @@ void PacketParser::parseTriggerMode(Response *packet)
     uint8_t b = packet->getHeader()[5];
     if (b & (1 << 0))
     {
-        device.setDeviceCaptureMode(CAPMODE_ROLL);
+        device.setCaptureMode(CAPMODE_ROLL);
     }
     else if (b & (1 << 3))
     {
-        device.setDeviceCaptureMode(CAPMODE_SCAN);
+        device.setCaptureMode(CAPMODE_SCAN);
     }
     else
     {
-        device.setDeviceCaptureMode(CAPMODE_NORMAL);
+        device.setCaptureMode(CAPMODE_NORMAL);
     }
     if (b & (1 << 1))
     {
