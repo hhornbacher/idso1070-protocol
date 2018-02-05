@@ -1,6 +1,6 @@
 #include "Protocol.h"
 
-Protocol::Protocol() : packetParser(device, sampleBuffer1, sampleBuffer2)
+Protocol::Protocol() : sampleBuffer1(SampleBufferSize), sampleBuffer2(SampleBufferSize), packetParser(device, sampleBuffer1, sampleBuffer2)
 {
 }
 
@@ -97,17 +97,17 @@ void Protocol::init(Command::ResponseHandler finishedHandler)
 {
     deque<Command *> initLoadDataCmds;
 
-    initLoadDataCmds.push_back(cmdFactory.readARMVersion());
-    initLoadDataCmds.push_back(cmdFactory.readFPGAVersion());
+    // initLoadDataCmds.push_back(cmdFactory.readARMVersion());
+    // initLoadDataCmds.push_back(cmdFactory.readFPGAVersion());
     initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x00));
-    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x04));
-    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x05));
-    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x07));
-    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x08));
-    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x09));
-    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x0a));
-    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x0b));
-    initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x0c));
+    // initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x04));
+    // initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x05));
+    // initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x07));
+    // initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x08));
+    // initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x09));
+    // initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x0a));
+    // initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x0b));
+    // initLoadDataCmds.push_back(cmdFactory.readEEPROMPage(0x0c));
 
     auto stage2 = bind(&Protocol::initStage2, this, placeholders::_1);
 
@@ -123,8 +123,8 @@ void Protocol::initStage2(Command::ResponseHandler finishedHandler)
 {
     deque<Command *> cmds;
     cmds.push_back(cmdFactory.updateSampleRate(device.getDeviceTimeBase(), device.getEnabledChannelsCount()));
-    cmds.push_back(cmdFactory.updateFreqDivLowBytes(device.getDeviceTimeBaseFromFreqDiv()));
-    cmds.push_back(cmdFactory.updateFreqDivHighBytes(device.getDeviceTimeBaseFromFreqDiv()));
+    cmds.push_back(cmdFactory.updateFreqDivLowBytes(device.getFreqDiv()));
+    cmds.push_back(cmdFactory.updateFreqDivHighBytes(device.getFreqDiv()));
     cmds.push_back(cmdFactory.updateChannelSelection(device.isChannelEnabled(CHANNEL_1), device.isChannelEnabled(CHANNEL_2), device.isSampleRate200Mor250M()));
     cmds.push_back(cmdFactory.updateTriggerSourceAndSlope(device.getTriggerChannel(), device.getDeviceScopeMode(), device.getTriggerSlope()));
     cmds.push_back(cmdFactory.updateTriggerLevel(device.getTriggerLevel(), device.getTriggerTopPWM(), device.getTriggerBottomPWM()));
@@ -272,40 +272,46 @@ void Protocol::receive()
         // {
         currentResponse = connector->getLatestResponse();
 
-        // if (currentCommand)
-        // {
-        //     // Check for sample data packet
-        //     if (currentResponse->getCommandCode() == 0x04 && currentResponse->getCommandType() == TYPE_CONTROL)
-        //     {
-        //         // Enable sampling mode
-        //         sampling = true;
-
-        //         // Create and pare sample
-        //         Sample *sample = new Sample(currentResponse);
-        //         packetParser.parse(sample);
-
-        //         // Remove sample packet
-        //         delete sample;
-
-        //         currentCommand->callResponseHandler();
-
-        //         // Remove current command
-        //         commandQueue.pop_front();
-        //         delete currentCommand;
-        //         currentCommand = NULL;
-        //         retries = 0;
-        //     }
-        //     else
-        //     {
-
         packetParser.parse(currentResponse);
-
-        //     // If it's a wifi connector, then we get two responses per command
-        //     if (match && connector->getType() == CONNECTOR_WIFI)
-        //         ignoreNextResponse = true;
-
         if (currentCommand)
         {
+            // // Check for sample data packet
+            // if (currentResponse->getCommandCode() == 0x04 && currentResponse->getCommandType() == TYPE_CONTROL)
+            // {
+            //     // Enable sampling mode
+            //     sampling = true;
+
+            //     // Create and parse sample
+            //     Sample *sample = new Sample(currentResponse);
+            //     packetParser.parse(sample);
+
+            //     // Remove sample packet
+            //     delete sample;
+
+            //     currentCommand->callResponseHandler();
+
+            //     // Remove current command
+            //     commandQueue.pop_front();
+            //     delete currentCommand;
+            //     currentCommand = NULL;
+            //     retries = 0;
+            // }
+            // else
+            // {
+
+            //     // If it's a wifi connector, we get two responses per command
+            //     if (match && connector->getType() == CONNECTOR_WIFI)
+            //         ignoreNextResponse = true;
+
+            // if (currentCommand)
+            // {
+
+            if (currentResponse->getCommandCode() == 0x04 && currentResponse->getCommandType() == TYPE_CONTROL)
+            {
+                // Enable sampling flag
+                device.setSampling(true);
+            }
+
             // Check if received packet is response to sent command
             bool match = currentCommand->getPayload()[0] == currentResponse->getCommandType() &&
                          currentCommand->getPayload()[1] == currentResponse->getCommandCode();
@@ -325,7 +331,6 @@ void Protocol::receive()
                 currentCommand = NULL;
                 retries = 0;
             }
-            // }
             // }
         }
         delete currentResponse;
@@ -371,11 +376,6 @@ void Protocol::setConnectionLostHandler(ConnectionLostHandler connectionLostHand
 void Protocol::setProgressHandler(ProgressHandler progressHandler)
 {
     this->progressHandler = progressHandler;
-}
-
-bool Protocol::isSampling()
-{
-    return sampling;
 }
 
 void Protocol::fetchChannelSamples(ChannelSelector channel, Sample::SampleBuffer &buffer)
