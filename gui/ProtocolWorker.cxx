@@ -247,12 +247,6 @@ bool ProtocolWorker::isConnectionLost() const
     return connectionLost;
 }
 
-bool ProtocolWorker::isSampling()
-{
-    lock_guard<mutex> lock(protocolMutex);
-    return protocol.isSampling();
-}
-
 ConnectorType ProtocolWorker::getConnectorType()
 {
     lock_guard<mutex> lock(protocolMutex);

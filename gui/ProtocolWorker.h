@@ -26,7 +26,6 @@ public:
   bool isConnected() const;
   bool isConnecting() const;
   bool isConnectionLost() const;
-  bool isSampling();
   ConnectorType getConnectorType();
   string getConnectionLostReason() const;
 
