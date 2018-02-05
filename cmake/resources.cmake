@@ -6,8 +6,8 @@ macro(add_resource RES_NAME RES_FILE RES_TARGET)
     add_custom_command(
         TARGET ${RES_TARGET}
         PRE_BUILD
-        COMMAND dd if=/dev/zero of=zero_pad bs=1 count=1 2> /dev/null
-        COMMAND cat < ${CMAKE_CURRENT_SOURCE_DIR}/${RES_FILE}  < zero_pad > ${RES_NAME}
+        COMMAND cp ${RES_FILE} ${RES_NAME}
+        COMMAND dd if=/dev/zero of=zero_pad bs=1 count=1 2> /dev/null >> ${RES_NAME}
         COMMAND objcopy ${RES_OBJCOPY_OPTS} ${RES_RENAME_SYMBOLS} ${RES_NAME} ${RES_OBJECT_FILE}
         COMMAND rm zero_pad ${RES_NAME}
         BYPRODUCTS ${RES_OBJECT_FILE}
