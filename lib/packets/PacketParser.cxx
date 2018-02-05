@@ -30,52 +30,6 @@ void PacketParser::parse(Response *packet)
     }
 }
 
-void PacketParser::parse(Sample *packet)
-{
-    uint8_t head = packet->getPayload()[0];
-    if (head & (1 << 5))
-    {
-        int i = head & 0x0f;
-        if (device.getLittlePacketStatus() == i)
-        {
-            device.setLittlePacketStatus(device.getLittlePacketStatus() + 1);
-            parseSamplePacket(packet, i);
-            if (i == (device.getPacketsNumber() - 1))
-            {
-                device.setLittlePacketStatus(0);
-
-                fixAdDiff();
-                interpolateSamples();
-
-                //             if (this.connector.isSendingCommands()) {
-                //                 return;
-                //             }
-
-                if (head & (1 << 6))
-                {
-                    printf("\n\nTrigger compared\n\n");
-                    // trigger compared
-                }
-
-                if (head & (1 << 4))
-                {
-                    printf("\n\nWave found\n\n");
-                    // wave found
-                }
-                else
-                {
-                    // wave not found
-                }
-
-                return;
-            }
-            return;
-        }
-        device.setLittlePacketStatus(0);
-        return;
-    }
-}
-
 void PacketParser::parseAAResponse(Response *packet)
 {
     switch (packet->getCommandCode())
@@ -567,6 +521,52 @@ void PacketParser::parseEEPROMPage00(Response *packet)
         device.setTriggerInnerPWM(3, device.getTriggerInnerPWM(1));
     }
     return;
+}
+
+void PacketParser::parse(Sample *packet)
+{
+    uint8_t head = packet->getPayload()[0];
+    if (head & (1 << 5))
+    {
+        int i = head & 0x0f;
+        if (device.getLittlePacketStatus() == i)
+        {
+            device.setLittlePacketStatus(device.getLittlePacketStatus() + 1);
+            parseSamplePacket(packet, i);
+            if (i == (device.getPacketsNumber() - 1))
+            {
+                device.setLittlePacketStatus(0);
+
+                fixAdDiff();
+                interpolateSamples();
+
+                //             if (this.connector.isSendingCommands()) {
+                //                 return;
+                //             }
+
+                if (head & (1 << 6))
+                {
+                    printf("\n\nTrigger compared\n\n");
+                    // trigger compared
+                }
+
+                if (head & (1 << 4))
+                {
+                    printf("\n\nWave found\n\n");
+                    // wave found
+                }
+                else
+                {
+                    // wave not found
+                }
+
+                return;
+            }
+            return;
+        }
+        device.setLittlePacketStatus(0);
+        return;
+    }
 }
 
 void PacketParser::parseSamplePacket(Sample *packet, int index)

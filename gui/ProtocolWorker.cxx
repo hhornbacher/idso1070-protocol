@@ -274,6 +274,13 @@ void ProtocolWorker::getDevice(IDSO1070 &dev)
     dev = protocol.getDevice();
 }
 
+void ProtocolWorker::fetchChannelSamples(ChannelSelector channel, Sample::SampleBuffer &buffer)
+{
+
+    lock_guard<mutex> lock(protocolMutex);
+    protocol.fetchChannelSamples(channel, buffer);
+}
+
 void ProtocolWorker::getTransmissionLog(Protocol::TransmissionLog &log)
 {
     lock_guard<mutex> lock(protocolMutex);

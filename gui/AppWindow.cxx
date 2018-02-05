@@ -1,6 +1,7 @@
 #include "AppWindow.h"
 
 AppWindow::AppWindow(const Glib::RefPtr<Gtk::Builder> &refGlade) : refGlade(refGlade),
+                                                                   scopeWidget(worker),
                                                                    pSettingsWidget(nullptr),
                                                                    boxHorizontal(ORIENTATION_HORIZONTAL)
 {
@@ -28,7 +29,7 @@ AppWindow::AppWindow(const Glib::RefPtr<Gtk::Builder> &refGlade) : refGlade(refG
         });
 
     // Create battery level update timer
-    updateBatteryTimer = signal_timeout().connect(sigc::mem_fun(*this, &AppWindow::onUpdateBatteryLevel), 5000);
+    // updateBatteryTimer = signal_timeout().connect(sigc::mem_fun(*this, &AppWindow::onUpdateBatteryLevel), 5000);
 
     // Create graph update timer
     updateScopeTimer = signal_timeout().connect(sigc::mem_fun(*this, &AppWindow::onUpdateScope), 100);
@@ -60,9 +61,10 @@ bool AppWindow::onUpdateBatteryLevel()
 
 bool AppWindow::onUpdateScope()
 {
-    if (worker.isConnected())
-    {
-    }
+    // if (worker.isSampling())
+    // {
+    scopeWidget.update();
+    // }
     return true;
 }
 

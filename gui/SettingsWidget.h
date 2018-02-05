@@ -73,7 +73,7 @@ protected:
   RefPtr<ListStore> pTriggerChannelStore;
   RefPtr<ListStore> pTriggerSlopeStore;
 
-  // Protocol worker thread reference
+  // Protocol worker thread pointer
   ProtocolWorker *worker;
 
 private:

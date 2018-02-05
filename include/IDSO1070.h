@@ -21,7 +21,7 @@ public:
   struct DeviceSettings
   {
     // freqDiv an timeBase are related to each other!
-    TimeBase timeBase = HDIV_1mS;
+    TimeBase timeBase = HDIV_10uS;
     uint32_t freqDiv = 0;
 
     ScopeMode scopeMode = SCOMODE_ANALOG;
