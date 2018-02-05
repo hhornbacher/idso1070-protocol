@@ -5,15 +5,19 @@
 #include <gtkmm/cssprovider.h>
 #include <gtkmm/styleproperty.h>
 
+#include "ProtocolWorker.h"
+
 class ScopeWidget : public Gtk::Widget
 {
 public:
   static const int DivColumns = 10;
   static const int DivRows = 8;
-  static const int ScopePadding = 10;
+  static const int ScopePadding = 30;
 
-  ScopeWidget();
+  ScopeWidget(ProtocolWorker &worker);
   virtual ~ScopeWidget();
+
+  void update();
 
 protected:
   // Overrides:
@@ -28,6 +32,12 @@ protected:
   void drawChannel2(const Cairo::RefPtr<Cairo::Context> &cr);
 
   Glib::RefPtr<Gdk::Window> refGdkWindow;
+
+  // Protocol worker thread reference
+  ProtocolWorker &worker;
+
+  Sample::SampleBuffer sampleBuffer1;
+  Sample::SampleBuffer sampleBuffer2;
 };
 
 #endif // _GRAPH_WIDGET_H_

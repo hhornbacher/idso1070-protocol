@@ -6,15 +6,36 @@
 
 using namespace std;
 
-ScopeWidget::ScopeWidget() : Glib::ObjectBase("scopewidget"),
-                             Gtk::Widget()
+ScopeWidget::ScopeWidget(ProtocolWorker &worker) : Glib::ObjectBase("scopewidget"),
+                                                   Gtk::Widget(),
+                                                   worker(worker),
+                                                   sampleBuffer1(1024 * 4),
+                                                   sampleBuffer2(1024 * 4)
 {
   set_has_window(true);
   set_name("scope-widget");
+  while (sampleBuffer1.size() < sampleBuffer1.capacity())
+    sampleBuffer1.push_back(0);
+  while (sampleBuffer2.size() < sampleBuffer2.capacity())
+    sampleBuffer2.push_back(0);
 }
 
 ScopeWidget::~ScopeWidget()
 {
+}
+
+void ScopeWidget::update()
+{
+  cout << "update" << endl;
+  Sample::SampleBuffer tmp1;
+  Sample::SampleBuffer tmp2;
+  worker.fetchChannelSamples(CHANNEL_1, tmp1);
+  worker.fetchChannelSamples(CHANNEL_1, tmp2);
+  if (tmp1.size() > 0)
+    sampleBuffer1.insert(sampleBuffer1.end(), tmp1.begin(), tmp1.end());
+  if (tmp2.size() > 0)
+    sampleBuffer1.insert(sampleBuffer2.end(), tmp2.begin(), tmp2.end());
+  queue_draw();
 }
 
 void ScopeWidget::on_size_allocate(Gtk::Allocation &allocation)
@@ -108,7 +129,12 @@ bool ScopeWidget::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
   cr->paint();
 
   drawGrid(cr);
+
+  // IDSO1070 device;
+  // worker.getDevice(device);
+  // if (device->isChannelEnabled(CHANNEL_1))
   drawChannel1(cr);
+  // if (device->isChannelEnabled(CHANNEL_2))
   drawChannel2(cr);
 
   return true;
@@ -170,8 +196,50 @@ void ScopeWidget::drawGrid(const Cairo::RefPtr<Cairo::Context> &cr)
 
 void ScopeWidget::drawChannel1(const Cairo::RefPtr<Cairo::Context> &cr)
 {
+  IDSO1070 device;
+  worker.getDevice(device);
+
+  Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(135, 180, 255)"));
+
+  // draw level
+  double xOffset = -0.5;
+  double yOffset = (8.0 / 256.0) * (256 - (uint8_t)device.getChannelVerticalPosition(CHANNEL_1));
+  cr->rectangle(xOffset, yOffset - 0.05, 0.3, 0.1);
+  cr->fill();
+
+  // draw samples
+  for (int i = 0; i < sampleBuffer1.size(); i++)
+  {
+    double ySampleOffset = (8.0 / 256.0) * (256 - ((uint8_t)device.getChannelVerticalPosition(CHANNEL_1) + (uint8_t)sampleBuffer1[i]));
+    if (i > 0)
+      cr->line_to((10.0 / sampleBuffer2.capacity()) * i, ySampleOffset);
+    else
+      cr->move_to(0.0, ySampleOffset);
+  }
+  cr->stroke();
 }
 
 void ScopeWidget::drawChannel2(const Cairo::RefPtr<Cairo::Context> &cr)
 {
+  IDSO1070 device;
+  worker.getDevice(device);
+
+  Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(112, 255, 164)"));
+
+  // draw level
+  double xOffset = -0.5;
+  double yOffset = (8.0 / 256.0) * (256 - (uint8_t)device.getChannelVerticalPosition(CHANNEL_2));
+  cr->rectangle(xOffset, yOffset - 0.05, 0.3, 0.1);
+  cr->fill();
+
+  // draw samples
+  for (int i = 0; i < sampleBuffer2.size(); i++)
+  {
+    double ySampleOffset = (8.0 / 256.0) * (256 - ((uint8_t)device.getChannelVerticalPosition(CHANNEL_2) + (uint8_t)sampleBuffer2[i]));
+    if (i > 0)
+      cr->line_to((10.0 / sampleBuffer2.capacity()) * i, ySampleOffset);
+    else
+      cr->move_to(0.0, ySampleOffset);
+  }
+  cr->stroke();
 }
