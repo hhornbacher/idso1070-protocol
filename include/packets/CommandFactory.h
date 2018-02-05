@@ -20,8 +20,8 @@ public:
   Command *startSampling();
 
   Command *updateSampleRate(TimeBase timeBase, int enabledChannels);
-  Command *updateFreqDivLowBytes(TimeBase timeBase);
-  Command *updateFreqDivHighBytes(TimeBase timeBase);
+  Command *updateFreqDivLowBytes(uint32_t freqDiv);
+  Command *updateFreqDivHighBytes(uint32_t freqDiv);
   Command *updateRAMChannelSelection(bool channel1Enabled, bool channel2Enabled);
   Command *updateChannelVolts125(VoltageDiv channel1VerticalDiv, VoltageDiv channel2VerticalDiv);
   Command *updateRelay1(VoltageDiv channel1VerticalDiv);

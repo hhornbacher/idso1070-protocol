@@ -152,22 +152,21 @@ Command *CommandFactory::updateSampleRate(TimeBase timeBase, int enabledChannels
             break;
         }
     }
-    b &= ~0x02;
     Command *cmd = new Command(CMDCODE_SAMPLE_RATE, b);
     return cmd;
 }
 
-Command *CommandFactory::updateFreqDivLowBytes(TimeBase timeBase)
+Command *CommandFactory::updateFreqDivLowBytes(uint32_t freqDiv)
 {
-    uint16_t freqDiv = (uint16_t)(timeBase & 0xffff);
-    Command *cmd = new Command(CMDCODE_FREQ_DIV_LOW, (uint8_t)(freqDiv & 0xff), (uint8_t)((freqDiv >> 8) & 0xff));
+    uint16_t lowBytes = (uint16_t)(freqDiv & 0xffff);
+    Command *cmd = new Command(CMDCODE_FREQ_DIV_LOW, (uint8_t)(lowBytes & 0xff), (uint8_t)((lowBytes >> 8) & 0xff));
     return cmd;
 }
 
-Command *CommandFactory::updateFreqDivHighBytes(TimeBase timeBase)
+Command *CommandFactory::updateFreqDivHighBytes(uint32_t freqDiv)
 {
-    uint16_t freqDiv = (uint16_t)((timeBase >> 16) & 0xffff);
-    Command *cmd = new Command(CMDCODE_FREQ_DIV_HIGH, (uint8_t)(freqDiv & 0xff), (uint8_t)((freqDiv >> 8) & 0xff));
+    uint16_t highBytes = (uint16_t)((freqDiv >> 16) & 0xffff);
+    Command *cmd = new Command(CMDCODE_FREQ_DIV_HIGH, (uint8_t)(highBytes & 0xff), (uint8_t)((highBytes >> 8) & 0xff));
     return cmd;
 }
 
