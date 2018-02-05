@@ -2,8 +2,7 @@
 
 #include <iostream>
 
-extern char _binary_glade_data_start[];
-extern char _binary_glade_data_size[];
+extern char resource_glade_data_start[];
 
 int main(int argc, char *argv[])
 {
@@ -11,14 +10,12 @@ int main(int argc, char *argv[])
       Gtk::Application::create(argc, argv,
                                "org.hhornbacher.idso1070.gui");
 
-  char *data_start = _binary_glade_data_start;
-  ustring gladeDate = data_start;
-
   // Load the GtkBuilder file and instantiate its widgets:
   auto refBuilder = Gtk::Builder::create();
   try
   {
-    refBuilder->add_from_string(gladeDate);
+    ustring gladeData = (char *)resource_glade_data_start;
+    refBuilder->add_from_string(gladeData);
   }
   catch (const Glib::FileError &ex)
   {
