@@ -298,34 +298,36 @@ void Protocol::receive()
         //     else
         //     {
 
-        // Check if received packet is response to sent command
-        bool match = currentCommand->getPayload()[0] == currentResponse->getCommandType() &&
-                     currentCommand->getPayload()[1] == currentResponse->getCommandCode();
-
         packetParser.parse(currentResponse);
 
         //     // If it's a wifi connector, then we get two responses per command
         //     if (match && connector->getType() == CONNECTOR_WIFI)
         //         ignoreNextResponse = true;
 
-        // Call handler of current command
-        if (!match && retries < MaxCommandRetries)
-            retries++;
-        else
+        if (currentCommand)
         {
-            currentCommand->callResponseHandler();
+            // Check if received packet is response to sent command
+            bool match = currentCommand->getPayload()[0] == currentResponse->getCommandType() &&
+                         currentCommand->getPayload()[1] == currentResponse->getCommandCode();
+            // Call handler of current command
+            if (!match && retries < MaxCommandRetries)
+                retries++;
+            else
+            {
+                currentCommand->callResponseHandler();
 
-            // Put transmission into log
-            transmissionLog.push_back(new Transmission(*currentCommand, *currentResponse));
+                // Put transmission into log
+                transmissionLog.push_back(new Transmission(*currentCommand, *currentResponse));
 
-            // Remove current command
-            commandQueue.pop_front();
-            delete currentCommand;
-            currentCommand = NULL;
-            retries = 0;
+                // Remove current command
+                commandQueue.pop_front();
+                delete currentCommand;
+                currentCommand = NULL;
+                retries = 0;
+            }
+            // }
+            // }
         }
-        // }
-        // }
         delete currentResponse;
         currentResponse = NULL;
     }
