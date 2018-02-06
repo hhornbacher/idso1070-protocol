@@ -67,7 +67,7 @@ public:
   // Get copy of current device state
   void getDevice(IDSO1070 &dev);
 
-  void fetchChannelSamples(ChannelSelector channel, Sample::SampleBuffer &buffer);
+  void fetchSamples(Sample::SampleBuffer &buffer);
 
   // Get copy of the transmission log
   void getTransmissionLog(Protocol::TransmissionLog &log);

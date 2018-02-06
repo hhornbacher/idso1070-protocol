@@ -8,16 +8,14 @@ using namespace std;
 
 ScopeWidget::ScopeWidget(ProtocolWorker &worker) : Glib::ObjectBase("scopewidget"),
                                                    Gtk::Widget(),
-                                                   worker(worker),
-                                                   sampleBuffer1(1024 * 4),
-                                                   sampleBuffer2(1024 * 4)
+                                                   worker(worker)
 {
   set_has_window(true);
   set_name("scope-widget");
-  while (sampleBuffer1.size() < sampleBuffer1.capacity())
-    sampleBuffer1.push_back(0);
-  while (sampleBuffer2.size() < sampleBuffer2.capacity())
-    sampleBuffer2.push_back(0);
+  while (sampleBuffer.channel1.size() < sampleBuffer.channel1.capacity())
+    sampleBuffer.channel1.push_back(0);
+  while (sampleBuffer.channel2.size() < sampleBuffer.channel2.capacity())
+    sampleBuffer.channel2.push_back(0);
 }
 
 ScopeWidget::~ScopeWidget()
@@ -26,15 +24,7 @@ ScopeWidget::~ScopeWidget()
 
 void ScopeWidget::update()
 {
-  cout << "update" << endl;
-  Sample::SampleBuffer tmp1;
-  Sample::SampleBuffer tmp2;
-  worker.fetchChannelSamples(CHANNEL_1, tmp1);
-  worker.fetchChannelSamples(CHANNEL_1, tmp2);
-  if (tmp1.size() > 0)
-    sampleBuffer1.insert(sampleBuffer1.end(), tmp1.begin(), tmp1.end());
-  if (tmp2.size() > 0)
-    sampleBuffer1.insert(sampleBuffer2.end(), tmp2.begin(), tmp2.end());
+  worker.fetchSamples(sampleBuffer);
   queue_draw();
 }
 
@@ -208,11 +198,11 @@ void ScopeWidget::drawChannel1(const Cairo::RefPtr<Cairo::Context> &cr)
   cr->fill();
 
   // draw samples
-  for (int i = 0; i < sampleBuffer1.size(); i++)
+  for (int i = 0; i < sampleBuffer.channel1.size(); i++)
   {
-    double ySampleOffset = (8.0 / 256.0) * (256 - ((uint8_t)device.getChannelVerticalPosition(CHANNEL_1) + (uint8_t)sampleBuffer1[i]));
+    double ySampleOffset = (8.0 / 256.0) * (256 - ((uint8_t)device.getChannelVerticalPosition(CHANNEL_1) + (uint8_t)sampleBuffer.channel1[i]));
     if (i > 0)
-      cr->line_to((10.0 / sampleBuffer2.capacity()) * i, ySampleOffset);
+      cr->line_to((10.0 / sampleBuffer.channel2.capacity()) * i, ySampleOffset);
     else
       cr->move_to(0.0, ySampleOffset);
   }
@@ -233,11 +223,11 @@ void ScopeWidget::drawChannel2(const Cairo::RefPtr<Cairo::Context> &cr)
   cr->fill();
 
   // draw samples
-  for (int i = 0; i < sampleBuffer2.size(); i++)
+  for (int i = 0; i < sampleBuffer.channel2.size(); i++)
   {
-    double ySampleOffset = (8.0 / 256.0) * (256 - ((uint8_t)device.getChannelVerticalPosition(CHANNEL_2) + (uint8_t)sampleBuffer2[i]));
+    double ySampleOffset = (8.0 / 256.0) * (256 - ((uint8_t)device.getChannelVerticalPosition(CHANNEL_2) + (uint8_t)sampleBuffer.channel2[i]));
     if (i > 0)
-      cr->line_to((10.0 / sampleBuffer2.capacity()) * i, ySampleOffset);
+      cr->line_to((10.0 / sampleBuffer.channel2.capacity()) * i, ySampleOffset);
     else
       cr->move_to(0.0, ySampleOffset);
   }

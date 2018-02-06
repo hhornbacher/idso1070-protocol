@@ -36,8 +36,7 @@ protected:
   // Protocol worker thread reference
   ProtocolWorker &worker;
 
-  Sample::SampleBuffer sampleBuffer1;
-  Sample::SampleBuffer sampleBuffer2;
+  Sample::SampleBuffer sampleBuffer;
 };
 
 #endif // _GRAPH_WIDGET_H_
