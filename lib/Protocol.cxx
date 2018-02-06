@@ -1,6 +1,6 @@
 #include "Protocol.h"
 
-Protocol::Protocol() : sampleBuffer1(SampleBufferSize), sampleBuffer2(SampleBufferSize), packetParser(device, sampleBuffer1, sampleBuffer2)
+Protocol::Protocol() : packetParser(device, sampleBuffer)
 {
 }
 
@@ -378,13 +378,18 @@ void Protocol::setProgressHandler(ProgressHandler progressHandler)
     this->progressHandler = progressHandler;
 }
 
-void Protocol::fetchChannelSamples(ChannelSelector channel, Sample::SampleBuffer &buffer)
+void Protocol::fetchSamples(Sample::SampleBuffer &buffer)
 {
-    if (channel == CHANNEL_2)
+    if (sampleBuffer.channel2.size() > 0)
     {
-        buffer = sampleBuffer2;
+        buffer.channel1.insert(buffer.channel1.end(), sampleBuffer.channel2.begin(), sampleBuffer.channel2.end());
+        sampleBuffer.channel2.clear();
     }
-    buffer = sampleBuffer1;
+    if (sampleBuffer.channel1.size() > 0)
+    {
+        buffer.channel2.insert(buffer.channel2.end(), sampleBuffer.channel1.begin(), sampleBuffer.channel1.end());
+        sampleBuffer.channel1.clear();
+    }
 }
 
 Connector *Protocol::getConnector()

@@ -17,8 +17,6 @@
 class Protocol
 {
 public:
-  static const int SampleBufferSize = 1024 * 16;
-
   // Definition of event handler types
   typedef function<void(float)> ProgressHandler;
   typedef function<void(Connector::Exception &)> ConnectionLostHandler;
@@ -76,7 +74,7 @@ public:
 
   IDSO1070 &getDevice();
   Connector *getConnector();
-  void fetchChannelSamples(ChannelSelector channel, Sample::SampleBuffer &buffer);
+  void fetchSamples(Sample::SampleBuffer &buffer);
 
   TransmissionLog &getTransmissionLog();
   void clearTransmissionLog(bool deleteObjects = true);
@@ -106,11 +104,10 @@ private:
 
   // Parser and sample data buffers
   PacketParser packetParser;
-  Sample::SampleBuffer sampleBuffer1;
-  Sample::SampleBuffer sampleBuffer2;
+  Sample::SampleBuffer sampleBuffer;
   TransmissionLog transmissionLog;
 
-  // Internal methods (called by process)
+  // Internal methods (called by process())
   void receive();
   void transmit();
 

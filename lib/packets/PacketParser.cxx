@@ -1,11 +1,8 @@
 #include "packets/PacketParser.h"
 
-PacketParser::PacketParser(
-    IDSO1070 &device,
-    Sample::SampleBuffer &sampleBuffer1,
-    Sample::SampleBuffer &sampleBuffer2) : device(device),
-                                           sampleBuffer1(sampleBuffer1),
-                                           sampleBuffer2(sampleBuffer2)
+PacketParser::PacketParser(IDSO1070 &device,
+                           Sample::SampleBuffer &sampleBuffer) : device(device),
+                                                                 sampleBuffer(sampleBuffer)
 {
 }
 
@@ -574,19 +571,19 @@ void PacketParser::parseBothChannelsData(Sample *packet, int index)
     {
         if (device.getChannelCoupling(CHANNEL_1) == COUPLING_GND)
         {
-            sampleBuffer1.push_back(device.getChannelVerticalPosition(CHANNEL_1));
+            sampleBuffer.channel1.push_back(device.getChannelVerticalPosition(CHANNEL_1));
         }
         else
         {
-            sampleBuffer1.push_back((int8_t)(packet->getPayload()[1 + (pos * 2)] & 255));
+            sampleBuffer.channel1.push_back((int8_t)(packet->getPayload()[1 + (pos * 2)] & 255));
         }
         if (device.getChannelCoupling(CHANNEL_2) == COUPLING_GND)
         {
-            sampleBuffer2.push_back(device.getChannelVerticalPosition(CHANNEL_2));
+            sampleBuffer.channel2.push_back(device.getChannelVerticalPosition(CHANNEL_2));
         }
         else
         {
-            sampleBuffer2.push_back((int8_t)(packet->getPayload()[1 + (pos * 2) + 1] & 255));
+            sampleBuffer.channel2.push_back((int8_t)(packet->getPayload()[1 + (pos * 2) + 1] & 255));
         }
         //     statisticCh1Max(sampleOffset + pos, this.channel1.getSamples()[sampleOffset + pos]);
         //     statisticCh1Min(sampleOffset + pos, this.channel1.getSamples()[sampleOffset + pos]);
@@ -605,11 +602,11 @@ void PacketParser::parseChannel1Data(Sample *packet, int index)
     {
         if (device.getChannelCoupling(CHANNEL_1) == COUPLING_GND)
         {
-            sampleBuffer1.push_back(device.getChannelVerticalPosition(CHANNEL_1));
+            sampleBuffer.channel1.push_back(device.getChannelVerticalPosition(CHANNEL_1));
         }
         else
         {
-            sampleBuffer1.push_back((int8_t)(packet->getPayload()[1 + pos] & 255));
+            sampleBuffer.channel1.push_back((int8_t)(packet->getPayload()[1 + pos] & 255));
         }
         //     statisticCh2Max(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
         //     statisticCh2Min(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
@@ -626,11 +623,11 @@ void PacketParser::parseChannel2Data(Sample *packet, int index)
     {
         if (device.getChannelCoupling(CHANNEL_2) == COUPLING_GND)
         {
-            sampleBuffer2.push_back(device.getChannelVerticalPosition(CHANNEL_2));
+            sampleBuffer.channel2.push_back(device.getChannelVerticalPosition(CHANNEL_2));
         }
         else
         {
-            sampleBuffer2.push_back((int8_t)(packet->getPayload()[1 + pos] & 255));
+            sampleBuffer.channel2.push_back((int8_t)(packet->getPayload()[1 + pos] & 255));
         }
         //     statisticCh2Max(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
         //     statisticCh2Min(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);

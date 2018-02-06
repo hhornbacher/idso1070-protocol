@@ -10,15 +10,14 @@
 class PacketParser
 {
 public:
-  PacketParser(IDSO1070 &device, Sample::SampleBuffer &sampleBuffer1, Sample::SampleBuffer &sampleBuffer2);
+  PacketParser(IDSO1070 &device, Sample::SampleBuffer &sampleBuffer);
 
   void parse(Response *packet);
   void parse(Sample *packet);
 
 private:
   IDSO1070 &device;
-  Sample::SampleBuffer &sampleBuffer1;
-  Sample::SampleBuffer &sampleBuffer2;
+  Sample::SampleBuffer &sampleBuffer;
 
   // Response parsing
   void parseAAResponse(Response *packet);

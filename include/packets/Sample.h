@@ -11,7 +11,15 @@
 class Sample : public Packet
 {
 public:
-  typedef boost::circular_buffer<int8_t> SampleBuffer;
+  static const int SampleBufferSize = 1024 * 16;
+
+  struct SampleBuffer
+  {
+    boost::circular_buffer<int8_t> channel1;
+    boost::circular_buffer<int8_t> channel2;
+
+    SampleBuffer() : channel1(SampleBufferSize), channel2(SampleBufferSize) {}
+  };
 
   Sample(uint8_t *data);
   Sample(Response *response);
