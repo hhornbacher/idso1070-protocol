@@ -64,10 +64,8 @@ public:
   void onUpdateProgress(float progress);
   void onInitialized();
 
-  // Get copy of current device state
-  void getDevice(IDSO1070 &dev);
-
-  void fetchSamples(Sample::SampleBuffer &buffer);
+  void fetchDevice(IDSO1070 &dev);
+  void fetchSamples(SampleBuffer &buffer);
 
   // Get copy of the transmission log
   void getTransmissionLog(Protocol::TransmissionLog &log);

@@ -47,19 +47,14 @@ void ProtocolWorker::stop()
 
 void ProtocolWorker::connect(string device)
 {
-    {
-        lock_guard<mutex> lock(protocolMutex);
-        connectionLost = false;
-        connectionLostReason = "";
-        connecting = true;
-        connected = false;
-        update = true;
-    }
+    lock_guard<mutex> lock(protocolMutex);
     protocol.connect(device);
-    {
-        lock_guard<mutex> lock(protocolMutex);
-        protocol.init(bind(&ProtocolWorker::onInitialized, this));
-    }
+    protocol.init(bind(&ProtocolWorker::onInitialized, this));
+    connectionLost = false;
+    connectionLostReason = "";
+    connecting = true;
+    connected = false;
+    update = true;
 }
 
 void ProtocolWorker::connect(string server, int port)
@@ -202,11 +197,9 @@ void ProtocolWorker::onUpdateUI()
 
 void ProtocolWorker::onUpdateProgress(float progress)
 {
+    lock_guard<mutex> lock(protocolMutex);
     this->progress = progress;
-    {
-        lock_guard<mutex> lock(protocolMutex);
-        update = true;
-    }
+    update = true;
 }
 
 void ProtocolWorker::onInitialized()
@@ -262,15 +255,14 @@ string ProtocolWorker::getConnectionLostReason() const
     return connectionLostReason;
 }
 
-void ProtocolWorker::getDevice(IDSO1070 &dev)
+void ProtocolWorker::fetchDevice(IDSO1070 &dev)
 {
     lock_guard<mutex> lock(protocolMutex);
     dev = protocol.getDevice();
 }
 
-void ProtocolWorker::fetchSamples(Sample::SampleBuffer &buffer)
+void ProtocolWorker::fetchSamples(SampleBuffer &buffer)
 {
-
     lock_guard<mutex> lock(protocolMutex);
     protocol.fetchSamples(buffer);
 }
