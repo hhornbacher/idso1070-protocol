@@ -11,7 +11,6 @@
 #include "packets/SampleBuffer.h"
 #include "packets/Sample.h"
 #include "packets/Response.h"
-#include "packets/PacketParser.h"
 #include "packets/Command.h"
 #include "packets/CommandFactory.h"
 
@@ -104,7 +103,6 @@ private:
   bool ignoreNextResponse = false;
 
   // Parser and sample data buffers
-  PacketParser packetParser;
   SampleBuffer sampleBuffer;
   TransmissionLog transmissionLog;
 
@@ -114,6 +112,37 @@ private:
 
   // Second stage of device initialization
   void initStage2(Command::ResponseHandler finishedHandler);
+
+  void parse(Response *packet);
+  void parse(Sample *packet);
+
+  // Response parsing
+  void parseAAResponse(Response *packet);
+  void parseEEResponse(Response *packet);
+  void parseFPGAResponse(Response *packet);
+  void parseStateResponse(Response *packet);
+  void parseFreqDivLowBytes(Response *packet);
+  void parseFreqDivHighBytes(Response *packet);
+  void parseRamChannelSelection(Response *packet);
+  void parseCh1ZeroLevel(Response *packet);
+  void parseCh2ZeroLevel(Response *packet);
+  void parseRelay(Response *packet);
+  void parseVoltsDiv125(Response *packet);
+  void parseTriggerLevel(Response *packet);
+  void parseTriggerSourceAndSlope(Response *packet);
+  void parseTriggerMode(Response *packet);
+  void parseEEPROMPage00(Response *packet);
+  void parseCoupling(Response *packet);
+
+  // Sample parsing
+  void parseSamplePacket(Sample *packet, int index);
+  void parseBothChannelsData(Sample *packet, int index);
+  void parseChannel1Data(Sample *packet, int index);
+  void parseChannel2Data(Sample *packet, int index);
+  void fixAdDiff();
+  void fixCh1AdDiff();
+  void fixCh2AdDiff();
+  void interpolateSamples();
 };
 
 #endif // _PROTOCOL_H_
