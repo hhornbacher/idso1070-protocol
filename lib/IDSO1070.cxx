@@ -14,8 +14,8 @@ IDSO1070::IDSO1070() : selectedChannel(CHANNEL_1), littlePacketStatus(0)
     setChannelVerticalDiv(CHANNEL_2, VDIV_1V);
     setChannelCoupling(CHANNEL_1, COUPLING_AC);
     setChannelCoupling(CHANNEL_2, COUPLING_AC);
-    setChannelVerticalPosition(CHANNEL_1, 188);
-    setChannelVerticalPosition(CHANNEL_2, 68);
+    setChannelVerticalPosition(CHANNEL_1, 136);
+    setChannelVerticalPosition(CHANNEL_2, 120);
 
     setTriggerMode(TRIGMODE_AUTO);
     setTriggerChannel(TRIGCHAN_CH1);
@@ -36,7 +36,7 @@ IDSO1070 &IDSO1070::operator=(IDSO1070 obj)
     return *this;
 }
 
-TimeBase IDSO1070::getDeviceTimeBase()
+TimeBase IDSO1070::getTimeBase()
 {
     return deviceSettings.timeBase;
 }
@@ -45,7 +45,7 @@ void IDSO1070::setTimeBase(TimeBase timeBase)
     deviceSettings.timeBase = timeBase;
 }
 
-CaptureMode IDSO1070::getDeviceCaptureMode()
+CaptureMode IDSO1070::getCaptureMode()
 {
     return deviceSettings.captureMode;
 }
@@ -54,7 +54,7 @@ void IDSO1070::setCaptureMode(CaptureMode captureMode)
     deviceSettings.captureMode = captureMode;
 }
 
-ScopeMode IDSO1070::getDeviceScopeMode()
+ScopeMode IDSO1070::getScopeMode()
 {
     return deviceSettings.scopeMode;
 }
@@ -93,7 +93,7 @@ int IDSO1070::getLittlePacketStatus()
 void IDSO1070::setFreqDiv(uint32_t freqDiv)
 {
     deviceSettings.freqDiv = freqDiv;
-    deviceSettings.timeBase = getDeviceTimeBaseFromFreqDiv();
+    deviceSettings.timeBase = getTimeBaseFromFreqDiv();
 }
 uint32_t IDSO1070::getFreqDiv()
 {
@@ -180,7 +180,7 @@ bool IDSO1070::isSampleRate200Mor250M()
     return deviceSettings.timeBase <= HDIV_1uS;
 }
 
-TimeBase IDSO1070::getDeviceTimeBaseFromFreqDiv()
+TimeBase IDSO1070::getTimeBaseFromFreqDiv()
 {
     switch (deviceSettings.freqDiv)
     {

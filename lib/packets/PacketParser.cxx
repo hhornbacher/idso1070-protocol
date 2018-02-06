@@ -1,8 +1,8 @@
 #include "packets/PacketParser.h"
 
 PacketParser::PacketParser(IDSO1070 &device,
-                           Sample::SampleBuffer &sampleBuffer) : device(device),
-                                                                 sampleBuffer(sampleBuffer)
+                           SampleBuffer &sampleBuffer) : device(device),
+                                                         sampleBuffer(sampleBuffer)
 {
 }
 
@@ -569,14 +569,7 @@ void PacketParser::parseBothChannelsData(Sample *packet, int index)
 
     while ((pos * 2) < IDSO1070::SamplesCountPerPacket)
     {
-        if (device.getChannelCoupling(CHANNEL_1) == COUPLING_GND)
-        {
-            sampleBuffer.channel1.push_back(device.getChannelVerticalPosition(CHANNEL_1));
-        }
-        else
-        {
-            sampleBuffer.channel1.push_back((int8_t)(packet->getPayload()[1 + (pos * 2)] & 255));
-        }
+
         if (device.getChannelCoupling(CHANNEL_2) == COUPLING_GND)
         {
             sampleBuffer.channel2.push_back(device.getChannelVerticalPosition(CHANNEL_2));
@@ -585,6 +578,16 @@ void PacketParser::parseBothChannelsData(Sample *packet, int index)
         {
             sampleBuffer.channel2.push_back((int8_t)(packet->getPayload()[1 + (pos * 2) + 1] & 255));
         }
+
+        if (device.getChannelCoupling(CHANNEL_1) == COUPLING_GND)
+        {
+            sampleBuffer.channel1.push_back(device.getChannelVerticalPosition(CHANNEL_1));
+        }
+        else
+        {
+            sampleBuffer.channel1.push_back((int8_t)(packet->getPayload()[1 + (pos * 2)] & 255));
+        }
+
         //     statisticCh1Max(sampleOffset + pos, this.channel1.getSamples()[sampleOffset + pos]);
         //     statisticCh1Min(sampleOffset + pos, this.channel1.getSamples()[sampleOffset + pos]);
         //     statisticCh2Max(sampleOffset + pos, this.channel2.getSamples()[sampleOffset + pos]);
@@ -637,7 +640,7 @@ void PacketParser::parseChannel2Data(Sample *packet, int index)
 
 void PacketParser::fixAdDiff()
 {
-    if (device.getEnabledChannelsCount() == 1 && device.getDeviceTimeBase() <= HDIV_1uS)
+    if (device.getEnabledChannelsCount() == 1 && device.getTimeBase() <= HDIV_1uS)
     {
         fixCh1AdDiff();
         fixCh2AdDiff();
@@ -724,7 +727,7 @@ void PacketParser::fixCh2AdDiff()
 void PacketParser::interpolateSamples()
 {
     int i = 1;
-    if (!(device.getDeviceTimeBase() == HDIV_1uS && device.getEnabledChannelsCount() == 2))
+    if (!(device.getTimeBase() == HDIV_1uS && device.getEnabledChannelsCount() == 2))
     {
         i = 0;
     }

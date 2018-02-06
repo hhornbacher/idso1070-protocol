@@ -6,18 +6,19 @@
 #include "IDSO1070.h"
 #include "Response.h"
 #include "Sample.h"
+#include "SampleBuffer.h"
 
 class PacketParser
 {
 public:
-  PacketParser(IDSO1070 &device, Sample::SampleBuffer &sampleBuffer);
+  PacketParser(IDSO1070 &device, SampleBuffer &sampleBuffer);
 
   void parse(Response *packet);
   void parse(Sample *packet);
 
 private:
   IDSO1070 &device;
-  Sample::SampleBuffer &sampleBuffer;
+  SampleBuffer &sampleBuffer;
 
   // Response parsing
   void parseAAResponse(Response *packet);

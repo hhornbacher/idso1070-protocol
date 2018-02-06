@@ -8,6 +8,7 @@
 
 #include "IDSO1070.h"
 
+#include "packets/SampleBuffer.h"
 #include "packets/Sample.h"
 #include "packets/Response.h"
 #include "packets/PacketParser.h"
@@ -74,7 +75,7 @@ public:
 
   IDSO1070 &getDevice();
   Connector *getConnector();
-  void fetchSamples(Sample::SampleBuffer &buffer);
+  void fetchSamples(SampleBuffer &buffer);
 
   TransmissionLog &getTransmissionLog();
   void clearTransmissionLog(bool deleteObjects = true);
@@ -104,7 +105,7 @@ private:
 
   // Parser and sample data buffers
   PacketParser packetParser;
-  Sample::SampleBuffer sampleBuffer;
+  SampleBuffer sampleBuffer;
   TransmissionLog transmissionLog;
 
   // Internal methods (called by process())

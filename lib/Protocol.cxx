@@ -122,11 +122,11 @@ void Protocol::init(Command::ResponseHandler finishedHandler)
 void Protocol::initStage2(Command::ResponseHandler finishedHandler)
 {
     deque<Command *> cmds;
-    cmds.push_back(cmdFactory.updateSampleRate(device.getDeviceTimeBase(), device.getEnabledChannelsCount()));
+    cmds.push_back(cmdFactory.updateSampleRate(device.getTimeBase(), device.getEnabledChannelsCount()));
     cmds.push_back(cmdFactory.updateFreqDivLowBytes(device.getFreqDiv()));
     cmds.push_back(cmdFactory.updateFreqDivHighBytes(device.getFreqDiv()));
     cmds.push_back(cmdFactory.updateChannelSelection(device.isChannelEnabled(CHANNEL_1), device.isChannelEnabled(CHANNEL_2), device.isSampleRate200Mor250M()));
-    cmds.push_back(cmdFactory.updateTriggerSourceAndSlope(device.getTriggerChannel(), device.getDeviceScopeMode(), device.getTriggerSlope()));
+    cmds.push_back(cmdFactory.updateTriggerSourceAndSlope(device.getTriggerChannel(), device.getScopeMode(), device.getTriggerSlope()));
     cmds.push_back(cmdFactory.updateTriggerLevel(device.getTriggerLevel(), device.getTriggerTopPWM(), device.getTriggerBottomPWM()));
     cmds.push_back(cmdFactory.updatePreTriggerLength(device.getSamplesNumberOfOneFrame(), device.getTriggerXPosition()));
     cmds.push_back(cmdFactory.updatePostTriggerLength(device.getSamplesNumberOfOneFrame(), device.getTriggerXPosition()));
@@ -140,7 +140,7 @@ void Protocol::initStage2(Command::ResponseHandler finishedHandler)
     cmds.push_back(cmdFactory.updateChannel1Level(device.getChannelVerticalDiv(CHANNEL_1), device.getChannelVerticalPosition(CHANNEL_1), device.getChannelPWM(CHANNEL_1, (uint8_t)device.getChannelVerticalDiv(CHANNEL_1), 0), device.getChannelPWM(CHANNEL_1, (uint8_t)device.getChannelVerticalDiv(CHANNEL_1), 1)));
     cmds.push_back(cmdFactory.updateChannel2Level(device.getChannelVerticalDiv(CHANNEL_2), device.getChannelVerticalPosition(CHANNEL_2), device.getChannelPWM(CHANNEL_2, (uint8_t)device.getChannelVerticalDiv(CHANNEL_2), 0), device.getChannelPWM(CHANNEL_2, (uint8_t)device.getChannelVerticalDiv(CHANNEL_2), 1)));
     cmds.push_back(cmdFactory.updateChannelVolts125(device.getChannelVerticalDiv(CHANNEL_1), device.getChannelVerticalDiv(CHANNEL_2)));
-    cmds.push_back(cmdFactory.updateTriggerMode(device.getDeviceCaptureMode(), device.getTriggerMode(), device.getDeviceScopeMode()));
+    cmds.push_back(cmdFactory.updateTriggerMode(device.getCaptureMode(), device.getTriggerMode(), device.getScopeMode()));
     cmds.push_back(cmdFactory.updateTriggerLevel(device.getTriggerLevel(), device.getTriggerTopPWM(), device.getTriggerBottomPWM()));
     cmds.push_back(cmdFactory.updateChannel1Coupling(device.getChannelCoupling(CHANNEL_1)));
     cmds.push_back(cmdFactory.updateChannel2Coupling(device.getChannelCoupling(CHANNEL_2)));
@@ -164,8 +164,8 @@ void Protocol::setTimeBase(TimeBase timeBase, Command::ResponseHandler responseH
 {
     deque<Command *> cmds;
     cmds.push_back(cmdFactory.updateSampleRate(timeBase, device.getEnabledChannelsCount()));
-    cmds.push_back(cmdFactory.updateFreqDivLowBytes(device.getDeviceTimeBaseFromFreqDiv()));
-    cmds.push_back(cmdFactory.updateFreqDivHighBytes(device.getDeviceTimeBaseFromFreqDiv()));
+    cmds.push_back(cmdFactory.updateFreqDivLowBytes(device.getTimeBaseFromFreqDiv()));
+    cmds.push_back(cmdFactory.updateFreqDivHighBytes(device.getTimeBaseFromFreqDiv()));
     ProgressHandler progressHandlerRef = progressHandler;
     sendCommandBatch(cmds, [progressHandlerRef, responseHandler] {
         if (progressHandlerRef)
@@ -178,7 +178,7 @@ void Protocol::setScopeMode(ScopeMode scopeMode, Command::ResponseHandler respon
 {
     deque<Command *> cmds;
     cmds.push_back(cmdFactory.updateTriggerSourceAndSlope(device.getTriggerChannel(), scopeMode, device.getTriggerSlope()));
-    cmds.push_back(cmdFactory.updateTriggerMode(device.getDeviceCaptureMode(), device.getTriggerMode(), scopeMode));
+    cmds.push_back(cmdFactory.updateTriggerMode(device.getCaptureMode(), device.getTriggerMode(), scopeMode));
     ProgressHandler progressHandlerRef = progressHandler;
     sendCommandBatch(cmds, [progressHandlerRef, responseHandler] {
         if (progressHandlerRef)
@@ -189,7 +189,7 @@ void Protocol::setScopeMode(ScopeMode scopeMode, Command::ResponseHandler respon
 
 void Protocol::setCaptureMode(CaptureMode captureMode, Command::ResponseHandler responseHandler)
 {
-    Command *cmd = cmdFactory.updateTriggerMode(captureMode, device.getTriggerMode(), device.getDeviceScopeMode());
+    Command *cmd = cmdFactory.updateTriggerMode(captureMode, device.getTriggerMode(), device.getScopeMode());
     cmd->setResponseHandler(responseHandler);
     sendCommand(cmd);
 }
@@ -216,21 +216,21 @@ void Protocol::setChannelVerticalPosition(ChannelSelector channel, uint16_t pos,
 
 void Protocol::setTriggerMode(TriggerMode mode, Command::ResponseHandler responseHandler)
 {
-    Command *cmd = cmdFactory.updateTriggerMode(device.getDeviceCaptureMode(), mode, device.getDeviceScopeMode());
+    Command *cmd = cmdFactory.updateTriggerMode(device.getCaptureMode(), mode, device.getScopeMode());
     cmd->setResponseHandler(responseHandler);
     sendCommand(cmd);
 }
 
 void Protocol::setTriggerChannel(TriggerChannel channel, Command::ResponseHandler responseHandler)
 {
-    Command *cmd = cmdFactory.updateTriggerSourceAndSlope(channel, device.getDeviceScopeMode(), device.getTriggerSlope());
+    Command *cmd = cmdFactory.updateTriggerSourceAndSlope(channel, device.getScopeMode(), device.getTriggerSlope());
     cmd->setResponseHandler(responseHandler);
     sendCommand(cmd);
 }
 
 void Protocol::setTriggerSlope(TriggerSlope slope, Command::ResponseHandler responseHandler)
 {
-    Command *cmd = cmdFactory.updateTriggerSourceAndSlope(device.getTriggerChannel(), device.getDeviceScopeMode(), slope);
+    Command *cmd = cmdFactory.updateTriggerSourceAndSlope(device.getTriggerChannel(), device.getScopeMode(), slope);
     cmd->setResponseHandler(responseHandler);
     sendCommand(cmd);
 }
@@ -251,7 +251,9 @@ void Protocol::startSampling(Command::ResponseHandler responseHandler)
 
 void Protocol::stopSampling(Command::ResponseHandler responseHandler)
 {
-    // TODO: Find command to stop sampling...
+    Command *cmd = cmdFactory.readARMVersion();
+    cmd->setResponseHandler(responseHandler);
+    sendCommand(cmd);
 }
 
 void Protocol::receive()
@@ -352,17 +354,17 @@ void Protocol::setProgressHandler(ProgressHandler progressHandler)
     this->progressHandler = progressHandler;
 }
 
-void Protocol::fetchSamples(Sample::SampleBuffer &buffer)
+void Protocol::fetchSamples(SampleBuffer &buffer)
 {
-    if (sampleBuffer.channel1.size() > 0)
-    {
-        buffer.channel1.insert(buffer.channel1.end(), sampleBuffer.channel1.begin(), sampleBuffer.channel1.end());
-        sampleBuffer.channel1.clear();
-    }
     if (sampleBuffer.channel2.size() > 0)
     {
         buffer.channel2.insert(buffer.channel2.end(), sampleBuffer.channel2.begin(), sampleBuffer.channel2.end());
         sampleBuffer.channel2.clear();
+    }
+    if (sampleBuffer.channel1.size() > 0)
+    {
+        buffer.channel1.insert(buffer.channel1.end(), sampleBuffer.channel1.begin(), sampleBuffer.channel1.end());
+        sampleBuffer.channel1.clear();
     }
 }
 

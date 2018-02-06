@@ -68,9 +68,9 @@ public:
   IDSO1070 &operator=(IDSO1070 obj);
 
   // General device settings
-  TimeBase getDeviceTimeBase();
-  CaptureMode getDeviceCaptureMode();
-  ScopeMode getDeviceScopeMode();
+  TimeBase getTimeBase();
+  CaptureMode getCaptureMode();
+  ScopeMode getScopeMode();
   string getARMFirmwareVersion();
   string getFPGAFirmwareVersion();
   string getProductName();
@@ -109,7 +109,7 @@ public:
   bool isSampling();
   int getLittlePacketStatus();
   bool isSampleRate200Mor250M();
-  TimeBase getDeviceTimeBaseFromFreqDiv();
+  TimeBase getTimeBaseFromFreqDiv();
   size_t getSamplesNumberOfOneFrame();
   uint8_t getEnabledChannelsCount();
   uint8_t getPacketsNumber();
