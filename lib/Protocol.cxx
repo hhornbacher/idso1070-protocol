@@ -275,36 +275,10 @@ void Protocol::receive()
         packetParser.parse(currentResponse);
         if (currentCommand)
         {
-            // // Check for sample data packet
-            // if (currentResponse->getCommandCode() == 0x04 && currentResponse->getCommandType() == TYPE_CONTROL)
-            // {
-            //     // Enable sampling mode
-            //     sampling = true;
-
-            //     // Create and parse sample
-            //     Sample *sample = new Sample(currentResponse);
-            //     packetParser.parse(sample);
-
-            //     // Remove sample packet
-            //     delete sample;
-
-            //     currentCommand->callResponseHandler();
-
-            //     // Remove current command
-            //     commandQueue.pop_front();
-            //     delete currentCommand;
-            //     currentCommand = NULL;
-            //     retries = 0;
-            // }
-            // else
-            // {
 
             //     // If it's a wifi connector, we get two responses per command
             //     if (match && connector->getType() == CONNECTOR_WIFI)
             //         ignoreNextResponse = true;
-
-            // if (currentCommand)
-            // {
 
             if (currentResponse->getCommandCode() == 0x04 && currentResponse->getCommandType() == TYPE_CONTROL)
             {
@@ -315,6 +289,7 @@ void Protocol::receive()
             // Check if received packet is response to sent command
             bool match = currentCommand->getPayload()[0] == currentResponse->getCommandType() &&
                          currentCommand->getPayload()[1] == currentResponse->getCommandCode();
+
             // Call handler of current command
             if (!match && retries < MaxCommandRetries)
                 retries++;
@@ -331,7 +306,6 @@ void Protocol::receive()
                 currentCommand = NULL;
                 retries = 0;
             }
-            // }
         }
         delete currentResponse;
         currentResponse = NULL;
@@ -380,15 +354,15 @@ void Protocol::setProgressHandler(ProgressHandler progressHandler)
 
 void Protocol::fetchSamples(Sample::SampleBuffer &buffer)
 {
-    if (sampleBuffer.channel2.size() > 0)
-    {
-        buffer.channel1.insert(buffer.channel1.end(), sampleBuffer.channel2.begin(), sampleBuffer.channel2.end());
-        sampleBuffer.channel2.clear();
-    }
     if (sampleBuffer.channel1.size() > 0)
     {
-        buffer.channel2.insert(buffer.channel2.end(), sampleBuffer.channel1.begin(), sampleBuffer.channel1.end());
+        buffer.channel1.insert(buffer.channel1.end(), sampleBuffer.channel1.begin(), sampleBuffer.channel1.end());
         sampleBuffer.channel1.clear();
+    }
+    if (sampleBuffer.channel2.size() > 0)
+    {
+        buffer.channel2.insert(buffer.channel2.end(), sampleBuffer.channel2.begin(), sampleBuffer.channel2.end());
+        sampleBuffer.channel2.clear();
     }
 }
 
