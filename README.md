@@ -34,8 +34,10 @@ USB ID: ```0483:5740 [STMicroelectronics STM32F407]```
 * CMake: >= 3.5
 * Boost: >= 1.58.0
 * gtkmm: >= 3.18.0
+* [liquid-dsp: >= 1.3.0](https://github.com/jgaeddert/liquid-dsp/tree/v1.3.0)
 
-On Ubuntu/Mint you can run ```apt install libboost-all-dev libgtkmm-3.0-dev cmake gcc``` to install the dependencies
+On Ubuntu/Mint you can run ```apt install libboost-all-dev libgtkmm-3.0-dev cmake gcc``` to install the dependencies.
+You have to compile and install liquid-dsp manually, for instructions follow the link above.
 
 ## Build instructions
 
