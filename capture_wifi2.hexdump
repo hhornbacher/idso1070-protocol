@@ -1,0 +1,75 @@
+...
+00000034  55 17 00 00  // Unkown command
+...
+0000005C  aa 02 00 00
+00000060  57 04 00 00
+00000064  57 03 00 00
+00000068  55 11 00 00
+0000006C  55 12 04 00
+00000070  55 13 00 00
+00000074  55 04 02 00   // Channel selection
+00000078  55 05 91 00
+0000007C  55 0d b5 0a
+00000080  55 07 ed 03   // Pre trigger length
+00000084  55 08 e8 03   // Post trigger length
+00000088  55 16 d0 77   // Read RAM count
+0000008C  55 0e 92 24
+00000090  55 0f 49 92
+00000094  55 10 24 49
+00000098  55 15 00 00   // RAM channel selection
+0000009C  55 03 80 00   // Set relay
+000000A0  55 03 02 00   // Set relay
+000000A4  55 06 00 00   // Channel volts div 125
+000000A8  55 0b 3e 08   // Channel 1 PWM
+000000AC  55 03 ef 00   // Set relay
+000000B0  55 06 00 00   // Channel volts div 125
+000000B4  55 03 40 00   // Set relay
+000000B8  55 03 04 00   // Set relay
+000000BC  55 06 00 00   // Channel volts div 125
+000000C0  55 0c 7d 05   // Channel 2 PWM
+000000C4  55 03 fe 00   // Set relay
+000000C8  55 06 00 00   // Channel volts div 125
+000000CC  55 02 02 00   // Trigger mode
+000000D0  aa 04 00 00
+000000D4  55 02 02 00   // Trigger mode
+000000D8  55 02 02 00   // Trigger mode
+000000DC  aa 04 00 00
+000000E0  aa 04 00 00
+000000E4  55 11 00 00   // Set TimeBase 20us
+000000E8  55 11 00 00
+000000EC  55 12 09 00 
+000000F0  55 13 00 00
+000000F4  55 04 02 00   // Channel selection
+000000F8  55 07 ed 03   // Pre trigger length
+000000FC  55 08 e8 03   // Post trigger length
+00000100  55 16 d0 77   // Read RAM count
+00000104  55 15 00 00   // RAM channel selection
+00000108  55 11 00 00   // Set TimeBase 50us
+0000010C  55 11 00 00
+00000110  55 12 18 00
+00000114  55 13 00 00
+00000118  55 04 02 00   // Channel selection
+0000011C  55 07 ed 03   // Pre trigger length
+00000120  55 08 e8 03   // Post trigger length
+00000124  55 16 d0 77   // Read RAM count
+00000128  55 15 00 00   // RAM channel selection
+0000012C  55 11 00 00   // Set TimeBase 100us
+00000130  55 12 31 00
+00000134  55 13 00 00
+00000138  55 04 02 00   // Channel selection
+0000013C  55 07 ed 03   // Pre trigger length
+00000140  55 08 e8 03   // Post trigger length
+00000144  55 16 d0 77   // Read RAM count
+00000148  55 15 00 00   // RAM channel selection
+0000014C  55 11 00 00   // Set TimeBase 200us
+00000150  55 12 63 00
+00000154  55 13 00 00
+00000158  55 04 02 00   // Channel selection
+0000015C  55 07 ed 03   // Pre trigger length
+00000160  55 08 e8 03   // Post trigger length
+00000164  55 16 d0 77   // Read RAM count
+00000168  55 15 00 00   // RAM channel selection
+0000016C  55 02 02 00   // Trigger mode
+00000170  aa 04 00 00
+00000174  55 15 00 00   // RAM channel selection
+00000178  55 15 00 00   // RAM channel selection
