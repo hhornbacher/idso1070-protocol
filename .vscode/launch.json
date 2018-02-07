@@ -5,13 +5,32 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
+            "name": "(gdb) Launch GUI",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/gui/idso1070-gui",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/gui",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Launch CLI",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/cli/idso1070-cli",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/cli",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
