@@ -1,7 +1,7 @@
 #include "AppWindow.h"
 
 AppWindow::AppWindow(const Glib::RefPtr<Gtk::Builder> &refGlade) : refGlade(refGlade),
-                                                                   scopeWidget(worker),
+                                                                   scopeWidget(&worker),
                                                                    pSettingsWidget(nullptr),
                                                                    boxHorizontal(ORIENTATION_HORIZONTAL)
 {
@@ -19,14 +19,10 @@ AppWindow::AppWindow(const Glib::RefPtr<Gtk::Builder> &refGlade) : refGlade(refG
 
     show_all_children();
 
-    // Setup the worker thread ...
-    // Connect the handler to the dispatcher.
+    // Connect the handler to the dispatcher and start the worker thread ...
+    worker.setNotifyHandler(bind(&AppWindow::notify, this));
     dispatcher.connect(sigc::mem_fun(*this, &AppWindow::onNotificationFromWorker));
-    // Create the thread itself
-    workerThread = new thread(
-        [this] {
-            worker.process(this);
-        });
+    worker.startThread();
 
     // Create battery level update timer
     // updateBatteryTimer = signal_timeout().connect(sigc::mem_fun(*this, &AppWindow::onUpdateBatteryLevel), 5000);
@@ -37,12 +33,9 @@ AppWindow::AppWindow(const Glib::RefPtr<Gtk::Builder> &refGlade) : refGlade(refG
 
 AppWindow::~AppWindow()
 {
-    worker.stop();
-    if (workerThread->joinable())
-        workerThread->join();
+    worker.stopThread();
     updateBatteryTimer.disconnect();
     updateScopeTimer.disconnect();
-    delete workerThread;
 }
 
 void AppWindow::onNotificationFromWorker()

@@ -4,8 +4,8 @@
 #include <gtkmm.h>
 
 #include <IDSO1070.h>
+#include <ProtocolWorker.h>
 
-#include "ProtocolWorker.h"
 #include "TransmissionLogDialog.h"
 
 using namespace Gtk;
@@ -39,10 +39,10 @@ protected:
   void onTriggerSlopeSelected();
 
   // Internal UI update methods
-  void updateConnectionControls(IDSO1070 &deviceState);
-  void updateDeviceInfo(IDSO1070 &deviceState);
-  void updateChannelsInfo(IDSO1070 &deviceState);
-  void updateTriggerInfo(IDSO1070 &deviceState);
+  void updateConnectionControls();
+  void updateDeviceInfo();
+  void updateChannelsInfo();
+  void updateTriggerInfo();
 
   // Protected Members - Gtk
   RefPtr<Builder> refGlade;
@@ -75,6 +75,8 @@ protected:
 
   // Protocol worker thread pointer
   ProtocolWorker *worker;
+
+  IDSO1070 device;
 
 private:
   class TextComboColumns : public TreeModel::ColumnRecord

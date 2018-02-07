@@ -34,7 +34,6 @@ protected:
   // Protected Members - WorkerThread
   Glib::Dispatcher dispatcher;
   ProtocolWorker worker;
-  thread *workerThread;
 
   // Protected Members - Timers
   sigc::connection updateBatteryTimer;

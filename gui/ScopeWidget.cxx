@@ -6,16 +6,16 @@
 
 using namespace std;
 
-ScopeWidget::ScopeWidget(ProtocolWorker &worker) : Glib::ObjectBase("scopewidget"),
+ScopeWidget::ScopeWidget(ProtocolWorker *worker) : Glib::ObjectBase("scopewidget"),
                                                    Gtk::Widget(),
                                                    worker(worker)
 {
   set_has_window(true);
   set_name("scope-widget");
-  while (sampleBuffer.channel1.size() < sampleBuffer.channel1.capacity())
-    sampleBuffer.channel1.push_back(0);
-  while (sampleBuffer.channel2.size() < sampleBuffer.channel2.capacity())
-    sampleBuffer.channel2.push_back(0);
+  // while (sampleBuffer.channel1.size() < sampleBuffer.channel1.capacity())
+  //   sampleBuffer.channel1.push_back(0);
+  // while (sampleBuffer.channel2.size() < sampleBuffer.channel2.capacity())
+  //   sampleBuffer.channel2.push_back(0);
 }
 
 ScopeWidget::~ScopeWidget()
@@ -24,7 +24,8 @@ ScopeWidget::~ScopeWidget()
 
 void ScopeWidget::update()
 {
-  worker.fetchSamples(sampleBuffer);
+  worker->fetchDevice(device);
+  worker->fetchSamples(sampleBuffer);
   queue_draw();
 }
 
@@ -115,16 +116,13 @@ bool ScopeWidget::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
     cr->set_line_width(1.0 / yScale);
   }
 
+  // Fill background
   Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(0, 0, 0)"));
   cr->paint();
 
   drawGrid(cr);
 
-  // IDSO1070 device;
-  // worker.getDevice(device);
-  // if (device->isChannelEnabled(CHANNEL_1))
   drawChannel1(cr);
-  // if (device->isChannelEnabled(CHANNEL_2))
   drawChannel2(cr);
 
   return true;
@@ -135,12 +133,12 @@ void ScopeWidget::drawGrid(const Cairo::RefPtr<Cairo::Context> &cr)
   const double width = (double)DivColumns;
   const double height = (double)DivRows;
 
-  // draw scope background
+  // Draw scope background
   Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(71, 71, 71)"));
   cr->rectangle(0.0, 0.0, width, height);
   cr->fill();
 
-  // draw column divs
+  // Draw column divs
   Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(50, 50, 50)"));
   for (int c = 0; c < (DivColumns - 1); c++)
   {
@@ -153,7 +151,7 @@ void ScopeWidget::drawGrid(const Cairo::RefPtr<Cairo::Context> &cr)
     }
   }
 
-  // draw row divs
+  // Draw row divs
   for (int r = 0; r < (DivRows - 1); r++)
   {
     if ((r + 1) != (DivRows / 2))
@@ -166,7 +164,7 @@ void ScopeWidget::drawGrid(const Cairo::RefPtr<Cairo::Context> &cr)
     }
   }
 
-  // draw center cross
+  // Draw center cross
   Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(200, 200, 200)"));
   cr->move_to(width / 2, 0.0);
   cr->line_to(width / 2, height);
@@ -174,7 +172,7 @@ void ScopeWidget::drawGrid(const Cairo::RefPtr<Cairo::Context> &cr)
   cr->line_to(width, height / 2);
   cr->stroke();
 
-  // draw frame
+  // Draw frame
   Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(200, 200, 200)"));
   cr->move_to(0.0, 0.0);
   cr->line_to(width, 0.0);
@@ -186,23 +184,20 @@ void ScopeWidget::drawGrid(const Cairo::RefPtr<Cairo::Context> &cr)
 
 void ScopeWidget::drawChannel1(const Cairo::RefPtr<Cairo::Context> &cr)
 {
-  IDSO1070 device;
-  worker.getDevice(device);
-
   Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(135, 180, 255)"));
 
-  // draw level
+  // Draw level
   double xOffset = -0.5;
   double yOffset = (8.0 / 256.0) * (256 - (uint8_t)device.getChannelVerticalPosition(CHANNEL_1));
   cr->rectangle(xOffset, yOffset - 0.05, 0.3, 0.1);
   cr->fill();
 
-  // draw samples
+  // Draw samples
   for (int i = 0; i < sampleBuffer.channel1.size(); i++)
   {
     double ySampleOffset = (8.0 / 256.0) * (256 - ((uint8_t)device.getChannelVerticalPosition(CHANNEL_1) + (uint8_t)sampleBuffer.channel1[i]));
     if (i > 0)
-      cr->line_to((10.0 / sampleBuffer.channel2.capacity()) * i, ySampleOffset);
+      cr->line_to((10.0 / sampleBuffer.channel1.capacity()) * i, ySampleOffset);
     else
       cr->move_to(0.0, ySampleOffset);
   }
@@ -211,18 +206,15 @@ void ScopeWidget::drawChannel1(const Cairo::RefPtr<Cairo::Context> &cr)
 
 void ScopeWidget::drawChannel2(const Cairo::RefPtr<Cairo::Context> &cr)
 {
-  IDSO1070 device;
-  worker.getDevice(device);
-
   Gdk::Cairo::set_source_rgba(cr, Gdk::RGBA("rgb(112, 255, 164)"));
 
-  // draw level
+  // Draw level
   double xOffset = -0.5;
   double yOffset = (8.0 / 256.0) * (256 - (uint8_t)device.getChannelVerticalPosition(CHANNEL_2));
   cr->rectangle(xOffset, yOffset - 0.05, 0.3, 0.1);
   cr->fill();
 
-  // draw samples
+  // Draw samples
   for (int i = 0; i < sampleBuffer.channel2.size(); i++)
   {
     double ySampleOffset = (8.0 / 256.0) * (256 - ((uint8_t)device.getChannelVerticalPosition(CHANNEL_2) + (uint8_t)sampleBuffer.channel2[i]));

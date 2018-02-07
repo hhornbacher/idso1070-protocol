@@ -14,7 +14,7 @@ public:
   static const int DivRows = 8;
   static const int ScopePadding = 30;
 
-  ScopeWidget(ProtocolWorker &worker);
+  ScopeWidget(ProtocolWorker *worker);
   virtual ~ScopeWidget();
 
   void update();
@@ -34,9 +34,10 @@ protected:
   Glib::RefPtr<Gdk::Window> refGdkWindow;
 
   // Protocol worker thread reference
-  ProtocolWorker &worker;
+  ProtocolWorker *worker;
 
-  Sample::SampleBuffer sampleBuffer;
+  IDSO1070 device;
+  SampleBuffer sampleBuffer;
 };
 
 #endif // _GRAPH_WIDGET_H_

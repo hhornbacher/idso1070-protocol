@@ -75,7 +75,7 @@
       <column type="gint"/>
     </columns>
     <data>
-      <row>
+      <!-- <row>
         <col id="0" translatable="yes">5 ns</col>
         <col id="1">0</col>
       </row>
@@ -106,7 +106,7 @@
       <row>
         <col id="0" translatable="yes">1 µs</col>
         <col id="1">7</col>
-      </row>
+      </row> -->
       <row>
         <col id="0" translatable="yes">2 µs</col>
         <col id="1">8</col>

@@ -1,5 +1,8 @@
 #include "SettingsWidget.h"
 
+#include <sstream>
+#include <iomanip>
+
 SettingsWidget::SettingsWidget(BaseObjectType *cobject, const RefPtr<Builder> &refGlade)
     : Box(cobject),
       refGlade(refGlade),
@@ -112,7 +115,10 @@ void SettingsWidget::onToggleSampling()
 {
     if (worker->isConnected())
     {
-        if (!worker->isSampling())
+
+        IDSO1070 device;
+        worker->fetchDevice(device);
+        if (!device.isSampling())
             worker->startSampling();
         else
             worker->stopSampling();
@@ -199,18 +205,18 @@ void SettingsWidget::onTriggerSlopeSelected()
 
 void SettingsWidget::update()
 {
-    IDSO1070 currentDeviceState;
-    worker->getDevice(currentDeviceState);
-    updateConnectionControls(currentDeviceState);
-    updateDeviceInfo(currentDeviceState);
-    updateChannelsInfo(currentDeviceState);
-    updateTriggerInfo(currentDeviceState);
-    Protocol::TransmissionLog log;
-    worker->getTransmissionLog(log);
-    pTransmissionLogDialog->updateLog(log);
+    worker->fetchDevice(device);
+    updateConnectionControls();
+    updateDeviceInfo();
+    updateChannelsInfo();
+    updateTriggerInfo();
+
+    Protocol::TransmissionLog currentLog;
+    worker->fetchTransmissionLog(currentLog);
+    pTransmissionLogDialog->updateLog(currentLog);
 }
 
-void SettingsWidget::updateConnectionControls(IDSO1070 &deviceState)
+void SettingsWidget::updateConnectionControls()
 {
     if (worker->isConnecting())
     {
@@ -243,7 +249,7 @@ void SettingsWidget::updateConnectionControls(IDSO1070 &deviceState)
     }
 }
 
-void SettingsWidget::updateDeviceInfo(IDSO1070 &deviceState)
+void SettingsWidget::updateDeviceInfo()
 {
     if (worker->isConnecting() || !worker->isConnected())
     {
@@ -261,24 +267,33 @@ void SettingsWidget::updateDeviceInfo(IDSO1070 &deviceState)
         pCaptureMode->set_sensitive(true);
         pToggleSampling->set_sensitive(true);
 
-        pTimeBase->set_active(pTimeBaseStore->children()[(int)deviceState.getDeviceTimeBase()]);
-        pScopeMode->set_active(pScopeModeStore->children()[(int)deviceState.getDeviceScopeMode()]);
-        pCaptureMode->set_active(pCaptureModeStore->children()[(int)deviceState.getDeviceCaptureMode()]);
+        // pTimeBase->set_active(pTimeBaseStore->children()[(int)device.getTimeBase()]);
+        // pScopeMode->set_active(pScopeModeStore->children()[(int)device.getScopeMode()]);
+        // pCaptureMode->set_active(pCaptureModeStore->children()[(int)device.getCaptureMode()]);
 
-        pBatteryLevel->set_value((double)deviceState.getBatteryLevel() / 100);
+        pBatteryLevel->set_value((double)device.getBatteryLevel() / 100);
 
-        if (!worker->isSampling())
+        stringstream deviceInfo;
+
+        deviceInfo << "Device Info:" << endl
+                   << "Freq div: 0x" << setfill('0') << setw(8) << hex << (uint32_t)device.getTimeBase();
+
+        pDeviceInfo->set_label(deviceInfo.str());
+
+        if (!device.isSampling())
         {
             pToggleSampling->set_label("Start sampling");
+            // pToggleSampling->set_active(true);
         }
         else
         {
             pToggleSampling->set_label("Stop sampling");
+            // pToggleSampling->set_active(false);
         }
     }
 }
 
-void SettingsWidget::updateChannelsInfo(IDSO1070 &deviceState)
+void SettingsWidget::updateChannelsInfo()
 {
     if (worker->isConnecting() || !worker->isConnected())
     {
@@ -289,7 +304,7 @@ void SettingsWidget::updateChannelsInfo(IDSO1070 &deviceState)
     {
         pChannel1Enabled->set_sensitive(true);
         pChannel2Enabled->set_sensitive(true);
-        if (deviceState.isChannelEnabled(CHANNEL_1))
+        if (device.isChannelEnabled(CHANNEL_1))
         {
             pChannel1Enabled->set_active(true);
             pChannel1Enabled->set_label("Disable");
@@ -299,7 +314,7 @@ void SettingsWidget::updateChannelsInfo(IDSO1070 &deviceState)
             pChannel1Enabled->set_active(false);
             pChannel1Enabled->set_label("Enable");
         }
-        if (deviceState.isChannelEnabled(CHANNEL_2))
+        if (device.isChannelEnabled(CHANNEL_2))
         {
             pChannel2Enabled->set_active(true);
             pChannel2Enabled->set_label("Disable");
@@ -312,7 +327,7 @@ void SettingsWidget::updateChannelsInfo(IDSO1070 &deviceState)
     }
 }
 
-void SettingsWidget::updateTriggerInfo(IDSO1070 &deviceState)
+void SettingsWidget::updateTriggerInfo()
 {
     if (worker->isConnecting() || !worker->isConnected())
     {
@@ -326,8 +341,8 @@ void SettingsWidget::updateTriggerInfo(IDSO1070 &deviceState)
         pTriggerChannel->set_sensitive(true);
         pTriggerSlope->set_sensitive(true);
 
-        pTriggerMode->set_active(pTriggerModeStore->children()[(int)deviceState.getTriggerMode()]);
-        pTriggerChannel->set_active(pTriggerChannelStore->children()[(int)deviceState.getTriggerChannel()]);
-        pTriggerSlope->set_active(pTriggerSlopeStore->children()[(int)deviceState.getTriggerSlope()]);
+        // pTriggerMode->set_active(pTriggerModeStore->children()[(int)device.getTriggerMode()]);
+        // pTriggerChannel->set_active(pTriggerChannelStore->children()[(int)device.getTriggerChannel()]);
+        // pTriggerSlope->set_active(pTriggerSlopeStore->children()[(int)device.getTriggerSlope()]);
     }
 }
