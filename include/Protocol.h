@@ -2,17 +2,18 @@
 #define _PROTOCOL_H_
 
 #include "base.h"
+#include "IDSO1070.h"
 
 #include "connection/TCPConnector.h"
 #include "connection/USBConnector.h"
-
-#include "IDSO1070.h"
 
 #include "packets/SampleBuffer.h"
 #include "packets/Sample.h"
 #include "packets/Response.h"
 #include "packets/Command.h"
 #include "packets/CommandFactory.h"
+
+#include <mutex>
 
 class Protocol
 {
@@ -72,16 +73,23 @@ public:
   void setConnectionLostHandler(ConnectionLostHandler connectionLostHandler);
   void setProgressHandler(ProgressHandler progressHandler);
 
-  IDSO1070 &getDevice();
   Connector *getConnector();
   void fetchSamples(SampleBuffer &buffer);
+  void fetchDevice(IDSO1070 &dev);
 
-  TransmissionLog &getTransmissionLog();
+  void fetchTransmissionLog(TransmissionLog &log);
   void clearTransmissionLog(bool deleteObjects = true);
   void clearCommandQueue();
 
 private:
   static const int MaxCommandRetries = 3;
+
+  // For thread safety
+  mutable mutex deviceMutex;
+  // mutable mutex protocolMutex;
+  mutable mutex sampleMutex;
+  mutable mutex logMutex;
+  mutable mutex commandMutex;
 
   // Device class to store the device's states and resources
   IDSO1070 device;
@@ -139,9 +147,6 @@ private:
   void parseBothChannelsData(Sample *packet, int index);
   void parseChannel1Data(Sample *packet, int index);
   void parseChannel2Data(Sample *packet, int index);
-  void fixAdDiff();
-  void fixCh1AdDiff();
-  void fixCh2AdDiff();
   void interpolateSamples();
 };
 

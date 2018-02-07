@@ -29,7 +29,7 @@ Command *CommandFactory::readBatteryLevel()
 }
 
 Command *CommandFactory::readRamCount(int enabledChannels, uint16_t samplesNumberOfOneFrame,
-                                      bool isSampleRate200Mor250M, double triggerXPosition,
+                                      double triggerXPosition,
                                       uint8_t packetsNumber)
 {
     uint16_t b = 0;
@@ -39,14 +39,9 @@ Command *CommandFactory::readRamCount(int enabledChannels, uint16_t samplesNumbe
     }
     else if (enabledChannels == 1)
     {
-        if (!isSampleRate200Mor250M)
-            b = samplesNumberOfOneFrame / 2;
-        else
-        {
-            double x = ((double)samplesNumberOfOneFrame * triggerXPosition / 2) +
-                       ((double)samplesNumberOfOneFrame * (1 - triggerXPosition));
-            b = (uint16_t)x;
-        }
+        double x = ((double)samplesNumberOfOneFrame * triggerXPosition / 2) +
+                   ((double)samplesNumberOfOneFrame * (1 - triggerXPosition));
+        b = (uint16_t)x;
     }
     Command *cmd = new Command(CMDCODE_READ_RAM_COUNT,
                                (uint8_t)(b & 0xff),
@@ -63,96 +58,7 @@ Command *CommandFactory::startSampling()
 
 Command *CommandFactory::updateSampleRate(TimeBase timeBase, int enabledChannels)
 {
-    uint8_t b = 0;
-
-    switch (timeBase)
-    {
-    case HDIV_5nS:
-    case HDIV_10nS:
-    case HDIV_20nS:
-    case HDIV_50nS:
-    case HDIV_100nS:
-    case HDIV_200nS:
-        b = 0x01;
-        break;
-    case HDIV_500nS:
-    case HDIV_1uS:
-    case HDIV_2uS:
-    case HDIV_5uS:
-    case HDIV_10uS:
-    case HDIV_20uS:
-    case HDIV_50uS:
-    case HDIV_100uS:
-    case HDIV_200uS:
-    case HDIV_500uS:
-    case HDIV_1mS:
-    case HDIV_2mS:
-    case HDIV_5mS:
-    case HDIV_10mS:
-    case HDIV_20mS:
-    case HDIV_50mS:
-    case HDIV_100mS:
-    case HDIV_200mS:
-    case HDIV_500mS:
-    case HDIV_1S:
-    case HDIV_2S:
-    case HDIV_5S:
-    case HDIV_10S:
-    case HDIV_20S:
-    case HDIV_50S:
-    case HDIV_100S:
-    case HDIV_200S:
-    case HDIV_500S:
-        b = 0x00;
-        break;
-    }
-    if (enabledChannels == 1)
-    {
-        switch (timeBase)
-        {
-        case HDIV_5nS:
-        case HDIV_10nS:
-        case HDIV_20nS:
-        case HDIV_50nS:
-        case HDIV_100nS:
-        case HDIV_200nS:
-        case HDIV_500nS:
-        case HDIV_1uS:
-            b |= 0x02;
-            break;
-        case HDIV_2uS:
-        case HDIV_5uS:
-        case HDIV_10uS:
-        case HDIV_20uS:
-        case HDIV_50uS:
-        case HDIV_100uS:
-        case HDIV_200uS:
-        case HDIV_500uS:
-        case HDIV_1mS:
-        case HDIV_2mS:
-        case HDIV_5mS:
-        case HDIV_10mS:
-        case HDIV_20mS:
-        case HDIV_50mS:
-        case HDIV_100mS:
-        case HDIV_200mS:
-        case HDIV_500mS:
-        case HDIV_1S:
-        case HDIV_2S:
-        case HDIV_5S:
-        case HDIV_10S:
-        case HDIV_20S:
-        case HDIV_50S:
-        case HDIV_100S:
-        case HDIV_200S:
-        case HDIV_500S:
-            b &= ~0x02;
-            break;
-        default:
-            break;
-        }
-    }
-    Command *cmd = new Command(CMDCODE_SAMPLE_RATE, b);
+    Command *cmd = new Command(CMDCODE_SAMPLE_RATE, 0);
     return cmd;
 }
 
@@ -452,19 +358,11 @@ Command *CommandFactory::updateTriggerLevel(uint16_t triggerLevel, float trigger
                        (uint8_t)((pwm >> 8) & 0x0f));
 }
 
-Command *CommandFactory::updateChannelSelection(bool channel1Enabled, bool channel2Enabled, bool isSampleRate200Mor250M)
+Command *CommandFactory::updateChannelSelection(bool channel1Enabled, bool channel2Enabled)
 {
     uint8_t b = 0;
     int channelCount = channel1Enabled && channel2Enabled ? 2 : channel1Enabled || channel2Enabled ? 1 : 0;
-    if (channel1Enabled && !channel2Enabled && isSampleRate200Mor250M)
-    {
-        b = 0x00;
-    }
-    else if (channel2Enabled && !channel1Enabled && isSampleRate200Mor250M)
-    {
-        b = 0x01;
-    }
-    else if (channelCount == 2 || (!isSampleRate200Mor250M && (channelCount == 1)))
+    if (channelCount == 2)
     {
         b = 0x02;
     }

@@ -10,49 +10,6 @@ USBConnector::~USBConnector()
         close(handle);
 }
 
-void USBConnector::enumerateDevices(USBDeviceList &list)
-{
-    DIR *dp;
-    dirent *dirp;
-    const char *path = "/sys/class/tty";
-    if ((dp = opendir(path)) == NULL)
-    {
-        return;
-    }
-
-    while ((dirp = readdir(dp)) != NULL)
-    {
-        if (dirp->d_type == DT_LNK)
-        {
-            string currentPath = path;
-            currentPath += "/";
-            currentPath += dirp->d_name;
-            currentPath += "/device";
-            struct stat buffer;
-            if (stat(currentPath.c_str(), &buffer) == 0)
-            {
-                string infoPath = currentPath;
-                infoPath += "/modalias";
-                int info = open(infoPath.c_str(), O_RDONLY);
-                if (info != -1)
-                {
-                    char buffer[15];
-                    int size = read(info, buffer, 14);
-                    buffer[14] = 0;
-                    close(info);
-                    if (strcmp(buffer, "usb:v0483p5740") == 0)
-                    {
-                        string dev = "/dev/";
-                        dev += dirp->d_name;
-                        list.push_back(dev);
-                    }
-                }
-            }
-        }
-    }
-    closedir(dp);
-}
-
 void USBConnector::start()
 {
     if (handle != -1)
@@ -149,4 +106,47 @@ void USBConnector::receive()
         }
     }
     grabPacket();
+}
+
+void USBConnector::enumerateDevices(USBDeviceList &list)
+{
+    DIR *dp;
+    dirent *dirp;
+    const char *path = "/sys/class/tty";
+    if ((dp = opendir(path)) == NULL)
+    {
+        return;
+    }
+
+    while ((dirp = readdir(dp)) != NULL)
+    {
+        if (dirp->d_type == DT_LNK)
+        {
+            string currentPath = path;
+            currentPath += "/";
+            currentPath += dirp->d_name;
+            currentPath += "/device";
+            struct stat buffer;
+            if (stat(currentPath.c_str(), &buffer) == 0)
+            {
+                string infoPath = currentPath;
+                infoPath += "/modalias";
+                int info = open(infoPath.c_str(), O_RDONLY);
+                if (info != -1)
+                {
+                    char buffer[15];
+                    int size = read(info, buffer, 14);
+                    buffer[14] = 0;
+                    close(info);
+                    if (strcmp(buffer, "usb:v0483p5740") == 0)
+                    {
+                        string dev = "/dev/";
+                        dev += dirp->d_name;
+                        list.push_back(dev);
+                    }
+                }
+            }
+        }
+    }
+    closedir(dp);
 }

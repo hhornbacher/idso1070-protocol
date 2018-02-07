@@ -20,9 +20,7 @@ public:
 
   struct DeviceSettings
   {
-    // freqDiv and timeBase are related to each other!
     TimeBase timeBase;
-    uint32_t freqDiv;
 
     ScopeMode scopeMode;
     CaptureMode captureMode;
@@ -78,7 +76,6 @@ public:
   uint16_t *getCaliLevel();
   uint8_t *getFPGAAlert();
   uint8_t getBatteryLevel();
-  uint32_t getFreqDiv();
 
   // Channel data access methods
   ChannelSelector getSelectedChannel();
@@ -108,8 +105,6 @@ public:
   // Misc
   bool isSampling();
   int getLittlePacketStatus();
-  bool isSampleRate200Mor250M();
-  TimeBase getTimeBaseFromFreqDiv();
   size_t getSamplesNumberOfOneFrame();
   uint8_t getEnabledChannelsCount();
   uint8_t getPacketsNumber();
@@ -127,7 +122,6 @@ protected:
   void setFPGAAlert(uint8_t *data);
   void setDiffFixData(size_t channel, size_t offset, uint8_t *data);
   void setBatteryLevel(uint8_t batteryLevel);
-  void setFreqDiv(uint32_t freqDiv);
   void setSelectedChannel(ChannelSelector channel);
   void enableChannel(ChannelSelector channel);
   void disableChannel(ChannelSelector channel);

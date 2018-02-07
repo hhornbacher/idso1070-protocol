@@ -14,7 +14,7 @@ public:
   Command *readFPGAVersion();
   Command *readBatteryLevel();
   Command *readRamCount(int enabledChannels, uint16_t samplesNumberOfOneFrame,
-                        bool isSampleRate200Mor250M, double triggerXPosition,
+                        double triggerXPosition,
                         uint8_t packetsNumber);
 
   Command *startSampling();
@@ -35,7 +35,7 @@ public:
   Command *updateChannel2Level(VoltageDiv channel2VerticalDiv, int16_t channel2VerticalPosition, float channel2PWM0, float channel2PWM1);
   Command *updateTriggerSourceAndSlope(TriggerChannel triggerChanel, ScopeMode scoMode, TriggerSlope triggerSlope);
   Command *updateTriggerLevel(uint16_t triggerLevel, float triggerTopPWM, float triggerBottomPWM);
-  Command *updateChannelSelection(bool channel1Enabled, bool channel2Enabled, bool isSampleRate200Mor250M);
+  Command *updateChannelSelection(bool channel1Enabled, bool channel2Enabled);
   Command *updatePreTriggerLength(uint16_t samplesNumberOfOneFrame, double triggerXPosition);
   Command *updatePostTriggerLength(uint16_t samplesNumberOfOneFrame, double triggerXPosition);
 };

@@ -3,22 +3,24 @@
 
 #include <Protocol.h>
 
-#include <gtkmm.h>
 #include <thread>
 #include <mutex>
 
-class AppWindow;
-
-class ProtocolWorker
+class ProtocolWorker : protected Protocol
 {
 public:
+  typedef function<void()> NotifyHandler;
+
   ProtocolWorker();
 
+  void setNotifyHandler(NotifyHandler notifyHandler);
+
   // Thread main loop
-  void process(AppWindow *caller);
+  void process();
 
   // Thread execution control & status
-  void stop();
+  void startThread();
+  void stopThread();
   bool hasStopped() const;
   float getProgress() const;
 
@@ -66,16 +68,17 @@ public:
 
   void fetchDevice(IDSO1070 &dev);
   void fetchSamples(SampleBuffer &buffer);
-
-  // Get copy of the transmission log
-  void getTransmissionLog(Protocol::TransmissionLog &log);
+  void fetchTransmissionLog(Protocol::TransmissionLog &log);
 
 protected:
   // Thread sync mutex
-  mutable mutex protocolMutex;
+  mutable mutex stateMutex;
 
-  // Protocol itself
-  Protocol protocol;
+  // Worker thread
+  thread *workerThread;
+
+  // Notify main thread
+  NotifyHandler notifyHandler;
 
   // Thread execution control & status members
   bool shallStop;
