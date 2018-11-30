@@ -7,9 +7,13 @@ It's possible to communicate with the device over WiFi (TCP) as well as USB.
 
 The protocol itself is based on a simple request-response flow with the packets described here.
 
+### Device
+
+
+
 ### Request (Command) packet
 
-This packet has the fixed size of 4 bytes
+This packet has a fixed size of 4 bytes
 
 Address|Size (byte)|Description
 -|-|-
@@ -51,7 +55,7 @@ FPGA|`0x55`|Read RAM count|`0x16`|*TBD*
 
 ### Response packet
 
-This packet has the fixed size of 509 bytes.
+This packet has a fixed size of 509 bytes.
 
 Section|Address|Size (byte)|Description
 -|-|-|-
@@ -63,7 +67,9 @@ END|`0x01FC`|1|Magic byte: `0xce`
 
 ### Connection
 
-There are two options connection to the device:
+There are two ways connecting to the device:
 
 * USB: Device connects over USB-Serial connection (maximum baud rate not yet known)
 * WiFi: When you're connected to the device's access point, there is a TCP server listening on `192.186.1.1:8870`
+
+Independet of the transport layer the application layer

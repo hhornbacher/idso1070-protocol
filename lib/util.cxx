@@ -3,23 +3,25 @@
 #include <sstream>
 #include <iomanip>
 
-float mapValue(int i, float f, float f2, float f3, float f4)
-{
-    return (((((float)i) - f) / (f2 - f)) * (f4 - f3)) + f3;
-}
+using namespace std;
 
-float mapValue(float f, float f2, float f3, float f4, float f5)
-{
-    return (((f - f2) / (f3 - f2)) * (f5 - f4)) + f4;
-}
+// float mapValue(int i, float f, float f2, float f3, float f4)
+// {
+//     return (((((float)i) - f) / (f2 - f)) * (f4 - f3)) + f3;
+// }
 
-string hexdump(uint8_t *data, size_t length, int cols)
+// float mapValue(float f, float f2, float f3, float f4, float f5)
+// {
+//     return (((f - f2) / (f3 - f2)) * (f5 - f4)) + f4;
+// }
+
+string hexdump(const uint8_t *data, size_t length, int cols)
 {
     stringstream ss;
     int rowCount = (length / cols) + (length % cols != 0 ? 1 : 0);
     for (int row = 0; row < rowCount; row++)
     {
-        int colCount = row == (length / cols) ? length % cols : cols;
+        int colCount = row == ((int)length / cols) ? length % cols : cols;
 
         ss << "0x" << setfill('0') << setw(8) << hex << (row * cols) << " | ";
 

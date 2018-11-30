@@ -9,11 +9,14 @@ set(CMAKE_BUILD_TYPE Debug)
 # set C++ standard to C++11
 set (CMAKE_CXX_STANDARD 11)
 
+# configure C++ warning level
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wshadow  -Wextra -Wnon-virtual-dtor -pedantic")
+
 # add local cmake dir to module path
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 # add Boost
-find_package(Boost 1.58.0 REQUIRED)
+find_package(Boost 1.58.0 REQUIRED COMPONENTS system thread)
 include_directories(${Boost_INCLUDE_DIR})
 
 # add PThread
@@ -25,7 +28,7 @@ include_directories(include)
 
 # source directories
 add_subdirectory(lib)
-add_subdirectory(gui)
+# add_subdirectory(gui)
 add_subdirectory(cli)
 
 # install idso1070.pc

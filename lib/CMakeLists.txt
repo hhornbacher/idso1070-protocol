@@ -1,5 +1,5 @@
 # version numbers
-set (libidso1070_VERSION_MAJOR 1)
+set (libidso1070_VERSION_MAJOR 2)
 set (libidso1070_VERSION_MINOR 0)
 
 project (libidso1070 VERSION "${libidso1070_VERSION_MAJOR}.${libidso1070_VERSION_MINOR}")
@@ -19,11 +19,8 @@ include_directories("${PROJECT_BINARY_DIR}")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_subdirectory(connection)
-add_subdirectory(packets)
-
-add_library(idso1070 SHARED Protocol.cxx ProtocolWorker.cxx IDSO1070.cxx util.cxx)
-target_link_libraries (idso1070 connection packets ${Boost_LIBRARIES} ${PTHREAD_LIBRARIES})
+add_library(idso1070 SHARED Packet.cxx Request.cxx Response.cxx util.cxx)
+target_link_libraries (idso1070 ${Boost_LIBRARIES} ${PTHREAD_LIBRARIES})
 
 set_target_properties(idso1070 PROPERTIES VERSION ${PROJECT_VERSION})
 
