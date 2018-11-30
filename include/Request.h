@@ -46,4 +46,6 @@ public:
 
   Request(Type type, Command command, uint16_t params = 0);
   Request(Type type, Command command, uint8_t param1, uint8_t param2);
+
+  std::string toString();
 };
