@@ -20,7 +20,7 @@ Request::Request(Type type, Command command, uint8_t param1, uint8_t param2)
   data_.push_back(param2);
 }
 
-string Request::toString()
+string Request::toString() const
 {
   stringstream ss;
   ss << "Request:\n";

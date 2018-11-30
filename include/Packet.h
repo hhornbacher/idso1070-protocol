@@ -14,7 +14,7 @@ public:
   DataVector &getData();
   boost::asio::mutable_buffers_1 getBuffer();
   size_t getSize() const;
-  std::string toString();
+  std::string toString() const;
 
 protected:
   DataVector data_;
