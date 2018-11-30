@@ -27,7 +27,7 @@ size_t Packet::getSize() const
   return data_.size();
 }
 
-string Packet::toString()
+string Packet::toString() const
 {
   stringstream ss;
   ss << "Packet length: " << data_.size() << " bytes\n";

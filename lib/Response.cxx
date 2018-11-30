@@ -19,6 +19,15 @@ string Response::toString() const
   stringstream ss;
   ss << "Response:\n";
 
+  if (isValid())
+  {
+    ss << "Valid: true\n";
+  }
+  else
+  {
+    ss << "Valid: false\n";
+  }
+
   ss << Packet::toString();
   return ss.str();
 }
