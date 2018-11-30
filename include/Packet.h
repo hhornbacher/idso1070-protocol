@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 #include <boost/asio.hpp>
 
 class Packet
@@ -13,6 +14,7 @@ public:
   DataVector &getData();
   boost::asio::mutable_buffers_1 getBuffer();
   size_t getSize() const;
+  std::string toString();
 
 protected:
   DataVector data_;

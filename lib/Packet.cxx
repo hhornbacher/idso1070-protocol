@@ -1,10 +1,14 @@
 #include <Packet.h>
 
+#include <util.h>
+#include <sstream>
+
 using namespace boost::asio;
+using namespace std;
 
 void Packet::setData(boost::asio::streambuf &data)
 {
-  const uint8_t *dataArray = boost::asio::buffer_cast<const uint8_t *>(data.data());
+  const uint8_t *dataArray = buffer_cast<const uint8_t *>(data.data());
   data_.insert(data_.begin(), dataArray, &dataArray[data.size()]);
 }
 
@@ -21,4 +25,13 @@ mutable_buffers_1 Packet::getBuffer()
 size_t Packet::getSize() const
 {
   return data_.size();
+}
+
+string Packet::toString()
+{
+  stringstream ss;
+  ss << "Packet length: " << data_.size() << " bytes\n";
+  ss << "Hexdump:\n";
+  ss << hexdump(data_.data(), data_.size(), 8);
+  return ss.str();
 }
