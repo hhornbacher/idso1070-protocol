@@ -7,9 +7,9 @@ It's possible to communicate with the device over WiFi (TCP) as well as USB.
 
 The protocol itself is based on a simple request-response flow with the packets described here.
 
-### Device
+### Protocol State Machine
 
-
+![State Machine Diagram](../images/state-machine.png)
 
 ### Request (Command) packet
 
