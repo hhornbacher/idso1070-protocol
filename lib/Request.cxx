@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Request::Request(Type type, Command command, uint16_t params)
+Request::Request(ResponseHandler handler, Type type, Command command, uint16_t params)
 {
   data_.push_back((uint8_t)type);
   data_.push_back((uint8_t)command);
@@ -12,7 +12,7 @@ Request::Request(Type type, Command command, uint16_t params)
   data_.push_back((uint8_t)((params >> 8) & 0xff));
 }
 
-Request::Request(Type type, Command command, uint8_t param1, uint8_t param2)
+Request::Request(ResponseHandler handler, Type type, Command command, uint8_t param1, uint8_t param2)
 {
   data_.push_back((uint8_t)type);
   data_.push_back((uint8_t)command);

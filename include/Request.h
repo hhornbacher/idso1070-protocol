@@ -1,10 +1,15 @@
 #pragma once
 
 #include "Packet.h"
+#include "Response.h"
+
+#include <functional>
 
 class Request : public Packet
 {
 public:
+  typedef std::function<void(Response &)> ResponseHandler;
+
   enum Type
   {
     Control = 0xaa,
@@ -44,8 +49,11 @@ public:
     ReadRAMCount = 0x16
   };
 
-  Request(Type type, Command command, uint16_t params = 0);
-  Request(Type type, Command command, uint8_t param1, uint8_t param2);
+  Request(ResponseHandler handler, Type type, Command command, uint16_t params = 0);
+  Request(ResponseHandler handler, Type type, Command command, uint8_t param1, uint8_t param2 = 0);
 
   std::string toString() const;
+
+private:
+  ResponseHandler responseHandler_;
 };

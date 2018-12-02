@@ -84,9 +84,7 @@ public:
   void start();
   void stop();
 
-  void sendRequest(Request &request, Response &response);
-  void writeRequest(Request &request);
-  void readResponse(Response &response);
+  void sendRequest(Request &request);
 
   std::string getFPGAFirmwareVersion();
   std::string getARMFirmwareVersion();
@@ -125,6 +123,9 @@ protected:
 
   bool running_{false};
   States state_{Idle};
+
+  boost::thread *ioServiceThread_;
+  boost::thread *stateMachineThread_;
 
 public:
   class Exception : public std::runtime_error
