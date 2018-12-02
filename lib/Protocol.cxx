@@ -38,9 +38,14 @@ void Protocol::stop()
 
 void Protocol::sendRequest(Request &request, Response &response)
 {
+  writeRequest(request);
+  readResponse(response);
+}
+
+void Protocol::writeRequest(Request &request)
+{
   requestTimer_.wait();
   boost::system::error_code ec;
-  boost::asio::streambuf responseBuffer;
 
   printf("%s", request.toString().c_str());
 
@@ -50,7 +55,15 @@ void Protocol::sendRequest(Request &request, Response &response)
     throw Exception(ec.message());
   }
 
-  boost::asio::read(port_, responseBuffer, boost::asio::transfer_at_least(509), ec);
+  requestTimer_.expires_from_now(boost::posix_time::milliseconds(150));
+}
+
+void Protocol::readResponse(Response &response)
+{
+  boost::system::error_code ec;
+  boost::asio::streambuf responseBuffer;
+
+  boost::asio::read(port_, responseBuffer, boost::asio::transfer_at_least(Response::Size), ec);
   if (ec)
   {
     throw Exception(ec.message());
@@ -59,13 +72,12 @@ void Protocol::sendRequest(Request &request, Response &response)
   response.setData(responseBuffer);
 
   printf("%s", response.toString().c_str());
-  requestTimer_.expires_from_now(boost::posix_time::milliseconds(300));
 }
 
 std::string Protocol::getFPGAFirmwareVersion()
 {
   Response response;
-  Request request(Request::Control, Request::getFPGAFirmwareVersion);
+  Request request(Request::Control, Request::ReadFPGAFirmwareVersion);
 
   sendRequest(request, response);
   const uint8_t *data = &response.getPayload()[6];
@@ -83,7 +95,7 @@ std::string Protocol::getFPGAFirmwareVersion()
 std::string Protocol::getARMFirmwareVersion()
 {
   Response response;
-  Request request(Request::State, Request::getARMFirmwareVersion);
+  Request request(Request::State, Request::ReadARMFirmwareVersion);
 
   sendRequest(request, response);
   return (const char *)response.getPayload();
@@ -92,7 +104,7 @@ std::string Protocol::getARMFirmwareVersion()
 uint8_t Protocol::getBatteryLevel()
 {
   Response response;
-  Request request(Request::State, Request::getBatteryLevel);
+  Request request(Request::State, Request::ReadBatteryLevel);
 
   sendRequest(request, response);
 
@@ -487,4 +499,25 @@ void Protocol::getRAMCount(int channelCount, uint16_t samplesPerFrame, double tr
   Request request(Request::FPGA, Request::ReadRAMCount, config);
 
   sendRequest(request, response);
+}
+
+void Protocol::startSampling()
+{
+  Response response;
+  Request request(Request::Control, Request::StartSampling);
+
+  sendRequest(request, response);
+
+  boost::thread t(boost::bind(&Protocol::samplingThread, this));
+  t.join();
+}
+
+void Protocol::samplingThread()
+{
+  printf("Sampling...");
+  for (size_t i = 0; i < 100; i++)
+  {
+    Response response;
+    readResponse(response);
+  }
 }

@@ -104,14 +104,14 @@ string Request::toString() const
   case ReservedDataOutput:
     ss << "ReservedDataOutput\n";
     break;
-  case Channel1PWM:
-    ss << "Channel1PWM\n";
+  case Channel1Level:
+    ss << "Channel1Level\n";
     break;
-  case Channel2PWM:
-    ss << "Channel2PWM\n";
+  case Channel2Level:
+    ss << "Channel2Level\n";
     break;
-  case TriggerPWM:
-    ss << "TriggerPWM\n";
+  case TriggerLevel:
+    ss << "TriggerLevel\n";
     break;
   case LogicAnalyzer1:
     ss << "LogicAnalyzer1\n";

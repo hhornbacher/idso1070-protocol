@@ -2,6 +2,7 @@
 
 #include "Request.h"
 #include "Response.h"
+#include "SampleStream.h"
 
 #include <stdexcept>
 #include <vector>
@@ -74,6 +75,8 @@ public:
   void stop();
 
   void sendRequest(Request &request, Response &response);
+  void writeRequest(Request &request);
+  void readResponse(Response &response);
 
   std::string getFPGAFirmwareVersion();
   std::string getARMFirmwareVersion();
@@ -97,7 +100,11 @@ public:
   void setChannelVolts125(VoltageDiv voltageDivChannel1, VoltageDiv voltageDivChannel2);
   void getRAMCount(int channelCount, uint16_t samplesPerFrame, double triggerXPosition, uint8_t packetsNumber);
 
+  void startSampling();
+
 protected:
+  void samplingThread();
+
   boost::mutex mutex_;
   boost::asio::io_service ioService_;
   boost::asio::serial_port port_;
