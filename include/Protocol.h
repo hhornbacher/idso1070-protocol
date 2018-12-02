@@ -14,6 +14,16 @@ class Protocol
 public:
   static constexpr int MaxPWM = 4095;
 
+  enum States
+  {
+    Idle,
+    SendRequest,
+    ReceiveResponse,
+    Completed,
+    Cancled,
+    Sampling
+  };
+
   enum TriggerChannel
   {
     Channel1,
@@ -103,7 +113,7 @@ public:
   void startSampling();
 
 protected:
-  void samplingThread();
+  void stateMachine();
 
   boost::mutex mutex_;
   boost::asio::io_service ioService_;
@@ -112,6 +122,9 @@ protected:
   std::string device_;
 
   boost::asio::deadline_timer requestTimer_;
+
+  bool running_{false};
+  States state_{Idle};
 
 public:
   class Exception : public std::runtime_error

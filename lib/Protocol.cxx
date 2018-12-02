@@ -10,6 +10,11 @@ Protocol::Protocol(const char *device) : port_(ioService_), device_(device), req
 
 void Protocol::start()
 {
+  if (running_)
+  {
+    throw Exception("Protocol is running already!");
+  }
+
   boost::system::error_code ec;
   printf("Connecting\n");
   port_.open(device_.c_str(), ec);
@@ -24,16 +29,46 @@ void Protocol::start()
   port_.set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
   port_.set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
 
-  boost::thread t(boost::bind(&boost::asio::io_service::run, &ioService_));
+  boost::thread ioServiceThread(boost::bind(&boost::asio::io_service::run, &ioService_));
+
+  boost::thread stateMachineThread(boost::bind(&Protocol::stateMachine, this));
+
+  running_ = true;
 }
 
 void Protocol::stop()
 {
-  boost::mutex::scoped_lock look(mutex_);
-  port_.cancel();
-  port_.close();
-  ioService_.stop();
-  ioService_.reset();
+  if (running_)
+  {
+    boost::mutex::scoped_lock look(mutex_);
+    running_ = false;
+    port_.cancel();
+    port_.close();
+    ioService_.stop();
+    ioService_.reset();
+  }
+}
+
+void Protocol::stateMachine()
+{
+  while (running_)
+  {
+    switch (state_)
+    {
+    case Idle:
+      break;
+    case SendRequest:
+      break;
+    case ReceiveResponse:
+      break;
+    case Completed:
+      break;
+    case Cancled:
+      break;
+    case Sampling:
+      break;
+    }
+  }
 }
 
 void Protocol::sendRequest(Request &request, Response &response)
@@ -507,17 +542,4 @@ void Protocol::startSampling()
   Request request(Request::Control, Request::StartSampling);
 
   sendRequest(request, response);
-
-  boost::thread t(boost::bind(&Protocol::samplingThread, this));
-  t.join();
-}
-
-void Protocol::samplingThread()
-{
-  printf("Sampling...");
-  for (size_t i = 0; i < 100; i++)
-  {
-    Response response;
-    readResponse(response);
-  }
 }
