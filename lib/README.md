@@ -11,9 +11,16 @@ The protocol is based on a simple request-response flow. The request packets hav
 
 ![Architecture Diagram](../images/architecture.png)
 
-### Request (Command) packet
+### Transport
 
-This packet has a fixed size of 4 bytes
+There are two ways to connect to the device:
+
+* USB: USB-Serial (automatic baud detection; maximum baud rate not yet known!)
+* WiFi: TCP server listening on `192.186.1.1:8870`
+
+### Packets
+
+#### Request
 
 Address|Size (byte)|Description
 -|-|-
@@ -21,7 +28,7 @@ Address|Size (byte)|Description
 `0x0001`|1|Command code
 `0x0002`|2|Parameters (can be 0-2 bytes, padded with zero)
 
-#### Commands
+##### Commands
 
 Type|=|Command|=|Parameters
 -|-|-|-|-
@@ -53,9 +60,7 @@ FPGA|`0x55`|Serial baud rate|`0x14`|*TBD*
 FPGA|`0x55`|RAM channel selection|`0x15`|*TBD*
 FPGA|`0x55`|Read RAM count|`0x16`|*TBD*
 
-### Response packet
-
-This packet has a fixed size of 509 bytes.
+#### Response
 
 Section|Address|Size (byte)|Description
 -|-|-|-
@@ -68,12 +73,3 @@ END|`0x01FC`|1|Magic byte: `0xce`
 ### Protocol State Machine
 
 ![State Machine Diagram](../images/state-machine.png)
-
-### Connection
-
-There are two ways connecting to the device:
-
-* USB: Device connects over USB-Serial connection (maximum baud rate not yet known)
-* WiFi: When you're connected to the device's access point, there is a TCP server listening on `192.186.1.1:8870`
-
-Independet of the transport layer the application layer
