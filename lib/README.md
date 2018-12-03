@@ -5,11 +5,11 @@ It's possible to communicate with the device over WiFi (TCP) as well as USB.
 
 ## About the Protocol
 
-The protocol itself is based on a simple request-response flow with the packets described here.
+The protocol is based on a simple request-response flow. The request packets have a fixed length of 4 bytes and the response packets of 509 bytes.
 
-### Protocol State Machine
+### Architecture
 
-![State Machine Diagram](../images/state-machine.png)
+![Architecture Diagram](../images/architecture.png)
 
 ### Request (Command) packet
 
@@ -64,6 +64,10 @@ HEADER|`0x0000`|2|HEADER: Magic bytes: `0xff 0x01`
 ||`0x0003`|4|HEADER: Bytes of the command packet, this response is addressed to
 PAYLOAD|`0x0007`|501|PAYLOAD
 END|`0x01FC`|1|Magic byte: `0xce`
+
+### Protocol State Machine
+
+![State Machine Diagram](../images/state-machine.png)
 
 ### Connection
 
