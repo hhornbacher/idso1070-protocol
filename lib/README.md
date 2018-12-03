@@ -1,8 +1,5 @@
 # IDSO1070 Protocol Library (for Linux)
 
-This is a reverse engineered implementation of the protocol used to communicate with the 2 channel digital storage IDSO1070 from Hantek.
-It's possible to communicate with the device over WiFi (TCP) as well as USB.
-
 ## About the Protocol
 
 The protocol is based on a simple request-response flow. The request packets have a fixed length of 4 bytes and the response packets of 509 bytes.
@@ -61,6 +58,8 @@ FPGA|`0x55`|RAM channel selection|`0x15`|*TBD*
 FPGA|`0x55`|Read RAM count|`0x16`|*TBD*
 
 #### Response
+
+Each request produces a response. When sampling was started there is a continuous stream of Response packets.
 
 Section|Address|Size (byte)|Description
 -|-|-|-
