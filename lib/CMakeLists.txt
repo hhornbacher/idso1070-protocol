@@ -19,10 +19,16 @@ include_directories("${PROJECT_BINARY_DIR}")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_library(idso1070 SHARED Packet.cxx Request.cxx Response.cxx Protocol.cxx util.cxx)
+add_library(idso1070 SHARED
+  Protocol.cxx
+  util.cxx
+  packet/Packet.cxx
+  packet/Request.cxx
+  packet/Response.cxx
+)
 target_link_libraries (idso1070 ${Boost_LIBRARIES} ${PTHREAD_LIBRARIES})
 
 set_target_properties(idso1070 PROPERTIES VERSION ${PROJECT_VERSION})
 
-install (TARGETS idso1070 
+install (TARGETS idso1070
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

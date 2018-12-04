@@ -49,11 +49,19 @@ public:
     ReadRAMCount = 0x16
   };
 
-  Request(ResponseHandler handler, Type type, Command command, uint16_t params = 0);
-  Request(ResponseHandler handler, Type type, Command command, uint8_t param1, uint8_t param2 = 0);
+  Request(ResponseHandler responseHandler, Type type, Command command, uint16_t params = 0);
+  Request(ResponseHandler responseHandler, Type type, Command command, uint8_t param1, uint8_t param2 = 0);
 
   std::string toString() const;
 
+  void callResponseHandler(Response &response);
+
 private:
   ResponseHandler responseHandler_;
+};
+
+class ReadFPGAFirmwareVersionRequest : public Request
+{
+public:
+  ReadFPGAFirmwareVersionRequest(ResponseHandler responseHandler) : Request(responseHandler, Request::Control, Request::ReadFPGAFirmwareVersion) {}
 };

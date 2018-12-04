@@ -1,10 +1,10 @@
-#include <Request.h>
+#include <packet/Request.h>
 
 #include <sstream>
 
 using namespace std;
 
-Request::Request(ResponseHandler handler, Type type, Command command, uint16_t params)
+Request::Request(ResponseHandler responseHandler, Type type, Command command, uint16_t params) : responseHandler_(responseHandler)
 {
   data_.push_back((uint8_t)type);
   data_.push_back((uint8_t)command);
@@ -12,8 +12,9 @@ Request::Request(ResponseHandler handler, Type type, Command command, uint16_t p
   data_.push_back((uint8_t)((params >> 8) & 0xff));
 }
 
-Request::Request(ResponseHandler handler, Type type, Command command, uint8_t param1, uint8_t param2)
+Request::Request(ResponseHandler responseHandler, Type type, Command command, uint8_t param1, uint8_t param2) : responseHandler_(responseHandler)
 {
+  responseHandler_ = responseHandler;
   data_.push_back((uint8_t)type);
   data_.push_back((uint8_t)command);
   data_.push_back(param1);

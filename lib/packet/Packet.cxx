@@ -1,10 +1,15 @@
-#include <Packet.h>
+#include <packet/Packet.h>
 
 #include <util.h>
 #include <sstream>
 
 using namespace boost::asio;
 using namespace std;
+
+void Packet::clearData()
+{
+  data_.clear();
+}
 
 void Packet::setData(boost::asio::streambuf &data)
 {

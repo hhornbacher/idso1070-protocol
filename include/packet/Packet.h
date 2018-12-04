@@ -10,6 +10,7 @@ class Packet
 public:
   typedef std::vector<uint8_t> DataVector;
 
+  void clearData();
   void setData(boost::asio::streambuf &data);
   DataVector &getData();
   boost::asio::mutable_buffers_1 getBuffer();
