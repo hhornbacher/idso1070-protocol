@@ -11,20 +11,14 @@ void Packet::clearData()
   data_.clear();
 }
 
-void Packet::setData(boost::asio::streambuf &data)
+void Packet::setData(const DataVector &data)
 {
-  const uint8_t *dataArray = buffer_cast<const uint8_t *>(data.data());
-  data_.insert(data_.begin(), dataArray, &dataArray[data.size()]);
+  data_.assign(data.begin(), data.end());
 }
 
-Packet::DataVector &Packet::getData()
+const Packet::DataVector &Packet::getData()
 {
   return data_;
-}
-
-mutable_buffers_1 Packet::getBuffer()
-{
-  return buffer(data_);
 }
 
 size_t Packet::getSize() const

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Request::Request(ResponseHandler responseHandler, Type type, Command command, uint16_t params) : responseHandler_(responseHandler)
+Request::Request(Type type, Command command, uint16_t params)
 {
   data_.push_back((uint8_t)type);
   data_.push_back((uint8_t)command);
@@ -12,9 +12,8 @@ Request::Request(ResponseHandler responseHandler, Type type, Command command, ui
   data_.push_back((uint8_t)((params >> 8) & 0xff));
 }
 
-Request::Request(ResponseHandler responseHandler, Type type, Command command, uint8_t param1, uint8_t param2) : responseHandler_(responseHandler)
+Request::Request(Type type, Command command, uint8_t param1, uint8_t param2)
 {
-  responseHandler_ = responseHandler;
   data_.push_back((uint8_t)type);
   data_.push_back((uint8_t)command);
   data_.push_back(param1);
