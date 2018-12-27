@@ -1,6 +1,6 @@
 #include <StateMachine.h>
 
-StateMachine::StateMachine(StateID initialState) : ioServiceThread_(nullptr), currentState_(initialState), initialState_(initialState)
+StateMachine::StateMachine(StateID initialState) : ioServiceThread_(nullptr), initialState_(initialState), currentState_(initialState)
 {
 }
 
@@ -14,6 +14,7 @@ void StateMachine::stop()
 {
   run_ = false;
   ioServiceThread_->join();
+  ioServiceThread_ = nullptr;
   currentPhase_ = Entry;
   currentState_ = initialState_;
   nextState_ = 0;
@@ -36,11 +37,13 @@ void StateMachine::process()
     switch (currentPhase_)
     {
     case Entry:
+      printf("Entry into state: 0x%04x\n", currentState_);
       currentPhase_ = Do;
       break;
     case Do:
       break;
     case Exit:
+      printf("Exit from state: 0x%04x\n", currentState_);
       currentState_ = nextState_;
       pendingTransition_ = false;
       currentPhase_ = Entry;
@@ -78,7 +81,7 @@ bool StateMachine::externalEvent(StateID nextState)
 {
   if (!run_)
   {
-    printf("Warning: State machine not started\n");
+    printf("Warning: State machine not running\n");
     return false;
   }
   if (isValidTransition(currentState_, nextState))
