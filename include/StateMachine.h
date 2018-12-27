@@ -4,6 +4,8 @@
 #include <map>
 #include <vector>
 
+#include <boost/thread.hpp>
+
 class StateMachine
 {
 public:
@@ -19,24 +21,32 @@ public:
 
   StateMachine(StateID initialState);
 
-  void process();
+  void start();
+  void stop();
 
 protected:
   void registerState(StateID id, StateHandler handler);
   void registerTransition(StateID stateA, StateID stateB);
 
-  void externalEvent(StateID nextState);
+  bool externalEvent(StateID nextState);
   void internalEvent(StateID nextState);
+
+  void commitTransition();
 
   bool isValidTransition(StateID stateA, StateID stateB);
 
   StateID getState();
 
+  void process();
+
 private:
+  std::unique_ptr<boost::thread> ioServiceThread_;
   std::map<StateID, StateHandler> stateHandlers_;
   Phase currentPhase_{Entry};
+  StateID initialState_{0};
   StateID currentState_{0};
   StateID nextState_{0};
   bool pendingTransition_{false};
   std::vector<Transition> transitionTable_;
+  bool run_{false};
 };
