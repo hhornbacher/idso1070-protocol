@@ -1,20 +1,20 @@
 #include <StateMachine.h>
 
-StateMachine::StateMachine(StateID initialState) : ioServiceThread_(nullptr), initialState_(initialState), currentState_(initialState)
+StateMachine::StateMachine(StateID initialState) : thread_(nullptr), initialState_(initialState), currentState_(initialState)
 {
 }
 
 void StateMachine::start()
 {
   run_ = true;
-  ioServiceThread_ = std::make_unique<boost::thread>(boost::bind(&StateMachine::process, this));
+  thread_ = std::make_unique<boost::thread>(boost::bind(&StateMachine::process, this));
 }
 
 void StateMachine::stop()
 {
   run_ = false;
-  ioServiceThread_->join();
-  ioServiceThread_ = nullptr;
+  thread_->join();
+  thread_ = nullptr;
   currentPhase_ = Entry;
   currentState_ = initialState_;
   nextState_ = 0;
@@ -58,7 +58,6 @@ void StateMachine::registerState(StateID id, StateHandler handler)
   if (it == stateHandlers_.end())
   {
     stateHandlers_[id] = handler;
-    printf("Registered Handler for State: 0x%04x\n", id);
   }
 }
 
@@ -72,8 +71,6 @@ void StateMachine::registerTransition(StateID stateA, StateID stateB)
       return;
     }
   }
-
-  printf("Registered Transition: 0x%08x (A: 0x%04x, B: 0x%04x)\n", transition, stateA, stateB);
   transitionTable_.insert(transitionTable_.end(), transition);
 }
 
@@ -101,6 +98,7 @@ void StateMachine::internalEvent(StateID nextState)
   if (isValidTransition(currentState_, nextState))
   {
     nextState_ = nextState;
+    pendingTransition_ = true;
   }
   else
   {
@@ -108,7 +106,7 @@ void StateMachine::internalEvent(StateID nextState)
   }
 }
 
-void StateMachine::commitTransition()
+void StateMachine::commitExternalEvent()
 {
   pendingTransition_ = true;
 }

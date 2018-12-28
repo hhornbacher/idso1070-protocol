@@ -31,7 +31,7 @@ protected:
   bool externalEvent(StateID nextState);
   void internalEvent(StateID nextState);
 
-  void commitTransition();
+  void commitExternalEvent();
 
   bool isValidTransition(StateID stateA, StateID stateB);
 
@@ -40,7 +40,7 @@ protected:
   void process();
 
 private:
-  std::unique_ptr<boost::thread> ioServiceThread_;
+  std::unique_ptr<boost::thread> thread_;
   std::map<StateID, StateHandler> stateHandlers_;
   Phase currentPhase_{Entry};
   StateID initialState_{0};
