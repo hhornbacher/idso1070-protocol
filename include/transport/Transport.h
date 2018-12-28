@@ -1,50 +1,83 @@
 #pragma once
 
-#include "../Exception.h"
+#include "../Error.h"
+#include "../StateMachine.h"
+#include "../packet/Request.h"
+#include "../packet/Response.h"
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
 #include <functional>
 
-class Transport
+class Transport : public StateMachine
 {
 public:
-  typedef std::function<void(Exception *, bool)> ConnectionHandler;
-  typedef std::function<void(Exception *)> TransactionHandler;
+  static constexpr int RequestTimeout = 1000;
+  typedef std::function<void(std::shared_ptr<Error>, bool)> ConnectionHandler;
+  typedef std::function<void(std::shared_ptr<Error>, std::shared_ptr<Response>)> RequestHandler;
 
   Transport();
+  virtual ~Transport() = 0;
+
+  void start();
+  void stop();
 
   void connect(ConnectionHandler connectionHandler);
   void disconnect(ConnectionHandler connectionHandler);
 
-  // void process();
-
-  void transaction(uint8_t *txBuffer, size_t txBufferLength, uint8_t *rxBuffer, size_t rxBufferLength, TransactionHandler transactionHandler);
-  void receive(uint8_t *rxBuffer, size_t rxBufferLength, TransactionHandler transactionHandler);
+  void request(const std::shared_ptr<Request> requestPtr, RequestHandler requestHandler, bool stream = false);
 
 protected:
-  virtual void setupConnection() = 0;
-  virtual void stopConnection() = 0;
-  virtual void send() = 0;
-  virtual void receive() = 0;
+  // These methods are called from the state machine thread
+  virtual void connectImpl() = 0;
+  virtual void disconnectImpl() = 0;
+  virtual void readImpl() = 0;
+  virtual void writeImpl() = 0;
+  virtual void cancelImpl() = 0;
 
-  boost::mutex mutex_;
+  // These methods are called from the state machine thread
+  void stateConnecting(StateMachine::Phase phase);
+  void stateConnected(StateMachine::Phase phase);
+  void stateDisconnecting(StateMachine::Phase phase);
+  void stateDisconnected(StateMachine::Phase phase);
+  void stateThrottling(StateMachine::Phase phase);
+  void stateWriting(StateMachine::Phase phase);
+  void stateReading(StateMachine::Phase phase);
+
+  // These methods are called from the io_service thread
+  void internalConnectHandler(const boost::system::error_code &ec);
+  void internalDisconnectHandler(const boost::system::error_code &ec);
+  void internalWriteHandler(const boost::system::error_code &ec, std::size_t bytesTransferred);
+  void internalReadHandler(const boost::system::error_code &ec, std::size_t bytesTransferred);
+  void internalThrottlingHandler(const boost::system::error_code &ec);
+  void internalTimeoutHandler(const boost::system::error_code &ec);
+
+protected:
+  enum States : StateMachine::StateID
+  {
+    Connecting,
+    Connected,
+    Disconnecting,
+    Disconnected,
+    Throttling,
+    Writing,
+    Reading
+  };
+
   boost::asio::io_service ioService_;
-  boost::thread *ioServiceThread_{NULL};
+  std::unique_ptr<boost::thread> ioServiceThread_;
+  boost::asio::io_service::work worker_;
   boost::asio::deadline_timer throttlingTimer_;
   boost::asio::deadline_timer timeoutTimer_;
+  boost::system::error_code ec_;
 
   ConnectionHandler connectionHandler_;
-  TransactionHandler transactionHandler_;
+  RequestHandler requestHandler_;
 
-  bool busy_{false};
   bool connected_{false};
+  bool stream_{false};
 
-  uint8_t *txBuffer_{NULL};
-  size_t txBufferLength_{0};
-  uint8_t *rxBuffer_{NULL};
-  size_t rxBufferLength_{0};
-
-  uint32_t timeout_{1000};
+  std::shared_ptr<Request> requestPtr_;
+  std::shared_ptr<Response> responsePtr_;
 };
