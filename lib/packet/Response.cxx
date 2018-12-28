@@ -4,6 +4,11 @@
 
 using namespace std;
 
+Response::Response()
+{
+  data_.reserve(Size);
+}
+
 void Response::getPayload(DataVector &data) const
 {
   data.assign(data_.begin() + 7, data_.end());

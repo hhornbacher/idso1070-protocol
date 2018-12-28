@@ -9,6 +9,8 @@
 class Request : public Packet
 {
 public:
+  static constexpr size_t Size = 4;
+
   enum Type
   {
     Control = 0xaa,
