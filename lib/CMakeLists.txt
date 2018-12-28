@@ -21,7 +21,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(idso1070 SHARED
   Protocol.cxx
+  StateMachine.cxx
   util.cxx
+  transport/Transport.cxx
+  transport/USBTransport.cxx
   packet/Packet.cxx
   packet/Request.cxx
   packet/Response.cxx
