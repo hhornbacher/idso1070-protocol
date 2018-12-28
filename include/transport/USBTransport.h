@@ -8,10 +8,11 @@ public:
   USBTransport(std::string device);
 
 protected:
-  void setupConnection();
-  void stopConnection();
-  void send();
-  void receive();
+  void connectImpl();
+  void disconnectImpl();
+  void readImpl();
+  void writeImpl();
+  void cancelImpl();
 
 private:
   std::string device_;
