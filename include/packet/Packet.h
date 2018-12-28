@@ -11,10 +11,8 @@ public:
   typedef std::vector<uint8_t> DataVector;
 
   void clearData();
-  void setData(const DataVector &data);
 
-  const DataVector &getData();
-  size_t getSize() const;
+  DataVector &getData();
   std::string toString() const;
 
 protected:
